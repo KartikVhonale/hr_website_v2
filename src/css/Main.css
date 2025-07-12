@@ -1469,45 +1469,49 @@
 
   /* --- (max-width: 900px) --- */
   @media (max-width: 900px) {
-    .jobseekers-blogs {
-      padding: 3rem 1.5rem;
+    .contact-content {
+      flex-direction: column;
+      gap: 1.5rem;
     }
-    .blogs-title {
-      font-size: 2rem;
+    .contact-info, .contact-form {
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
     }
-    .blogs-subtitle {
-      font-size: 1rem;
+    
+    /* Enhanced tablet layouts */
+    .features-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.2rem;
     }
+    
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+    }
+    
+    .content-container {
+      gap: 2rem;
+    }
+    
+    .featured-jobs-list,
+    .featured-employers-list {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+    
     .blogs-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, 1fr);
       gap: 1.5rem;
     }
-    .articles-hero {
-      padding: 3rem 1.5rem 2rem 1.5rem;
-      border-radius: 0 0 2rem 2rem;
-    }
-    .articles-title {
-      font-size: 2.5rem;
-    }
-    .articles-desc {
-      font-size: 1.1rem;
-    }
-    .articles-categories {
-      gap: 0.8rem;
-    }
-    .category-btn {
-      padding: 0.5rem 1rem;
-      font-size: 0.85rem;
-    }
-    .articles-content {
-      padding: 2rem 1.5rem;
-    }
+    
     .articles-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, 1fr);
       gap: 1.5rem;
     }
-    .articles-results {
-      font-size: 1.3rem;
+    
+    .about-team-list {
+      gap: 1.5rem;
     }
   }
 
@@ -1540,6 +1544,8 @@
       border-radius: 2.5rem;
       box-shadow: 0 4px 16px rgba(0,81,162,0.15);
     }
+    
+    /* Enhanced mobile content sections */
     .content {
       padding: 2.5rem 0.8rem;
     }
@@ -1577,6 +1583,43 @@
       font-size: 0.9rem;
       line-height: 1.5;
     }
+    
+    /* Enhanced features section */
+    .features {
+      padding: 3rem 1rem;
+    }
+    .features-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    .feature-card {
+      padding: 1.8rem 1.2rem;
+    }
+    
+    /* Enhanced stats section */
+    .stats {
+      padding: 2.5rem 1rem;
+    }
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+    
+    /* Enhanced CTA section */
+    .cta-section {
+      padding: 3rem 1rem;
+    }
+    .cta-buttons {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: center;
+    }
+    .cta-button {
+      width: 100%;
+      max-width: 280px;
+    }
+    
+    /* Enhanced jobseekers page */
     .jobseekers-hero {
       padding: 2rem 0.7rem 1.2rem 0.7rem;
       border-radius: 0 0 1.2rem 1.2rem;
@@ -1597,6 +1640,8 @@
     .job-card {
       padding: 1.5rem 1rem;
     }
+    
+    /* Enhanced employers page */
     .employers-hero {
       padding: 2rem 0.7rem 1.2rem 0.7rem;
       border-radius: 0 0 1.2rem 1.2rem;
@@ -1607,9 +1652,6 @@
     .employers-featured {
       padding: 2rem 0.7rem 1.2rem 0.7rem;
     }
-    .featured-title {
-      font-size: 1.5rem;
-    }
     .featured-employers-list {
       grid-template-columns: 1fr;
       gap: 1rem;
@@ -1617,6 +1659,8 @@
     .employer-card {
       padding: 1.5rem 1rem;
     }
+    
+    /* Enhanced about page */
     .about-hero {
       padding: 2rem 0.7rem 1.2rem 0.7rem;
       border-radius: 0 0 1.2rem 1.2rem;
@@ -1629,7 +1673,15 @@
     }
     .about-team-list {
       gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
     }
+    .about-team-card {
+      min-width: 160px;
+      max-width: 180px;
+    }
+    
+    /* Enhanced contact page */
     .contact-hero {
       padding: 2rem 0.7rem 1.2rem 0.7rem;
       border-radius: 0 0 1.2rem 1.2rem;
@@ -1644,62 +1696,60 @@
       flex-direction: column;
       gap: 0.5rem;
     }
+    .contact-form {
+      padding: 1.8rem 1.2rem;
+    }
+    
+    /* Enhanced blogs section */
     .jobseekers-blogs {
-      padding: 2rem 1rem;
+      padding: 3rem 1.5rem;
     }
     .blogs-title {
-      font-size: 1.8rem;
-    }
-    .blogs-subtitle {
-      font-size: 0.95rem;
-    }
-    .blog-card-content {
-      padding: 1.2rem;
-    }
-    .blog-title {
-      font-size: 1.2rem;
-    }
-    .blog-excerpt {
-      font-size: 0.9rem;
-    }
-    .blog-meta {
-      font-size: 0.8rem;
-      gap: 0.8rem;
-    }
-    .articles-page {
-      padding-top: 60px;
-    }
-    .articles-hero {
-      padding: 2rem 1rem 1.5rem 1rem;
-      border-radius: 0 0 1.5rem 1.5rem;
-    }
-    .articles-title {
       font-size: 2rem;
     }
-    .articles-desc {
+    .blogs-subtitle {
       font-size: 1rem;
     }
-    .articles-search-input {
-      padding: 0.8rem 1.2rem;
-      font-size: 0.95rem;
+    .blogs-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    .blog-card {
+      margin-bottom: 1rem;
+    }
+    
+    /* Enhanced articles page */
+    .articles-hero {
+      padding: 3rem 1.5rem 2rem 1.5rem;
+      border-radius: 0 0 2rem 2rem;
+    }
+    .articles-title {
+      font-size: 2.5rem;
+    }
+    .articles-desc {
+      font-size: 1.1rem;
     }
     .articles-categories {
-      gap: 0.6rem;
+      gap: 0.8rem;
+      flex-wrap: wrap;
     }
     .category-btn {
-      padding: 0.4rem 0.8rem;
-      font-size: 0.8rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
     }
     .articles-content {
-      padding: 1.5rem 1rem;
+      padding: 2rem 1.5rem;
+    }
+    .articles-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
     }
     .articles-results {
-      font-size: 1.2rem;
+      font-size: 1.3rem;
     }
-    .pagination-btn {
-      padding: 0.6rem 1rem;
-      font-size: 0.9rem;
-      min-width: 40px;
+    .articles-pagination {
+      flex-wrap: wrap;
+      gap: 0.3rem;
     }
   }
 
@@ -1729,6 +1779,8 @@
       border-radius: 2rem;
       box-shadow: 0 4px 16px rgba(0,81,162,0.15);
     }
+    
+    /* Enhanced mobile content sections */
     .content {
       padding: 2rem 0.6rem;
     }
@@ -1761,6 +1813,58 @@
     .mini-feature p {
       font-size: 0.85rem;
     }
+    
+    /* Enhanced mobile features */
+    .features {
+      padding: 2rem 0.8rem;
+    }
+    .features h2 {
+      font-size: 1.8rem;
+    }
+    .section-subtitle {
+      font-size: 1rem;
+    }
+    .feature-card {
+      padding: 1.5rem 1rem;
+    }
+    .feature-card h3 {
+      font-size: 1.1rem;
+    }
+    .feature-card p {
+      font-size: 0.9rem;
+    }
+    
+    /* Enhanced mobile stats */
+    .stats {
+      padding: 2rem 0.8rem;
+    }
+    .stats-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    .stat-item h3 {
+      font-size: 2rem;
+    }
+    .stat-item p {
+      font-size: 1rem;
+    }
+    
+    /* Enhanced mobile CTA */
+    .cta-section {
+      padding: 2.5rem 0.8rem;
+    }
+    .cta-section h2 {
+      font-size: 1.8rem;
+    }
+    .cta-section p {
+      font-size: 1rem;
+    }
+    .cta-button {
+      padding: 0.8rem 1.5rem;
+      font-size: 0.95rem;
+    }
+    
+    /* Enhanced mobile jobseekers page */
     .jobseekers-page {
       padding-top: 60px;
     }
@@ -1795,6 +1899,8 @@
       padding: 0.5rem 1.2rem;
       font-size: 0.9rem;
     }
+    
+    /* Enhanced mobile employers page */
     .employers-page {
       padding-top: 60px;
     }
@@ -1829,6 +1935,8 @@
       padding: 0.5rem 1.2rem;
       font-size: 0.9rem;
     }
+    
+    /* Enhanced mobile about page */
     .about-page {
       padding-top: 60px;
     }
@@ -1846,6 +1954,12 @@
     }
     .about-section {
       padding: 0.7rem 0.5rem 0.7rem 0.5rem;
+    }
+    .about-section h2 {
+      font-size: 1.6rem;
+    }
+    .about-section p {
+      font-size: 0.95rem;
     }
     .about-team-list {
       gap: 0.8rem;
@@ -1866,6 +1980,8 @@
     .about-team-card p {
       font-size: 0.85rem;
     }
+    
+    /* Enhanced mobile contact page */
     .contact-page {
       padding-top: 60px;
     }
@@ -1897,9 +2013,22 @@
     .contact-info p {
       font-size: 0.9rem;
     }
-    .contact-content {
-      gap: 1rem;
+    .contact-field {
+      margin-bottom: 1rem;
     }
+    .contact-input, .contact-textarea {
+      padding: 0.8rem 1rem 0.8rem 2.2rem;
+      font-size: 0.95rem;
+    }
+    .floating-label label {
+      font-size: 0.95rem;
+    }
+    .contact-btn {
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+    }
+    
+    /* Enhanced mobile blogs section */
     .jobseekers-blogs {
       padding: 2rem 1rem;
     }
@@ -1922,6 +2051,16 @@
       font-size: 0.8rem;
       gap: 0.8rem;
     }
+    .blog-read-more {
+      padding: 0.7rem 1.2rem;
+      font-size: 0.85rem;
+    }
+    .blogs-view-all {
+      padding: 0.8rem 1.5rem;
+      font-size: 0.95rem;
+    }
+    
+    /* Enhanced mobile articles page */
     .articles-page {
       padding-top: 60px;
     }
@@ -1956,6 +2095,16 @@
       padding: 0.6rem 1rem;
       font-size: 0.9rem;
       min-width: 40px;
+    }
+    
+    /* Enhanced mobile footer adjustments */
+    .footer {
+      padding: 2rem 1rem 1rem 1rem;
+    }
+    .footer-bottom {
+      margin-top: 1.5rem;
+      padding-top: 0.8rem;
+      font-size: 0.9rem;
     }
   }
  
