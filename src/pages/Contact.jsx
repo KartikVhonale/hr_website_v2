@@ -19,6 +19,13 @@ const Contact = () => {
   const handleSubmit = e => {
     e.preventDefault();
     setSubmitted(true);
+    
+    // Show success message for 2 seconds, then reset the form
+    setTimeout(() => {
+      setForm({ name: '', email: '', phone: '', role: '', subject: '', message: '' });
+      setSubmitted(false);
+    }, 2000);
+    
     // Here you would send the form data to your backend or email service
   };
 
@@ -60,7 +67,6 @@ const Contact = () => {
                   <option value="partner">Partner</option>
                   <option value="other">Other</option>
                 </select>
-                <label htmlFor="role">I am a...</label>
               </div>
             </div>
             <div className="contact-field floating-label">

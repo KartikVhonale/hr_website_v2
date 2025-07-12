@@ -1093,6 +1093,17 @@
   font-weight: 600;
   max-width: 95%;
 }
+
+/* Dark mode floating label background */
+:root[data-theme='dark'] .floating-label input:focus + label,
+:root[data-theme='dark'] .floating-label input:not(:placeholder-shown) + label,
+:root[data-theme='dark'] .floating-label select:focus + label,
+:root[data-theme='dark'] .floating-label select:not([value=""]) + label,
+:root[data-theme='dark'] .floating-label textarea:focus + label,
+:root[data-theme='dark'] .floating-label textarea:not(:placeholder-shown) + label {
+  background: #181e26;
+  color: #66b2ff;
+}
 .floating-label select + label {
   pointer-events: none;
 }
