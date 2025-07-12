@@ -123,137 +123,6 @@
     border-color: #3399ff;
     transform: scale(1.04);
   }
-  @media (max-width: 700px) {
-    .hero {
-      padding: 2.5rem 1rem 1.5rem 1rem;
-      border-radius: 0 0 2rem 2rem;
-      box-shadow: 0 6px 24px rgba(0,81,162,0.08);
-    }
-    .hero h1 {
-      font-size: 2.9rem;
-      text-shadow: 0 2px 8px rgba(0,81,162,0.1);
-    }
-    .hero p {
-      font-size: 1.05rem;
-      line-height: 1.6;
-    }
-    .hero-buttons {
-      flex-direction: column;
-      gap: 1rem;
-      margin-top: 1rem;
-      align-items: center;
-    }
-    .hero .cta-button {
-      width: 100%;
-      max-width: 300px;
-      padding: 1rem 2rem;
-      font-size: 1.1rem;
-      border-radius: 2.5rem;
-      box-shadow: 0 4px 16px rgba(0,81,162,0.15);
-    }
-  }
-  @media (max-width: 480px) {
-    .hero {
-      padding: 2rem 0.8rem 1.2rem 0.8rem;
-      border-radius: 0 0 1.5rem 1.5rem;
-    }
-    .hero h1 {
-      font-size: 2.9rem;
-      margin-bottom: 1rem;
-      letter-spacing: -0.5px;
-    }
-    .hero p {
-      font-size: 1rem;
-      margin-bottom: 1.8rem;
-      line-height: 1.6;
-    }
-    .hero-buttons {
-      gap: 0.8rem;
-      align-items: center;
-    }
-    .hero .cta-button {
-      padding: 1rem 2rem;
-      font-size: 1.05rem;
-      border-radius: 2rem;
-      box-shadow: 0 4px 16px rgba(0,81,162,0.15);
-    }
-  }
-  
-  /* Mobile styles for content sections */
-  @media (max-width: 700px) {
-    .content {
-      padding: 2.5rem 0.8rem;
-    }
-    .content-container {
-      grid-template-columns: 1fr;
-      gap: 2rem;
-    }
-    .content-text h2 {
-      font-size: 1.8rem;
-      margin-bottom: 1rem;
-    }
-    .content-text p {
-      font-size: 1rem;
-      line-height: 1.6;
-      margin-bottom: 1.5rem;
-    }
-    .benefits-list {
-      margin-bottom: 2rem;
-    }
-    .benefits-list li {
-      font-size: 0.95rem;
-      margin-bottom: 0.8rem;
-      line-height: 1.5;
-    }
-    .mini-feature {
-      padding: 1.5rem;
-      border-radius: 1rem;
-      margin-bottom: 1rem;
-    }
-    .mini-feature h4 {
-      font-size: 1.1rem;
-      margin-bottom: 0.6rem;
-    }
-    .mini-feature p {
-      font-size: 0.9rem;
-      line-height: 1.5;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .content {
-      padding: 2rem 0.6rem;
-    }
-    .content-container {
-      gap: 1.5rem;
-    }
-    .content-text h2 {
-      font-size: 1.6rem;
-      margin-bottom: 0.8rem;
-    }
-    .content-text p {
-      font-size: 0.95rem;
-      margin-bottom: 1.2rem;
-    }
-    .benefits-list {
-      margin-bottom: 1.5rem;
-    }
-    .benefits-list li {
-      font-size: 0.9rem;
-      margin-bottom: 0.6rem;
-    }
-    .mini-feature {
-      padding: 1.2rem;
-      margin-bottom: 0.8rem;
-    }
-    .mini-feature h4 {
-      font-size: 1rem;
-      margin-bottom: 0.5rem;
-    }
-    .mini-feature p {
-      font-size: 0.85rem;
-    }
-  }
   
   /* Features Section */
   .features {
@@ -714,65 +583,6 @@
     color: #b3c6e0;
   }
   
-  @media (max-width: 700px) {
-    .jobseekers-hero {
-      padding: 2rem 0.7rem 1.2rem 0.7rem;
-      border-radius: 0 0 1.2rem 1.2rem;
-    }
-    .jobseekers-title {
-      font-size: 2rem;
-    }
-    .jobseekers-featured {
-      padding: 2rem 0.7rem 1.2rem 0.7rem;
-    }
-    .featured-title {
-      font-size: 1.5rem;
-    }
-    .featured-jobs-list {
-      grid-template-columns: 1fr;
-      gap: 1rem;
-    }
-    .job-card {
-      padding: 1.5rem 1rem;
-    }
-  }
-  @media (max-width: 480px) {
-    .jobseekers-page {
-      padding-top: 60px;
-    }
-    .jobseekers-hero {
-      padding: 1.2rem 0.5rem 0.8rem 0.5rem;
-      border-radius: 0 0 0.7rem 0.7rem;
-    }
-    .jobseekers-title {
-      font-size: 1.8rem;
-      margin-bottom: 0.8rem;
-    }
-    .jobseekers-desc {
-      font-size: 0.9rem;
-      margin-bottom: 1.5rem;
-    }
-    .jobseekers-featured {
-      padding: 1.5rem 0.5rem 1rem 0.5rem;
-    }
-    .featured-jobs-list {
-      gap: 0.8rem;
-    }
-    .job-card {
-      padding: 1.2rem 0.8rem;
-    }
-    .job-card h3 {
-      font-size: 1.1rem;
-    }
-    .job-card p {
-      font-size: 0.9rem;
-    }
-    .apply-btn {
-      padding: 0.5rem 1.2rem;
-      font-size: 0.9rem;
-    }
-  }
-  
   /* Section Animation */
   .fade-slide-in {
     opacity: 0;
@@ -915,65 +725,6 @@
     color: #b3c6e0;
   }
   
-  @media (max-width: 700px) {
-    .employers-hero {
-      padding: 2rem 0.7rem 1.2rem 0.7rem;
-      border-radius: 0 0 1.2rem 1.2rem;
-    }
-    .employers-title {
-      font-size: 2rem;
-    }
-    .employers-featured {
-      padding: 2rem 0.7rem 1.2rem 0.7rem;
-    }
-    .featured-title {
-      font-size: 1.5rem;
-    }
-    .featured-employers-list {
-      grid-template-columns: 1fr;
-      gap: 1rem;
-    }
-    .employer-card {
-      padding: 1.5rem 1rem;
-    }
-  }
-  @media (max-width: 480px) {
-    .employers-page {
-      padding-top: 60px;
-    }
-    .employers-hero {
-      padding: 1.2rem 0.5rem 0.8rem 0.5rem;
-      border-radius: 0 0 0.7rem 0.7rem;
-    }
-    .employers-title {
-      font-size: 1.8rem;
-      margin-bottom: 0.8rem;
-    }
-    .employers-desc {
-      font-size: 0.9rem;
-      margin-bottom: 1.5rem;
-    }
-    .employers-featured {
-      padding: 1.5rem 0.5rem 1rem 0.5rem;
-    }
-    .featured-employers-list {
-      gap: 0.8rem;
-    }
-    .employer-card {
-      padding: 1.2rem 0.8rem;
-    }
-    .employer-card h3 {
-      font-size: 1.1rem;
-    }
-    .employer-card p {
-      font-size: 0.9rem;
-    }
-    .employer-card .apply-btn {
-      padding: 0.5rem 1.2rem;
-      font-size: 0.9rem;
-    }
-  }
-  
   /* --- About Us Page Styles --- */
   .about-page {
     padding-top: 90px;
@@ -1086,61 +837,6 @@
   }
   :root[data-theme='dark'] .about-team-card p {
     color: #b3c6e0;
-  }
-  
-  @media (max-width: 700px) {
-    .about-hero {
-      padding: 2rem 0.7rem 1.2rem 0.7rem;
-      border-radius: 0 0 1.2rem 1.2rem;
-    }
-    .about-title {
-      font-size: 2rem;
-    }
-    .about-section {
-      padding: 1.2rem 0.7rem 1.2rem 0.7rem;
-    }
-    .about-team-list {
-      gap: 1rem;
-    }
-  }
-  @media (max-width: 480px) {
-    .about-page {
-      padding-top: 60px;
-    }
-    .about-hero {
-      padding: 1.2rem 0.5rem 0.8rem 0.5rem;
-      border-radius: 0 0 0.7rem 0.7rem;
-    }
-    .about-title {
-      font-size: 1.8rem;
-      margin-bottom: 0.8rem;
-    }
-    .about-desc {
-      font-size: 0.9rem;
-      margin-bottom: 1.5rem;
-    }
-    .about-section {
-      padding: 0.7rem 0.5rem 0.7rem 0.5rem;
-    }
-    .about-team-list {
-      gap: 0.8rem;
-    }
-    .about-team-card {
-      padding: 1rem 0.8rem;
-      min-width: 120px;
-      max-width: 140px;
-    }
-    .about-team-avatar {
-      width: 40px;
-      height: 40px;
-      font-size: 1.1rem;
-    }
-    .about-team-card h3 {
-      font-size: 1rem;
-    }
-    .about-team-card p {
-      font-size: 0.85rem;
-    }
   }
   
   /* --- Contact Page Styles --- */
@@ -1266,40 +962,6 @@
     background: #1a3a2a;
   }
   
-  @media (max-width: 700px) {
-    .contact-hero {
-      padding: 2rem 0.7rem 1.2rem 0.7rem;
-      border-radius: 0 0 1.2rem 1.2rem;
-    }
-    .contact-title {
-      font-size: 2rem;
-    }
-    .contact-section {
-      padding: 1.2rem 0.7rem 1.2rem 0.7rem;
-    }
-  }
-  @media (max-width: 480px) {
-    .contact-page {
-      padding-top: 60px;
-    }
-    .contact-hero {
-      padding: 1.2rem 0.5rem 0.8rem 0.5rem;
-      border-radius: 0 0 0.7rem 0.7rem;
-    }
-    .contact-title {
-      font-size: 1.8rem;
-    }
-    .contact-desc {
-      font-size: 0.9rem;
-    }
-    .contact-section {
-      padding: 0.7rem 0.5rem 0.7rem 0.5rem;
-    }
-    .contact-form {
-      padding: 1rem 0.8rem;
-    }
-  }
-  
   /* Contact Page Side-by-Side Layout */
   .contact-content {
     display: flex;
@@ -1316,31 +978,124 @@
     border-color: #232b36;
     color: #f3f6fa;
   } */
-  @media (max-width: 900px) {
-    .contact-content {
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-    .contact-info, .contact-form {
-      width: 100%;
-      max-width: 100%;
-      margin: 0;
-    }
+  
+  /* === Contact Form Styles (from Contact.jsx) === */
+.contact-form.contact-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 32px 0 rgba(60, 80, 120, 0.10), 0 1.5px 8px rgba(0,0,0,0.03);
+  padding: 2.5rem 2rem;
+  transition: box-shadow 0.2s;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+.contact-form-row {
+  display: flex;
+  gap: 1.2rem;
+  margin-bottom: 1.1rem;
+}
+@media (max-width: 700px) {
+  .contact-form-row {
+    flex-direction: column;
+    gap: 0.5rem;
   }
-  @media (max-width: 480px) {
-    .contact-content {
-      gap: 1rem;
-    }
-    .contact-info {
-      padding: 1.2rem 0.8rem;
-    }
-    .contact-info h2 {
-      font-size: 1.3rem;
-    }
-    .contact-info p {
-      font-size: 0.9rem;
-    }
-  }
+}
+.contact-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.1rem;
+  position: relative;
+}
+.floating-label {
+  position: relative;
+}
+.contact-input-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #2563eb;
+  font-size: 1.1em;
+  pointer-events: none;
+  opacity: 0.85;
+  z-index: 2;
+}
+.contact-input, .contact-textarea {
+  background: #f7fafd;
+  border: 1.5px solid #e3e8f0;
+  border-radius: 8px;
+  padding: 0.85rem 1rem 0.85rem 2.5rem;
+  font-size: 1rem;
+  color: #1a2340;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+  box-shadow: none;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  resize: none;
+}
+.contact-input:focus, .contact-textarea:focus, .contact-input:active, .contact-textarea:active {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px #2563eb22;
+  background: #f5faff;
+}
+.floating-label select.contact-input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%232563eb" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.2em;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+.floating-label textarea.contact-textarea {
+  min-height: 110px;
+  max-height: 220px;
+  line-height: 1.6;
+  padding-top: 1.2rem;
+  padding-bottom: 1.2rem;
+}
+.floating-label label {
+  position: absolute;
+  left: 2.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  color: #6b7a99;
+  font-size: 1rem;
+  font-weight: 500;
+  pointer-events: none;
+  transition: all 0.18s cubic-bezier(0.4,0,0.2,1);
+  z-index: 3;
+  padding: 0 0.2em;
+  white-space: nowrap;
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.floating-label input:focus + label,
+.floating-label input:not(:placeholder-shown) + label,
+.floating-label select:focus + label,
+.floating-label select:not([value=""]) + label,
+.floating-label textarea:focus + label,
+.floating-label textarea:not(:placeholder-shown) + label {
+  top: -0.7em;
+  left: 2.2rem;
+  font-size: 0.92em;
+  color: #2563eb;
+  background: #fff;
+  padding: 0 0.3em;
+  font-weight: 600;
+  max-width: 95%;
+}
+.floating-label select + label {
+  pointer-events: none;
+}
 
   /* Blogs Section Styles */
   .jobseekers-blogs {
@@ -1518,47 +1273,6 @@
 
   :root[data-theme='dark'] .blog-excerpt {
     color: var(--text-secondary, #a0aec0);
-  }
-
-  @media (max-width: 700px) {
-    .jobseekers-blogs {
-      padding: 3rem 1.5rem;
-    }
-    .blogs-title {
-      font-size: 2rem;
-    }
-    .blogs-subtitle {
-      font-size: 1rem;
-    }
-    .blogs-grid {
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .jobseekers-blogs {
-      padding: 2rem 1rem;
-    }
-    .blogs-title {
-      font-size: 1.8rem;
-    }
-    .blogs-subtitle {
-      font-size: 0.95rem;
-    }
-    .blog-card-content {
-      padding: 1.2rem;
-    }
-    .blog-title {
-      font-size: 1.2rem;
-    }
-    .blog-excerpt {
-      font-size: 0.9rem;
-    }
-    .blog-meta {
-      font-size: 0.8rem;
-      gap: 0.8rem;
-    }
   }
 
   /* Articles Page Styles */
@@ -1751,7 +1465,23 @@
     font-size: 1.1rem;
   }
 
-  @media (max-width: 700px) {
+  /* === Responsive Media Queries: Grouped by Breakpoint === */
+
+  /* --- (max-width: 900px) --- */
+  @media (max-width: 900px) {
+    .jobseekers-blogs {
+      padding: 3rem 1.5rem;
+    }
+    .blogs-title {
+      font-size: 2rem;
+    }
+    .blogs-subtitle {
+      font-size: 1rem;
+    }
+    .blogs-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
     .articles-hero {
       padding: 3rem 1.5rem 2rem 1.5rem;
       border-radius: 0 0 2rem 2rem;
@@ -1781,7 +1511,417 @@
     }
   }
 
+  /* --- (max-width: 700px) --- */
+  @media (max-width: 700px) {
+    .hero {
+      padding: 2.5rem 1rem 1.5rem 1rem;
+      border-radius: 0 0 2rem 2rem;
+      box-shadow: 0 6px 24px rgba(0,81,162,0.08);
+    }
+    .hero h1 {
+      font-size: 2.9rem;
+      text-shadow: 0 2px 8px rgba(0,81,162,0.1);
+    }
+    .hero p {
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+    .hero-buttons {
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 1rem;
+      align-items: center;
+    }
+    .hero .cta-button {
+      width: 100%;
+      max-width: 300px;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      border-radius: 2.5rem;
+      box-shadow: 0 4px 16px rgba(0,81,162,0.15);
+    }
+    .content {
+      padding: 2.5rem 0.8rem;
+    }
+    .content-container {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    .content-text h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+    .content-text p {
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+    .benefits-list {
+      margin-bottom: 2rem;
+    }
+    .benefits-list li {
+      font-size: 0.95rem;
+      margin-bottom: 0.8rem;
+      line-height: 1.5;
+    }
+    .mini-feature {
+      padding: 1.5rem;
+      border-radius: 1rem;
+      margin-bottom: 1rem;
+    }
+    .mini-feature h4 {
+      font-size: 1.1rem;
+      margin-bottom: 0.6rem;
+    }
+    .mini-feature p {
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .jobseekers-hero {
+      padding: 2rem 0.7rem 1.2rem 0.7rem;
+      border-radius: 0 0 1.2rem 1.2rem;
+    }
+    .jobseekers-title {
+      font-size: 2rem;
+    }
+    .jobseekers-featured {
+      padding: 2rem 0.7rem 1.2rem 0.7rem;
+    }
+    .featured-title {
+      font-size: 1.5rem;
+    }
+    .featured-jobs-list {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    .job-card {
+      padding: 1.5rem 1rem;
+    }
+    .employers-hero {
+      padding: 2rem 0.7rem 1.2rem 0.7rem;
+      border-radius: 0 0 1.2rem 1.2rem;
+    }
+    .employers-title {
+      font-size: 2rem;
+    }
+    .employers-featured {
+      padding: 2rem 0.7rem 1.2rem 0.7rem;
+    }
+    .featured-title {
+      font-size: 1.5rem;
+    }
+    .featured-employers-list {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    .employer-card {
+      padding: 1.5rem 1rem;
+    }
+    .about-hero {
+      padding: 2rem 0.7rem 1.2rem 0.7rem;
+      border-radius: 0 0 1.2rem 1.2rem;
+    }
+    .about-title {
+      font-size: 2rem;
+    }
+    .about-section {
+      padding: 1.2rem 0.7rem 1.2rem 0.7rem;
+    }
+    .about-team-list {
+      gap: 1rem;
+    }
+    .contact-hero {
+      padding: 2rem 0.7rem 1.2rem 0.7rem;
+      border-radius: 0 0 1.2rem 1.2rem;
+    }
+    .contact-title {
+      font-size: 2rem;
+    }
+    .contact-section {
+      padding: 1.2rem 0.7rem 1.2rem 0.7rem;
+    }
+    .contact-form-row {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .jobseekers-blogs {
+      padding: 2rem 1rem;
+    }
+    .blogs-title {
+      font-size: 1.8rem;
+    }
+    .blogs-subtitle {
+      font-size: 0.95rem;
+    }
+    .blog-card-content {
+      padding: 1.2rem;
+    }
+    .blog-title {
+      font-size: 1.2rem;
+    }
+    .blog-excerpt {
+      font-size: 0.9rem;
+    }
+    .blog-meta {
+      font-size: 0.8rem;
+      gap: 0.8rem;
+    }
+    .articles-page {
+      padding-top: 60px;
+    }
+    .articles-hero {
+      padding: 2rem 1rem 1.5rem 1rem;
+      border-radius: 0 0 1.5rem 1.5rem;
+    }
+    .articles-title {
+      font-size: 2rem;
+    }
+    .articles-desc {
+      font-size: 1rem;
+    }
+    .articles-search-input {
+      padding: 0.8rem 1.2rem;
+      font-size: 0.95rem;
+    }
+    .articles-categories {
+      gap: 0.6rem;
+    }
+    .category-btn {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+    }
+    .articles-content {
+      padding: 1.5rem 1rem;
+    }
+    .articles-results {
+      font-size: 1.2rem;
+    }
+    .pagination-btn {
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+      min-width: 40px;
+    }
+  }
+
+  /* --- (max-width: 480px) --- */
   @media (max-width: 480px) {
+    .hero {
+      padding: 2rem 0.8rem 1.2rem 0.8rem;
+      border-radius: 0 0 1.5rem 1.5rem;
+    }
+    .hero h1 {
+      font-size: 2.9rem;
+      margin-bottom: 1rem;
+      letter-spacing: -0.5px;
+    }
+    .hero p {
+      font-size: 1rem;
+      margin-bottom: 1.8rem;
+      line-height: 1.6;
+    }
+    .hero-buttons {
+      gap: 0.8rem;
+      align-items: center;
+    }
+    .hero .cta-button {
+      padding: 1rem 2rem;
+      font-size: 1.05rem;
+      border-radius: 2rem;
+      box-shadow: 0 4px 16px rgba(0,81,162,0.15);
+    }
+    .content {
+      padding: 2rem 0.6rem;
+    }
+    .content-container {
+      gap: 1.5rem;
+    }
+    .content-text h2 {
+      font-size: 1.6rem;
+      margin-bottom: 0.8rem;
+    }
+    .content-text p {
+      font-size: 0.95rem;
+      margin-bottom: 1.2rem;
+    }
+    .benefits-list {
+      margin-bottom: 1.5rem;
+    }
+    .benefits-list li {
+      font-size: 0.9rem;
+      margin-bottom: 0.6rem;
+    }
+    .mini-feature {
+      padding: 1.2rem;
+      margin-bottom: 0.8rem;
+    }
+    .mini-feature h4 {
+      font-size: 1rem;
+      margin-bottom: 0.4rem;
+    }
+    .mini-feature p {
+      font-size: 0.85rem;
+    }
+    .jobseekers-page {
+      padding-top: 60px;
+    }
+    .jobseekers-hero {
+      padding: 1.2rem 0.5rem 0.8rem 0.5rem;
+      border-radius: 0 0 0.7rem 0.7rem;
+    }
+    .jobseekers-title {
+      font-size: 1.8rem;
+      margin-bottom: 0.8rem;
+    }
+    .jobseekers-desc {
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    .jobseekers-featured {
+      padding: 1.5rem 0.5rem 1rem 0.5rem;
+    }
+    .featured-jobs-list {
+      gap: 0.8rem;
+    }
+    .job-card {
+      padding: 1.2rem 0.8rem;
+    }
+    .job-card h3 {
+      font-size: 1.1rem;
+    }
+    .job-card p {
+      font-size: 0.9rem;
+    }
+    .apply-btn {
+      padding: 0.5rem 1.2rem;
+      font-size: 0.9rem;
+    }
+    .employers-page {
+      padding-top: 60px;
+    }
+    .employers-hero {
+      padding: 1.2rem 0.5rem 0.8rem 0.5rem;
+      border-radius: 0 0 0.7rem 0.7rem;
+    }
+    .employers-title {
+      font-size: 1.8rem;
+      margin-bottom: 0.8rem;
+    }
+    .employers-desc {
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    .employers-featured {
+      padding: 1.5rem 0.5rem 1rem 0.5rem;
+    }
+    .featured-employers-list {
+      gap: 0.8rem;
+    }
+    .employer-card {
+      padding: 1.2rem 0.8rem;
+    }
+    .employer-card h3 {
+      font-size: 1.1rem;
+    }
+    .employer-card p {
+      font-size: 0.9rem;
+    }
+    .employer-card .apply-btn {
+      padding: 0.5rem 1.2rem;
+      font-size: 0.9rem;
+    }
+    .about-page {
+      padding-top: 60px;
+    }
+    .about-hero {
+      padding: 1.2rem 0.5rem 0.8rem 0.5rem;
+      border-radius: 0 0 0.7rem 0.7rem;
+    }
+    .about-title {
+      font-size: 1.8rem;
+      margin-bottom: 0.8rem;
+    }
+    .about-desc {
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    .about-section {
+      padding: 0.7rem 0.5rem 0.7rem 0.5rem;
+    }
+    .about-team-list {
+      gap: 0.8rem;
+    }
+    .about-team-card {
+      padding: 1rem 0.8rem;
+      min-width: 120px;
+      max-width: 140px;
+    }
+    .about-team-avatar {
+      width: 40px;
+      height: 40px;
+      font-size: 1.1rem;
+    }
+    .about-team-card h3 {
+      font-size: 1rem;
+    }
+    .about-team-card p {
+      font-size: 0.85rem;
+    }
+    .contact-page {
+      padding-top: 60px;
+    }
+    .contact-hero {
+      padding: 1.2rem 0.5rem 0.8rem 0.5rem;
+      border-radius: 0 0 0.7rem 0.7rem;
+    }
+    .contact-title {
+      font-size: 1.8rem;
+    }
+    .contact-desc {
+      font-size: 0.9rem;
+    }
+    .contact-section {
+      padding: 0.7rem 0.5rem 0.7rem 0.5rem;
+    }
+    .contact-form {
+      padding: 1rem 0.8rem;
+    }
+    .contact-content {
+      gap: 1rem;
+    }
+    .contact-info {
+      padding: 1.2rem 0.8rem;
+    }
+    .contact-info h2 {
+      font-size: 1.3rem;
+    }
+    .contact-info p {
+      font-size: 0.9rem;
+    }
+    .contact-content {
+      gap: 1rem;
+    }
+    .jobseekers-blogs {
+      padding: 2rem 1rem;
+    }
+    .blogs-title {
+      font-size: 1.8rem;
+    }
+    .blogs-subtitle {
+      font-size: 0.95rem;
+    }
+    .blog-card-content {
+      padding: 1.2rem;
+    }
+    .blog-title {
+      font-size: 1.2rem;
+    }
+    .blog-excerpt {
+      font-size: 0.9rem;
+    }
+    .blog-meta {
+      font-size: 0.8rem;
+      gap: 0.8rem;
+    }
     .articles-page {
       padding-top: 60px;
     }
