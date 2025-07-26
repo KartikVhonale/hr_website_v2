@@ -3,15 +3,24 @@ import { useNavigate } from 'react-router-dom';
 
 const BlogCard = ({ id, title, excerpt, author, date, readTime, image, category }) => {
   const navigate = useNavigate();
+
+  let parsedCategories = [];
+  if (Array.isArray(category)) {
+    parsedCategories = category.flatMap(cat => cat.split(',').map(c => c.trim()));
+  } else if (typeof category === 'string') {
+    parsedCategories = category.split(',').map(c => c.trim());
+  }
+  const maxCategoriesToShow = 2;
   return (
     <div className="blog-card">
       <div className="blog-card-image">
         <img src={image} alt={title} />
-          {Array.isArray(category) ? (
-            category.map((cat, index) => <div className="blog-category" key={index}>{cat}</div>)
-          ) : (
-            <div >{category}</div>
-          )}
+        <div className="blog-categories">
+          {parsedCategories.slice(0, maxCategoriesToShow).map((cat, index) => (
+            <div className="blog-category" key={index}>{cat}</div>
+          ))}
+          {parsedCategories.length > maxCategoriesToShow && <div className="blog-category">...</div>}
+        </div>
       </div>
       <div className="blog-card-content">
         <div className="blog-meta">

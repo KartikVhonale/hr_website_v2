@@ -33,7 +33,12 @@ const Articles = () => {
 
         const allCategories = articles.reduce((acc, article) => {
           if (Array.isArray(article.category)) {
-            return [...acc, ...article.category];
+            const categories = article.category.flatMap(cat => cat.split(',').map(c => c.trim()));
+            return [...acc, ...categories];
+          }
+          if (typeof article.category === 'string') {
+            const categories = article.category.split(',').map(c => c.trim());
+            return [...acc, ...categories];
           }
           return acc;
         }, []);
@@ -52,7 +57,13 @@ const Articles = () => {
 
   // Filter articles based on category and search query
   const filteredArticles = allArticles.filter(article => {
-    const matchesCategory = selectedCategory === 'All' || (Array.isArray(article.category) && article.category.includes(selectedCategory));
+    let categories = [];
+    if (Array.isArray(article.category)) {
+      categories = article.category.flatMap(cat => cat.split(',').map(c => c.trim()));
+    } else if (typeof article.category === 'string') {
+      categories = article.category.split(',').map(c => c.trim());
+    }
+    const matchesCategory = selectedCategory === 'All' || categories.includes(selectedCategory);
     const authorName = article.author ? article.author.name : '';
     const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          article.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
