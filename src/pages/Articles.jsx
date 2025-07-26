@@ -19,7 +19,7 @@ const Articles = () => {
   useScrollAnimation(articlesRef);
 
   useEffect(() => {
-    const fetchArticles = async () => {
+    const fetchArticlesAndCategories = async () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/articles`);
         const data = await response.json();
@@ -28,7 +28,18 @@ const Articles = () => {
           throw new Error(data.message || 'Failed to fetch articles');
         }
 
-        setAllArticles(data.data);
+        const articles = data.data;
+        setAllArticles(articles);
+
+        const allCategories = articles.reduce((acc, article) => {
+          if (Array.isArray(article.category)) {
+            return [...acc, ...article.category];
+          }
+          return acc;
+        }, []);
+        const uniqueCategories = ['All', ...new Set(allCategories)];
+        setCategories(uniqueCategories);
+
       } catch (err) {
         setError(err.message);
       } finally {
@@ -36,24 +47,7 @@ const Articles = () => {
       }
     };
 
-    fetchArticles();
-
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/articles/categories`);
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || 'Failed to fetch categories');
-        }
-
-        setCategories(['All', ...data.data]);
-      } catch (err) {
-        setError(err.message);
-      }
-    };
-
-    fetchCategories();
+    fetchArticlesAndCategories();
   }, []);
 
   // Filter articles based on category and search query

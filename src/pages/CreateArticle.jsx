@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import '../css/CreateArticle.css';
 
 const CreateArticle = () => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -69,7 +69,13 @@ const CreateArticle = () => {
         throw new Error(data.message || 'Failed to create article');
       }
 
-      navigate('/articles');
+      if (user && user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else if (user && user.role === 'employer') {
+        navigate('/employer/dashboard');
+      } else {
+        navigate('/articles');
+      }
     } catch (err) {
       setError(err.message);
     } finally {

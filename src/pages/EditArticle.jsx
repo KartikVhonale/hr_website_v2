@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import '../css/CreateArticle.css';
 
 const EditArticle = () => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const navigate = useNavigate();
   const { id } = useParams();
   const [title, setTitle] = useState('');
@@ -85,7 +85,13 @@ const EditArticle = () => {
         throw new Error(data.message || 'Failed to update article');
       }
 
-      navigate('/dashboard');
+      if (user && user.role === 'admin') {
+        navigate('/admin');
+      } else if (user && user.role === 'employer') {
+        navigate('/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       setError(err.message);
     } finally {
