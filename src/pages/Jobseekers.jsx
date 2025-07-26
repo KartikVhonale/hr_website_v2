@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../css/Main.css';
 import JobCard from '../components/ui/JobCard';
@@ -26,46 +26,10 @@ const jobs = [
   },
 ];
 
-const blogs = [
-  {
-    title: 'How to Ace Your Technical Interview',
-    excerpt: 'Master the art of technical interviews with our comprehensive guide covering coding challenges, system design, and behavioral questions.',
-    author: 'Sarah Johnson',
-    date: 'Dec 15, 2024',
-    readTime: 8,
-    image: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=400&h=250&fit=crop',
-    category: 'Career Tips'
-  },
-  {
-    title: 'Building a Strong Professional Network',
-    excerpt: 'Learn effective strategies to build and maintain professional relationships that can advance your career and open new opportunities.',
-    author: 'Michael Chen',
-    date: 'Dec 12, 2024',
-    readTime: 6,
-    image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=250&fit=crop',
-    category: 'Networking'
-  },
-  {
-    title: 'Remote Work Best Practices',
-    excerpt: 'Discover proven strategies to stay productive, maintain work-life balance, and thrive in remote work environments.',
-    author: 'Emily Rodriguez',
-    date: 'Dec 10, 2024',
-    readTime: 7,
-    image: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=400&h=250&fit=crop',
-    category: 'Remote Work'
-  },
-  {
-    title: 'Resume Writing Secrets That Get You Hired',
-    excerpt: 'Transform your resume with expert tips on formatting, keyword optimization, and highlighting your achievements effectively.',
-    author: 'David Kim',
-    date: 'Dec 8, 2024',
-    readTime: 9,
-    image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=250&fit=crop',
-    category: 'Resume Tips'
-  }
-];
-
 const Jobseekers = () => {
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const heroRef = useRef();
   const featuredRef = useRef();
@@ -73,6 +37,28 @@ const Jobseekers = () => {
   useScrollAnimation(heroRef);
   useScrollAnimation(featuredRef);
   useScrollAnimation(blogsRef);
+
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/articles`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Failed to fetch articles');
+        }
+
+        // Get only the latest 4 articles
+        setArticles(data.data.slice(0, 4));
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticles();
+  }, []);
 
   const handleViewAllArticles = () => {
     navigate('/articles');
@@ -105,18 +91,25 @@ const Jobseekers = () => {
         <h2 className="blogs-title">Career Insights & Tips</h2>
         <p className="blogs-subtitle">Stay ahead in your career with expert advice and industry insights</p>
         <div className="blogs-grid">
-          {blogs.map((blog, idx) => (
-            <BlogCard
-              key={idx}
-              title={blog.title}
-              excerpt={blog.excerpt}
-              author={blog.author}
-              date={blog.date}
-              readTime={blog.readTime}
-              image={blog.image}
-              category={blog.category}
-            />
-          ))}
+          {loading ? (
+            <div>Loading articles...</div>
+          ) : error ? (
+            <div>{error}</div>
+          ) : (
+            articles.map((article) => (
+              <BlogCard
+                key={article._id}
+                id={article._id}
+                title={article.title}
+                excerpt={article.content.substring(0, 100) + '...'}
+                author={article.author ? article.author.name : 'Unknown Author'}
+                date={article.date}
+                readTime={article.readTime}
+                image={article.image}
+                category={article.category}
+              />
+            ))
+          )}
         </div>
         <div className="blogs-cta">
           <button className="blogs-view-all" onClick={handleViewAllArticles}>View All Articles</button>
