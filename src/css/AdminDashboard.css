@@ -1,0 +1,140 @@
+/* Admin Dashboard Styles */
+
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+  margin-top: 90px;
+  background: transparent;
+}
+
+.dashboard-title {
+  font-size: 2.7rem;
+  font-weight: 900;
+  letter-spacing: -1.5px;
+  color: #1e293b;
+  text-shadow: 0 2px 12px rgba(37,99,235,0.08);
+  margin-bottom: 2.8rem;
+  line-height: 1.1;
+}
+
+:root[data-theme='dark'] .dashboard-title {
+  color: #f3f6fa;
+  text-shadow: 0 2px 16px #111927, 0 0px 8px #60a5fa;
+  filter: drop-shadow(0 0 6px #60a5fa33);
+}
+
+.dashboard-card {
+  background: #fff;
+  border-radius: 1.1rem;
+  box-shadow: 0 4px 24px 0 rgba(37,99,235,0.07), 0 1.5px 6px 0 rgba(0,0,0,0.03);
+  padding: 2.2rem 2rem 2rem 2rem;
+  margin-bottom: 2.2rem;
+  transition: box-shadow 0.2s, transform 0.2s;
+  border: 1.5px solid #e0e7ef;
+}
+
+.dashboard-card:hover {
+  box-shadow: 0 8px 32px 0 rgba(37,99,235,0.13), 0 2px 8px 0 rgba(0,0,0,0.04);
+  transform: translateY(-2px) scale(1.01);
+}
+
+:root[data-theme='dark'] .dashboard-card {
+  background: #232b3a;
+  border: 1.5px solid #334155;
+  box-shadow: 0 4px 24px 0 rgba(96,165,250,0.07), 0 1.5px 6px 0 rgba(0,0,0,0.08);
+}
+
+.dashboard-section-header {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #2563eb;
+  margin-bottom: 1.2rem;
+  letter-spacing: -0.5px;
+  border-left: 4px solid #2563eb;
+  padding-left: 0.9rem;
+  background: linear-gradient(90deg, #e0e7ef 60%, #f1f5f9 100%);
+  border-radius: 0.3rem;
+  box-shadow: 0 1px 6px rgba(37,99,235,0.04);
+}
+
+:root[data-theme='dark'] .dashboard-section-header {
+  color: #60a5fa;
+  border-left: 4px solid #60a5fa;
+  background: linear-gradient(90deg, #232b3a 60%, #181f2a 100%);
+  box-shadow: 0 1px 8px #111927;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}
+
+.filter-controls input,
+.filter-controls select {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  font-size: 1rem;
+}
+
+:root[data-theme='dark'] .filter-controls input,
+:root[data-theme='dark'] .filter-controls select {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #d1d5db;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+th,
+td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+:root[data-theme='dark'] th,
+:root[data-theme='dark'] td {
+  border-bottom: 1px solid #334155;
+}
+
+th {
+  font-weight: 600;
+  color: #4b5563;
+}
+
+:root[data-theme='dark'] th {
+  color: #9ca3af;
+}
+
+td {
+  color: #1f2937;
+}
+
+:root[data-theme='dark'] td {
+  color: #d1d5db;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+:root[data-theme='dark'] tbody tr:hover {
+  background-color: #374151;
+}
