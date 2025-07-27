@@ -1,0 +1,314 @@
+.header {
+  background-color: rgba(255, 255, 255, 0.75); /* semi-transparent white for light mode */
+  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+  padding: 0.75rem 0;
+  min-height: 64px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  backdrop-filter: blur(18px); /* stronger blur */
+  -webkit-backdrop-filter: blur(18px);
+  transition: top 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s, box-shadow 0.3s;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  opacity: 1;
+}
+
+/* .header.hidden {
+  top: -89px;
+  opacity: 0;
+} */
+
+:root[data-theme='dark'] .header {
+  background-color: rgba(0, 0, 0, 0.55);
+}
+
+:root[data-theme='light'] {
+  --signup-btn-bg: #0051a2;
+  --signup-btn-hover: #003b75;
+}
+:root[data-theme='dark'] {
+  --signup-btn-bg: #66b2ff;
+  --signup-btn-hover: #3399ff;
+}
+
+.header-content {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 64px;
+}
+
+.logo{
+  width: 11.5rem;
+}
+.logo h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  transition: font-size 0.3s;
+}
+
+.nav-menu {
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: center;
+  align-items: center;
+}
+
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 1.115rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
+  position: relative;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: var(--accent-primary);
+  background: rgba(0, 81, 162, 0.08);
+}
+
+.header-auth-buttons {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-left: auto;
+  justify-content: flex-end;
+}
+
+.header-btn {
+  padding: 0.45rem 1.1rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  border: none;
+  outline: none;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.header-login {
+  background: transparent;
+  color: var(--accent-primary);
+  border: 1.5px solid var(--accent-primary);
+}
+
+.header-login:hover {
+  background: var(--accent-primary);
+  color: #fff;
+}
+
+.header-signup {
+  background: var(--signup-btn-bg);
+  color: #fff !important;
+  border: 1.5px solid var(--signup-btn-bg);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.header-signup:hover {
+  background: var(--signup-btn-hover);
+  border-color: var(--signup-btn-hover);
+  color: #fff !important;
+}
+
+/* Hamburger menu styles */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 1201;
+}
+.hamburger .bar {
+  width: 1.7rem;
+  height: 0.22rem;
+  background: var(--accent-primary, #0051a2);
+  margin: 0.22rem 0;
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+
+/* Sidebar styles - improved */
+.sidebar {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px;
+  height: 100vh;
+  background: var(--bg-primary, #fff);
+  box-shadow: 2px 0 16px rgba(0,0,0,0.12);
+  z-index: 1202;
+  padding: 2.5rem 1.5rem 1.5rem 1.5rem;
+  flex-direction: column;
+  gap: 2rem;
+  transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+  transform: translateX(-100%);
+  overflow-y: auto;
+}
+.sidebar.open {
+  display: flex;
+  transform: translateX(0);
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.25);
+  z-index: 1200;
+  transition: opacity 0.3s;
+  opacity: 0;
+  pointer-events: none;
+}
+.sidebar-overlay.open {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.close-sidebar {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: var(--accent-primary, #0051a2);
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  cursor: pointer;
+}
+.sidebar-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.sidebar-link {
+  text-decoration: none;
+  color: var(--text-primary, #222);
+  font-size: 1.15rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.sidebar-link:hover {
+  color: var(--accent-primary, #0051a2);
+}
+.sidebar-auth {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+.sidebar-btn {
+  padding: 0.45rem 1.1rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1.5px solid var(--accent-primary, #0051a2);
+  background: transparent;
+  color: var(--accent-primary, #0051a2);
+  transition: background 0.2s, color 0.2s;
+}
+.sidebar-btn:hover {
+  background: var(--accent-primary, #0051a2);
+  color: #fff;
+}
+
+/* Responsive design */
+@media (max-width: 900px) {
+  .nav-list {
+    gap: 1rem;
+  }
+  .header-auth-buttons {
+    margin-left: 1.2rem;
+  }
+}
+
+@media (max-width: 950px) {
+  .header-content {
+    flex-direction: row;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    min-height: 56px;
+  }
+  .header {
+    padding: 0.75rem 0;
+    min-height: 56px;
+  }
+  .logo h1 {
+    font-size: 2rem;
+  }
+  .nav-menu {
+    display: none;
+  }
+  .hamburger {
+    display: flex;
+    padding-right: 6.5rem;
+  }
+  .header-auth-buttons {
+    margin-left: 0;
+    margin-top: 0;
+    justify-content: flex-end;
+    display: none;
+  }
+  .header-btn {
+    font-size: 0.95rem;
+    padding: 0.4rem 0.9rem;
+  }
+  .sidebar {
+    display: flex;
+  }
+  .sidebar:not(.open) {
+    transform: translateX(-100%);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  .sidebar-overlay {
+    display: block;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo h1 {
+    font-size: 2.3rem;
+  }
+  .sidebar {
+    width: 90vw;
+    min-width: 0;
+    padding: 2.5rem 1rem 1.5rem 1rem;
+  }
+}
