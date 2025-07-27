@@ -17,7 +17,8 @@ import CreateArticle from './pages/CreateArticle';
 import EditArticle from './pages/EditArticle';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
-import CreateJob from './pages/CreateJob';
+import CreateJob from './pages/Employers/CreateJob';
+import ManageJobs from './pages/ManageJobs';
 import './App.css';
 import { Routes, Route } from 'react-router-dom';
 
@@ -40,9 +41,12 @@ function App() {
             <Route path="/articles/:id" element={<ArticleDetail />} />
             <Route path="/create-article" element={<CreateArticle />} />
             <Route path="/edit-article/:id" element={<EditArticle />} />
-            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            
+            
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/create-job" element={<CreateJob />} />
+            <Route path="/manage-jobs" element={<ManageJobs />} />
           </Routes>
           <Footer />
         </div>

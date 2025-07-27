@@ -92,7 +92,7 @@
 .form-group input,
 .form-group textarea,
 .form-group select {
-  width: 100%;
+  min-width: none;
   max-width: 500px;
   padding: 0.8rem 1.1rem;
   background-color: var(--input-bg);

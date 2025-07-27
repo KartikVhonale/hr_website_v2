@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import Card from '../components/ui/card';
-import Button from '../components/ui/button';
-import CreateJobSidebar from '../components/dashboard/CreateJobSidebar';
-import '../css/CreateJob.css';
+import { useAuth } from '../../context/AuthContext';
+import Card from '../../components/ui/card';
+import Button from '../../components/ui/button';
+import CreateJobSidebar from '../../components/dashboard/CreateJobSidebar';
+import '../../css/CreateJob.css';
 
 const CreateJob = () => {
   const { token } = useAuth();
