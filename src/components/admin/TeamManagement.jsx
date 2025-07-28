@@ -6,9 +6,13 @@ import { FaEdit, FaTrash, FaUser } from 'react-icons/fa';
 const TeamManagement = ({ team }) => {
   return (
     <Card className="dashboard-card">
-      <div className="dashboard-section-header">Team Page</div>
-      <div style={{ marginBottom: 16 }}>
-        <Button size="sm" variant="secondary"><FaUser /> Add Member</Button>
+      <div className="section-header">
+        <h2>Team Management</h2>
+        <div className="btn-group">
+          <button className="btn btn-primary btn-icon">
+            <FaUser /> Add Member
+          </button>
+        </div>
       </div>
       <div style={{ overflowX: 'auto' }}>
         <table>
@@ -25,8 +29,14 @@ const TeamManagement = ({ team }) => {
                 <td>{member.name}</td>
                 <td>{member.role}</td>
                 <td className="actions">
-                  <Button size="sm"><FaEdit /> Edit</Button>
-                  <Button size="sm" variant="destructive"><FaTrash /> Delete</Button>
+                  <div className="btn-group">
+                    <button className="btn btn-warning btn-sm btn-icon">
+                      <FaEdit /> Edit
+                    </button>
+                    <button className="btn btn-danger btn-sm btn-icon">
+                      <FaTrash /> Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

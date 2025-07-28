@@ -35,8 +35,16 @@ const ArticleManagement = ({ articles, setArticles }) => {
   return (
     <Card className="dashboard-card">
       <div className="dashboard-section-header">Article Manager</div>
-      <div style={{ marginBottom: 16 }}>
-        <Button size="sm" variant="secondary" onClick={() => navigate('/create-article')}><FaEdit /> New Article</Button>
+      <div className="section-header">
+        <h2>Articles</h2>
+        <div className="btn-group">
+          <button className="btn btn-primary btn-icon" onClick={() => navigate('/create-article')}>
+            <FaEdit /> New Article
+          </button>
+          <button className="btn btn-secondary btn-icon">
+            <FaSearch /> Search
+          </button>
+        </div>
       </div>
       <div style={{ overflowX: 'auto' }}>
         <table>
@@ -57,9 +65,17 @@ const ArticleManagement = ({ articles, setArticles }) => {
                 <td><StatusBadge status={article.status} /></td>
                 <td>{article.featured ? <FaStar color="#f59e42" /> : <FaStar color="#e5e7eb" />}</td>
                 <td className="actions">
-                  <Button size="sm" onClick={() => navigate(`/edit-article/${article._id}`)}><FaEdit /> Edit</Button>
-                  <Button size="sm" variant="destructive" onClick={() => handleDeleteArticle(article._id)}><FaTrash /> Delete</Button>
-                  <Button size="sm" variant="secondary"><FaStar /> Toggle</Button>
+                  <div className="btn-group">
+                    <button className="btn btn-warning btn-sm btn-icon" onClick={() => navigate(`/edit-article/${article._id}`)}>
+                      <FaEdit /> Edit
+                    </button>
+                    <button className="btn btn-danger btn-sm btn-icon" onClick={() => handleDeleteArticle(article._id)}>
+                      <FaTrash /> Delete
+                    </button>
+                    <button className="btn btn-info btn-sm btn-icon">
+                      <FaStar /> Toggle
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

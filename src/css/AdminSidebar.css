@@ -4,7 +4,9 @@
   position: absolute;
   left: 0;
   top: 80px;
-  height: 150%; 
+  min-height: 100vh;
+  max-height: 2000vh; 
+  height: 150vh;
   width: 280px;
   background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
   border-right: 1px solid #334155;

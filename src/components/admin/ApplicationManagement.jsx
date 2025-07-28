@@ -14,7 +14,14 @@ const ApplicationManagement = ({ applications }) => {
 
   return (
     <Card className="dashboard-card">
-      <div className="dashboard-section-header">Application Tracker</div>
+      <div className="section-header">
+        <h2>Application Tracker</h2>
+        <div className="btn-group">
+          <button className="btn btn-primary btn-icon">
+            <FaSearch /> Search Applications
+          </button>
+        </div>
+      </div>
       <div className="filter-controls">
         <input type="text" placeholder="Search applications..." value={appSearch} onChange={e => setAppSearch(e.target.value)} />
         <select value={appStatus} onChange={e => setAppStatus(e.target.value)}>
@@ -40,8 +47,14 @@ const ApplicationManagement = ({ applications }) => {
                 <td>{app.applicant.name}</td>
                 <td><StatusBadge status={app.status} /></td>
                 <td className="actions">
-                  <Button size="sm"><FaEye /> View</Button>
-                  <Button size="sm" variant="secondary"><FaSyncAlt /> Update</Button>
+                  <div className="btn-group">
+                    <button className="btn btn-info btn-sm btn-icon">
+                      <FaEye /> View
+                    </button>
+                    <button className="btn btn-warning btn-sm btn-icon">
+                      <FaSyncAlt /> Update
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

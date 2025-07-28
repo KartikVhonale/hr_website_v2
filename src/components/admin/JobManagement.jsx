@@ -14,7 +14,14 @@ const JobManagement = ({ jobs }) => {
 
   return (
     <Card className="dashboard-card">
-      <div className="dashboard-section-header">Job Post Management</div>
+      <div className="section-header">
+        <h2>Job Post Management</h2>
+        <div className="btn-group">
+          <button className="btn btn-primary btn-icon">
+            <FaSearch /> Search Jobs
+          </button>
+        </div>
+      </div>
       <div className="filter-controls">
         <input type="text" placeholder="Search jobs..." value={jobSearch} onChange={e => setJobSearch(e.target.value)} />
         <select value={jobStatus} onChange={e => setJobStatus(e.target.value)}>
@@ -42,9 +49,17 @@ const JobManagement = ({ jobs }) => {
                 <td><StatusBadge status={job.status} /></td>
                 <td>{job.salary}</td>
                 <td className="actions">
-                  <Button size="sm"><FaEye /> View</Button>
-                  <Button size="sm" variant="destructive"><FaTrash /> Delete</Button>
-                  <Button size="sm" variant="secondary"><FaCheck /> Approve</Button>
+                  <div className="btn-group">
+                    <button className="btn btn-info btn-sm btn-icon">
+                      <FaEye /> View
+                    </button>
+                    <button className="btn btn-danger btn-sm btn-icon">
+                      <FaTrash /> Delete
+                    </button>
+                    <button className="btn btn-success btn-sm btn-icon">
+                      <FaCheck /> Approve
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

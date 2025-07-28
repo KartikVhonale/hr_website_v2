@@ -88,7 +88,14 @@ const ContactManagement = ({ contacts, setContacts }) => {
 
   return (
     <Card className="dashboard-card">
-      <div className="dashboard-section-header">Contact Form Submissions</div>
+      <div className="section-header">
+        <h2>Contact Form Submissions</h2>
+        <div className="btn-group">
+          <button className="btn btn-primary btn-icon">
+            <FaSearch /> Search Contacts
+          </button>
+        </div>
+      </div>
       <div className="filter-controls">
         <div className="search-bar">
           <input
@@ -126,26 +133,28 @@ const ContactManagement = ({ contacts, setContacts }) => {
                   <StatusBadge isResolved={contact.isResolved} />
                 </td>
                 <td className="actions">
-                  <Button size="sm" onClick={() => handleViewDetails(contact)}>
-                    <FaEye /> View
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={contact.isResolved ? 'success' : 'secondary'}
-                    onClick={() =>
-                      handleMarkResolved(contact._id, contact.isResolved)
-                    }
-                  >
-                    <FaCheck />{' '}
-                    {contact.isResolved ? 'Mark as Open' : 'Mark as Resolved'}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    onClick={() => handleDelete(contact._id)}
-                  >
-                    <FaTrash /> Delete
-                  </Button>
+                  <div className="btn-group">
+                    <button className="btn btn-info btn-sm btn-icon" onClick={() => handleViewDetails(contact)}>
+                      <FaEye /> View
+                    </button>
+                    <button
+                      className={`btn btn-sm btn-icon ${
+                        contact.isResolved ? 'btn-warning' : 'btn-success'
+                      }`}
+                      onClick={() =>
+                        handleMarkResolved(contact._id, contact.isResolved)
+                      }
+                    >
+                      <FaCheck />{' '}
+                      {contact.isResolved ? 'Mark as Open' : 'Mark as Resolved'}
+                    </button>
+                    <button
+                      className="btn btn-danger btn-sm btn-icon"
+                      onClick={() => handleDelete(contact._id)}
+                    >
+                      <FaTrash /> Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -195,6 +204,11 @@ const ContactDetailsModal = ({ contact, onClose }) => {
           <p>
             <strong>Status:</strong> <StatusBadge isResolved={contact.isResolved} />
           </p>
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-secondary" onClick={onClose}>
+            Close
+          </button>
         </div>
       </div>
     </div>

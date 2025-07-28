@@ -20,7 +20,14 @@ const UserManagement = ({ users, handleEditUser, handleDeleteUser, handleResetPa
 
   return (
     <Card className="dashboard-card">
-      <div className="dashboard-section-header">User Management</div>
+      <div className="section-header">
+        <h2>User Management</h2>
+        <div className="btn-group">
+          <button className="btn btn-primary btn-icon">
+            <FaEdit /> Add User
+          </button>
+        </div>
+      </div>
 
       <div className="filter-controls">
         <input
@@ -61,26 +68,25 @@ const UserManagement = ({ users, handleEditUser, handleDeleteUser, handleResetPa
                   )}
                 </td>
                 <td className="actions">
-                  <>
-                    <Button size="sm" onClick={() => handleEditUser(user)}>
+                  <div className="btn-group">
+                    <button className="btn btn-warning btn-sm btn-icon" onClick={() => handleEditUser(user)}>
                       <FaEdit /> Edit
-                    </Button>
-                    <Button size="sm" variant="destructive" onClick={() => handleDeleteUser(user._id)}>
-                      <FaTrash /> Delete
-                    </Button>
-                    <Button size="sm" variant="secondary" onClick={() => handleResetPassword(user._id)}>
+                    </button>
+                    <button className="btn btn-secondary btn-sm btn-icon" onClick={() => handleResetPassword(user._id)}>
                       <FaKey /> Reset
-                    </Button>
+                    </button>
+                    <button className="btn btn-danger btn-sm btn-icon" onClick={() => handleDeleteUser(user._id)}>
+                      <FaTrash /> Delete
+                    </button>
                     {user.role === 'employer' && (
-                      <Button
-                        size="sm"
-                        variant={user.isAuthorized ? 'warning' : 'success'}
+                      <button
+                        className={`btn btn-sm btn-icon ${user.isAuthorized ? 'btn-warning' : 'btn-success'}`}
                         onClick={() => handleToggleAuthorize(user._id, !user.isAuthorized)}
                       >
                         {user.isAuthorized ? 'Unauthorize' : 'Authorize'}
-                      </Button>
+                      </button>
                     )}
-                  </>
+                  </div>
                 </td>
               </tr>
             ))}
