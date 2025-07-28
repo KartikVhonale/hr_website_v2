@@ -4,9 +4,9 @@
   position: absolute;
   left: 0;
   top: 80px;
-  min-height: 100vh;
+  min-height: 120vh;
   max-height: 2000vh; 
-  height: 150vh;
+  height: 100%;
   width: 280px;
   background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
   border-right: 1px solid #334155;
@@ -244,7 +244,118 @@
   z-index: 1000;
   margin-left: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  border: 1px solid #374151;
+}
+
+/* ===== MOBILE RESPONSIVE STYLES ===== */
+
+/* Mobile Sidebar Styles */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100vh;
+    z-index: 999;
+    transition: left 0.3s ease;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .admin-sidebar.mobile {
+    left: -280px;
+  }
+
+  .admin-sidebar.mobile-open {
+    left: 0;
+  }
+
+  .admin-sidebar.collapsed {
+    width: 280px; /* Override collapsed width on mobile */
+  }
+
+  .sidebar-header {
+    padding: 1.5rem 1rem;
+    min-height: 70px;
+  }
+
+  .sidebar-logo .logo-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .sidebar-logo .logo-content span {
+    font-size: 0.875rem;
+  }
+
+  .sidebar-link {
+    padding: 1rem;
+    gap: 16px;
+  }
+
+  .sidebar-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .sidebar-label {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .sidebar-description {
+    font-size: 0.8rem;
+  }
+
+  .sidebar-icon {
+    font-size: 1.125rem;
+    min-width: 24px;
+  }
+
+  /* Remove hover tooltips on mobile */
+  .admin-sidebar.collapsed .sidebar-link:hover::after {
+    display: none;
+  }
+}
+
+/* Small Mobile Adjustments */
+@media (max-width: 480px) {
+  .admin-sidebar {
+    width: 260px;
+    left: -260px;
+  }
+
+  .admin-sidebar.mobile-open {
+    left: 0;
+  }
+
+  .sidebar-header {
+    padding: 1rem 0.75rem;
+  }
+
+  .sidebar-logo .logo-content h2 {
+    font-size: 1.25rem;
+  }
+
+  .sidebar-link {
+    padding: 0.875rem;
+  }
+
+  .sidebar-label {
+    font-size: 0.9rem;
+  }
+
+  .sidebar-description {
+    font-size: 0.75rem;
+  }
+}
+
+/* Dark theme mobile adjustments */
+@media (max-width: 768px) {
+  :root[data-theme='dark'] .admin-sidebar {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border-right: 1px solid #475569;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+  }
 }
 
 .admin-sidebar.collapsed .sidebar-link:hover::before {

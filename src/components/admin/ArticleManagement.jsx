@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import Card from '../ui/card';
 import Button from '../ui/button';
 import { FaEdit, FaTrash, FaStar, FaSearch } from 'react-icons/fa';
+import '../../css/AdminComponents-mobile.css';
 
 const ArticleManagement = ({ articles, setArticles }) => {
   const navigate = useNavigate();
@@ -33,56 +34,71 @@ const ArticleManagement = ({ articles, setArticles }) => {
   };
 
   return (
-    <Card className="dashboard-card">
-      <div className="dashboard-section-header">Article Manager</div>
-      <div className="section-header">
-        <h2>Articles</h2>
-        <div className="btn-group">
-          <button className="btn btn-primary btn-icon" onClick={() => navigate('/create-article')}>
-            <FaEdit /> New Article
-          </button>
-          <button className="btn btn-secondary btn-icon">
-            <FaSearch /> Search
-          </button>
+    <div className="article-management">
+      <Card className="dashboard-card">
+        <div className="section-header">
+          <h2>Article Manager</h2>
+          <div className="btn-group">
+            <button className="btn btn-primary btn-icon" onClick={() => navigate('/create-article')}>
+              <FaEdit /> <span>New Article</span>
+            </button>
+            <button className="btn btn-secondary btn-icon">
+              <FaSearch /> <span>Search</span>
+            </button>
+          </div>
         </div>
-      </div>
-      <div style={{ overflowX: 'auto' }}>
-        <table>
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Author</th>
-              <th>Status</th>
-              <th>Featured</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {articles.map(article => (
-              <tr key={article._id}>
-                <td>{article.title}</td>
-                <td>{article.author ? article.author.name : 'Unknown'}</td>
-                <td><StatusBadge status={article.status} /></td>
-                <td>{article.featured ? <FaStar color="#f59e42" /> : <FaStar color="#e5e7eb" />}</td>
-                <td className="actions">
-                  <div className="btn-group">
-                    <button className="btn btn-warning btn-sm btn-icon" onClick={() => navigate(`/edit-article/${article._id}`)}>
-                      <FaEdit /> Edit
-                    </button>
-                    <button className="btn btn-danger btn-sm btn-icon" onClick={() => handleDeleteArticle(article._id)}>
-                      <FaTrash /> Delete
-                    </button>
-                    <button className="btn btn-info btn-sm btn-icon">
-                      <FaStar /> Toggle
-                    </button>
-                  </div>
-                </td>
+        <div className="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Article Title</th>
+                <th>Author</th>
+                <th>Status</th>
+                <th>Featured</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Card>
+            </thead>
+            <tbody>
+              {articles.map(article => (
+                <tr key={article._id}>
+                  <td>
+                    <div className="article-info">
+                      <strong>{article.title}</strong>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="author-info">
+                      {article.author ? article.author.name : 'Unknown'}
+                    </div>
+                  </td>
+                  <td>
+                    <StatusBadge status={article.status} />
+                  </td>
+                  <td>
+                    <div className="featured-status">
+                      {article.featured ? <FaStar color="#f59e42" /> : <FaStar color="#e5e7eb" />}
+                    </div>
+                  </td>
+                  <td className="actions">
+                    <div className="btn-group">
+                      <button className="btn btn-warning btn-sm btn-icon" onClick={() => navigate(`/edit-article/${article._id}`)}>
+                        <FaEdit /> <span>Edit</span>
+                      </button>
+                      <button className="btn btn-danger btn-sm btn-icon" onClick={() => handleDeleteArticle(article._id)}>
+                        <FaTrash /> <span>Delete</span>
+                      </button>
+                      <button className="btn btn-info btn-sm btn-icon">
+                        <FaStar /> <span>Toggle</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
   );
 };
 

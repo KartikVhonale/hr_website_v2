@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import Card from '../../components/ui/card';
-import Button from '../../components/ui/button';
-import CreateJobSidebar from '../../components/dashboard/CreateJobSidebar';
+import Card from '../ui/card';
+import Button from '../ui/button';
 import '../../css/CreateJob.css';
 
 const CreateJob = () => {
@@ -19,7 +18,6 @@ const CreateJob = () => {
   const [skills, setSkills] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -62,10 +60,6 @@ const CreateJob = () => {
 
   return (
     <div className="create-job-page">
-      <button className="sidebar-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-      </button>
-      <CreateJobSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <main className="create-job-main-content">
         <div className="create-job-container">
           <Card className="create-job-card">

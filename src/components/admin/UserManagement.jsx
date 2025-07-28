@@ -2,8 +2,9 @@ import React from 'react';
 import Card from '../ui/card';
 import Button from '../ui/button';
 import { FaEdit, FaTrash, FaKey } from 'react-icons/fa';
+import '../../css/AdminComponents-mobile.css';
 
-const UserManagement = ({ users, handleEditUser, handleDeleteUser, handleResetPassword, onAuthorizeUser, onUnauthorizeUser }) => {
+const UserManagement = ({ users, handleEditUser, handleDeleteUser, handleResetPassword, onAuthorizeUser, onUnauthorizeUser, onAddUser }) => {
   const [userSearch, setUserSearch] = React.useState('');
   const [userRole, setUserRole] = React.useState('all');
 
@@ -19,15 +20,16 @@ const UserManagement = ({ users, handleEditUser, handleDeleteUser, handleResetPa
   };
 
   return (
-    <Card className="dashboard-card">
-      <div className="section-header">
-        <h2>User Management</h2>
-        <div className="btn-group">
-          <button className="btn btn-primary btn-icon">
-            <FaEdit /> Add User
-          </button>
+    <div className="user-management">
+      <Card className="dashboard-card">
+        <div className="section-header">
+          <h2>User Management</h2>
+          <div className="btn-group">
+            <button className="btn btn-primary btn-icon" onClick={onAddUser}>
+              <FaEdit /> <span>Add User</span>
+            </button>
+          </div>
         </div>
-      </div>
 
       <div className="filter-controls">
         <input
@@ -43,57 +45,68 @@ const UserManagement = ({ users, handleEditUser, handleDeleteUser, handleResetPa
         </select>
       </div>
 
-      <div style={{ overflowX: 'auto' }}>
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Authorized employer</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsers.map(user => (
-              <tr key={user._id}>
-                <td>{user.name}</td>
-                <td>{user.email}</td>
-                <td>{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</td>
-                <td>
-                  {user.role === 'employer' ? (
-                    <StatusBadge status={user.isAuthorized ? 'Authorized' : 'Unauthorized'} />
-                  ) : (
-                    'N/A'
-                  )}
-                </td>
-                <td className="actions">
-                  <div className="btn-group">
-                    <button className="btn btn-warning btn-sm btn-icon" onClick={() => handleEditUser(user)}>
-                      <FaEdit /> Edit
-                    </button>
-                    <button className="btn btn-secondary btn-sm btn-icon" onClick={() => handleResetPassword(user._id)}>
-                      <FaKey /> Reset
-                    </button>
-                    <button className="btn btn-danger btn-sm btn-icon" onClick={() => handleDeleteUser(user._id)}>
-                      <FaTrash /> Delete
-                    </button>
-                    {user.role === 'employer' && (
-                      <button
-                        className={`btn btn-sm btn-icon ${user.isAuthorized ? 'btn-warning' : 'btn-success'}`}
-                        onClick={() => handleToggleAuthorize(user._id, !user.isAuthorized)}
-                      >
-                        {user.isAuthorized ? 'Unauthorize' : 'Authorize'}
-                      </button>
-                    )}
-                  </div>
-                </td>
+        <div className="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Card>
+            </thead>
+            <tbody>
+              {filteredUsers.map(user => (
+                <tr key={user._id}>
+                  <td>
+                    <div className="user-info">
+                      <strong>{user.name}</strong>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="user-email">{user.email}</div>
+                  </td>
+                  <td>
+                    <span className="role-badge">
+                      {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                    </span>
+                  </td>
+                  <td>
+                    {user.role === 'employer' ? (
+                      <StatusBadge status={user.isAuthorized ? 'Authorized' : 'Unauthorized'} />
+                    ) : (
+                      <span className="status-badge">Active</span>
+                    )}
+                  </td>
+                  <td className="actions">
+                    <div className="btn-group">
+                      <button className="btn btn-warning btn-sm btn-icon" onClick={() => handleEditUser(user)}>
+                        <FaEdit /> <span>Edit</span>
+                      </button>
+                      <button className="btn btn-secondary btn-sm btn-icon" onClick={() => handleResetPassword(user._id)}>
+                        <FaKey /> <span>Reset</span>
+                      </button>
+                      <button className="btn btn-danger btn-sm btn-icon" onClick={() => handleDeleteUser(user._id)}>
+                        <FaTrash /> <span>Delete</span>
+                      </button>
+                      {user.role === 'employer' && (
+                        <button
+                          className={`btn btn-sm btn-icon ${user.isAuthorized ? 'btn-warning' : 'btn-success'}`}
+                          onClick={() => handleToggleAuthorize(user._id, !user.isAuthorized)}
+                        >
+                          <span>{user.isAuthorized ? 'Unauthorize' : 'Authorize'}</span>
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
   );
 };
 

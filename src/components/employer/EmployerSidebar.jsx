@@ -34,6 +34,12 @@ const EmployerSidebar = ({ activeSection, onSectionChange }) => {
       description: 'Create & manage jobs'
     },
     {
+      id: 'articles',
+      label: 'Articles',
+      icon: FaFileAlt,
+      description: 'Create & manage articles'
+    },
+    {
       id: 'applications',
       label: 'Applications',
       icon: FaClipboardList,

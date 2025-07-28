@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import EmployerSidebar from '../employer/EmployerSidebar';
-import CreateJob from '../../pages/Employers/CreateJob';
-import ManageJobs from '../../pages/Employers/ManageJobs';
+import EmployerSidebar from './EmployerSidebar';
+import CreateJob from './CreateJob';
+import ManageJobs from './ManageJobs';
+import ArticleManagement from './ArticleManagement';
 import '../../css/EmployerDashboard.css';
 import { 
   FaBriefcase, 
@@ -18,9 +19,10 @@ import {
   FaFileAlt
 } from 'react-icons/fa';
 
-const EmployerDashboard = () => {
-  const { user, token, loading: authLoading } = useAuth();
+const EmployerDashboard = ({ userData }) => {
+  const { token, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const user = userData;
   const [activeSection, setActiveSection] = useState('overview');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -92,7 +94,7 @@ const EmployerDashboard = () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/articles`);
       const data = await response.json();
       if (data.success) {
-        const userArticles = data.data.filter(article => article.author._id === user._id);
+        const userArticles = data.data.filter(article => article.author && article.author._id === user._id);
         setArticles(userArticles);
       }
     } catch (err) {
@@ -260,6 +262,10 @@ const EmployerDashboard = () => {
     </div>
   );
 
+  const renderArticleManagement = () => (
+    <ArticleManagement articles={articles} setArticles={setArticles} />
+  );
+
   const renderCompanyProfile = () => (
     <div className="company-profile-section">
       <h2>Company Profile</h2>
@@ -309,6 +315,8 @@ const EmployerDashboard = () => {
         return renderJobManagement();
       case 'create-job':
         return renderCreateJob();
+      case 'articles':
+        return renderArticleManagement();
       case 'applications':
         return renderApplications();
       case 'candidates':

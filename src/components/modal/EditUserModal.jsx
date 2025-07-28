@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import Modal from 'react-modal';
-import '../css/Modal.css';
 
 const EditUserModal = ({ isOpen, onRequestClose, user, onUserUpdated }) => {
   const { token } = useAuth();

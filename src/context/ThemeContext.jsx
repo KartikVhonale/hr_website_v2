@@ -17,6 +17,11 @@ export const ThemeProvider = ({ children }) => {
     // Update data-theme attribute and localStorage when theme changes
     document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    if (isDarkMode) {
+      document.body.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark');
+    }
   }, [isDarkMode]);
 
   const toggleDarkMode = () => {
@@ -36,4 +41,4 @@ export const useTheme = () => {
     throw new Error('useTheme must be used within a ThemeProvider');
   }
   return context;
-}; 
+};

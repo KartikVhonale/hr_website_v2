@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import EditUserModal from '../components/EditUserModal';
+import EditUserModal from '../components/modal/EditUserModal';
+import AddUserModal from '../components/modal/AddUserModal';
 import AdminSidebar from '../components/admin/AdminSidebar';
 import UserManagement from '../components/admin/UserManagement';
 import JobManagement from '../components/admin/JobManagement';
@@ -10,7 +11,8 @@ import ContactManagement from '../components/admin/ContactManagement';
 import TeamManagement from '../components/admin/TeamManagement';
 import { useNavigate } from 'react-router-dom';
 import '../css/AdminDashboard.css';
-import { FaEdit, FaTrash, FaKey, FaEye, FaCheck, FaTimes, FaStar, FaUser, FaSearch, FaSyncAlt, FaChartBar, FaUsers, FaBriefcase } from 'react-icons/fa';
+import '../css/AdminDashboard-responsive.css';
+import { FaEdit, FaTrash, FaKey, FaEye, FaCheck, FaTimes, FaStar, FaUser, FaSearch, FaSyncAlt, FaChartBar, FaUsers, FaBriefcase, FaBars, FaTimes as FaClose, FaTachometerAlt, FaClipboardList, FaFileAlt, FaEnvelope, FaUserFriends, FaCog } from 'react-icons/fa';
 
 const AdminDashboard = () => {
   const { token, loading: authLoading } = useAuth();
@@ -19,6 +21,9 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeSection, setActiveSection] = useState('overview');
+  const [activities, setActivities] = useState([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   // Controllers
   const [userSearch, setUserSearch] = useState('');
@@ -28,7 +33,25 @@ const AdminDashboard = () => {
   const [appSearch, setAppSearch] = useState('');
   const [appStatus, setAppStatus] = useState('all');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+
+  // Handle window resize for responsive design
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setIsSidebarOpen(false); // Close sidebar on desktop
+      }
+    };
+
+    // Initial check
+    handleResize();
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (authLoading) {
@@ -229,6 +252,62 @@ const AdminDashboard = () => {
     fetchTeam();
   }, [token]);
 
+  useEffect(() => {
+    const fetchActivities = async () => {
+      if (!token) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/activity`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Failed to fetch activities');
+        }
+
+        setActivities(data.data);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    fetchActivities();
+  }, [token]);
+
+  const formatTimeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
+
+    let interval = seconds / 31536000;
+    if (interval > 1) {
+      return Math.floor(interval) + " years ago";
+    }
+    interval = seconds / 2592000;
+    if (interval > 1) {
+      return Math.floor(interval) + " months ago";
+    }
+    interval = seconds / 86400;
+    if (interval > 1) {
+      return Math.floor(interval) + " days ago";
+    }
+    interval = seconds / 3600;
+    if (interval > 1) {
+      return Math.floor(interval) + " hours ago";
+    }
+    interval = seconds / 60;
+    if (interval > 1) {
+      return Math.floor(interval) + " minutes ago";
+    }
+    return Math.floor(seconds) + " seconds ago";
+  };
+
   const handleDeleteUser = async (userId) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
@@ -259,6 +338,10 @@ const AdminDashboard = () => {
 
   const handleUserUpdated = (updatedUser) => {
     setUsers(users.map(user => user._id === updatedUser._id ? updatedUser : user));
+  };
+
+  const handleUserAdded = (newUser) => {
+    setUsers([...users, newUser]);
   };
 
   const handleResetPassword = async (userId) => {
@@ -358,18 +441,16 @@ const AdminDashboard = () => {
       <div className="recent-activity">
         <h3>Recent Activity</h3>
         <div className="activity-list">
-          <div className="activity-item">
-            <span className="activity-time">2 hours ago</span>
-            <span className="activity-text">New user registration</span>
-          </div>
-          <div className="activity-item">
-            <span className="activity-time">4 hours ago</span>
-            <span className="activity-text">Job application submitted</span>
-          </div>
-          <div className="activity-item">
-            <span className="activity-time">1 day ago</span>
-            <span className="activity-text">New article published</span>
-          </div>
+          {activities.length > 0 ? (
+            activities.map((activity, index) => (
+              <div className="activity-item" key={index}>
+                <span className="activity-time">{formatTimeAgo(activity.date)}</span>
+                <span className="activity-text">{activity.type}: <strong>{activity.details}</strong></span>
+              </div>
+            ))
+          ) : (
+            <p>No recent activity.</p>
+          )}
         </div>
       </div>
     </div>
@@ -387,6 +468,7 @@ const AdminDashboard = () => {
             handleDeleteUser={handleDeleteUser}
             handleResetPassword={handleResetPassword}
             onAuthorizeUser={handleAuthorizeUser}
+            onAddUser={() => setIsAddModalOpen(true)}
           />
         );
       case 'jobs':
@@ -414,10 +496,30 @@ const AdminDashboard = () => {
   if (loading || authLoading) {
     return (
       <div className="admin-layout">
-        <AdminSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
-        <div className="admin-content">
+        <AdminSidebar 
+          activeSection={activeSection} 
+          onSectionChange={setActiveSection}
+          isMobile={isMobile}
+          isOpen={isSidebarOpen}
+          onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+        />
+        <div className={`admin-content ${isMobile && isSidebarOpen ? 'sidebar-open' : ''}`}>
+          {isMobile && (
+            <div className="mobile-header">
+              <button 
+                className="mobile-menu-btn"
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              >
+                {isSidebarOpen ? <FaClose /> : <FaBars />}
+              </button>
+              <h1 className="mobile-title">Admin Dashboard</h1>
+            </div>
+          )}
           <div className="dashboard-container">Loading...</div>
         </div>
+        {isMobile && isSidebarOpen && (
+          <div className="sidebar-overlay" onClick={() => setIsSidebarOpen(false)} />
+        )}
       </div>
     );
   }
@@ -425,23 +527,127 @@ const AdminDashboard = () => {
   if (error) {
     return (
       <div className="admin-layout">
-        <AdminSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
-        <div className="admin-content">
+        <AdminSidebar 
+          activeSection={activeSection} 
+          onSectionChange={setActiveSection}
+          isMobile={isMobile}
+          isOpen={isSidebarOpen}
+          onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+        />
+        <div className={`admin-content ${isMobile && isSidebarOpen ? 'sidebar-open' : ''}`}>
+          {isMobile && (
+            <div className="mobile-header">
+              <button 
+                className="mobile-menu-btn"
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              >
+                {isSidebarOpen ? <FaClose /> : <FaBars />}
+              </button>
+              <h1 className="mobile-title">Admin Dashboard</h1>
+            </div>
+          )}
           <div className="dashboard-container">{error}</div>
         </div>
+        {isMobile && isSidebarOpen && (
+          <div className="sidebar-overlay" onClick={() => setIsSidebarOpen(false)} />
+        )}
       </div>
     );
   }
 
   return (
     <div className="admin-layout">
-      <AdminSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
-      <div className="admin-content">
+      <AdminSidebar 
+        activeSection={activeSection} 
+        onSectionChange={(section) => {
+          setActiveSection(section);
+          if (isMobile) {
+            setIsSidebarOpen(false); // Close sidebar on mobile after selection
+          }
+        }}
+        isMobile={isMobile}
+        isOpen={isSidebarOpen}
+        onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+      />
+      <div className={`admin-content ${isMobile && isSidebarOpen ? 'sidebar-open' : ''}`}>
+        {isMobile && (
+          <div className="mobile-header">
+            <button 
+              className="mobile-menu-btn"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              title="Open navigation menu"
+            >
+              {isSidebarOpen ? <FaClose /> : <FaBars />}
+            </button>
+            <h1 className="mobile-title">Admin Dashboard</h1>
+            <div className="mobile-header-actions">
+              <span className="current-section">{activeSection.charAt(0).toUpperCase() + activeSection.slice(1)}</span>
+            </div>
+          </div>
+        )}
         <div className="dashboard-container">
-          <h1 className="dashboard-title">Admin Dashboard</h1>
+          {!isMobile && <h1 className="dashboard-title">Admin Dashboard</h1>}
           {renderContent()}
         </div>
       </div>
+      
+      {/* Mobile Bottom Navigation */}
+      {isMobile && (
+        <div className="mobile-bottom-nav">
+          <button 
+            className={`nav-item ${activeSection === 'overview' ? 'active' : ''}`}
+            onClick={() => setActiveSection('overview')}
+          >
+            <FaTachometerAlt />
+            <span>Overview</span>
+          </button>
+          <button 
+            className={`nav-item ${activeSection === 'users' ? 'active' : ''}`}
+            onClick={() => setActiveSection('users')}
+          >
+            <FaUsers />
+            <span>Users</span>
+          </button>
+          <button 
+            className={`nav-item ${activeSection === 'jobs' ? 'active' : ''}`}
+            onClick={() => setActiveSection('jobs')}
+          >
+            <FaBriefcase />
+            <span>Jobs</span>
+          </button>
+          <button 
+            className={`nav-item ${activeSection === 'applications' ? 'active' : ''}`}
+            onClick={() => setActiveSection('applications')}
+          >
+            <FaClipboardList />
+            <span>Apps</span>
+          </button>
+          <button 
+            className={`nav-item ${activeSection === 'articles' ? 'active' : ''}`}
+            onClick={() => setActiveSection('articles')}
+          >
+            <FaFileAlt />
+            <span>Articles</span>
+          </button>
+          <button 
+            className={`nav-item ${isSidebarOpen ? 'active' : ''}`}
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            title={isSidebarOpen ? "Close menu" : "More options"}
+          >
+            {isSidebarOpen ? <FaClose /> : <FaBars />}
+            <span>More</span>
+          </button>
+        </div>
+      )}
+      
+      {/* Overlay for mobile sidebar - only show on mobile when sidebar is open */}
+      {isMobile && isSidebarOpen && window.innerWidth <= 768 && (
+        <div 
+          className="sidebar-overlay" 
+          onClick={() => setIsSidebarOpen(false)}
+          style={{ display: 'block' }}
+        />
+      )}
       
       {selectedUser && (
         <EditUserModal
@@ -451,6 +657,12 @@ const AdminDashboard = () => {
           onUserUpdated={handleUserUpdated}
         />
       )}
+
+      <AddUserModal
+        isOpen={isAddModalOpen}
+        onRequestClose={() => setIsAddModalOpen(false)}
+        onUserAdded={handleUserAdded}
+      />
     </div>
   );
 };

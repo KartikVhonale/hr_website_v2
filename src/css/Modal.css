@@ -57,3 +57,45 @@
 .modal-content button:disabled {
   background-color: #ccc;
 }
+
+/* Dark Mode Styles */
+body.dark .modal-content {
+  background: #181e26;
+  border: 1.5px solid #232b36;
+  color: #f3f6fa;
+}
+
+body.dark .modal-content h2 {
+  color: #66b2ff;
+}
+
+body.dark .modal-content label {
+  color: #b3c6e0;
+}
+
+body.dark .modal-content input,
+body.dark .modal-content select {
+  background: #151515;
+  border-color: #232b36;
+  color: #f2f2f2;
+}
+
+body.dark .modal-content input:focus,
+body.dark .modal-content select:focus {
+  border-color: #66b2ff;
+  box-shadow: 0 0 0 2px #66b2ff22;
+}
+
+body.dark .modal-content button {
+  background: linear-gradient(90deg, #0051a2 60%, #3399ff 100%);
+  color: #fff;
+}
+
+body.dark .modal-content button:hover {
+  background: linear-gradient(90deg, #3399ff 60%, #0051a2 100%);
+}
+
+body.dark .modal-content button:disabled {
+  background: #2d3748;
+  cursor: not-allowed;
+}

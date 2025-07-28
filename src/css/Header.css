@@ -45,7 +45,32 @@
 
 .logo{
   width: 11.5rem;
+  z-index: 1001;
+  position: relative;
 }
+
+.logo-link {
+  text-decoration: none;
+  display: block;
+  padding: 0.5rem;
+  margin: -0.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  touch-action: manipulation;
+}
+
+.logo-link:hover {
+  background: rgba(0, 81, 162, 0.05);
+  transform: scale(1.02);
+}
+
+.logo-link:active {
+  transform: scale(0.98);
+  background: rgba(0, 81, 162, 0.1);
+}
+
 .logo h1 {
   margin: 0;
   font-size: 1.5rem;
@@ -54,6 +79,7 @@
   letter-spacing: -0.5px;
   font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   transition: font-size 0.3s;
+  pointer-events: none; /* Prevent text selection interference */
 }
 
 .nav-menu {

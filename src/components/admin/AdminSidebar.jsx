@@ -13,7 +13,7 @@ import {
 } from 'react-icons/fa';
 import '../../css/AdminSidebar.css';
 
-const AdminSidebar = ({ activeSection, onSectionChange }) => {
+const AdminSidebar = ({ activeSection, onSectionChange, isMobile, isOpen, onToggle }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const sidebarItems = [
@@ -72,7 +72,7 @@ const AdminSidebar = ({ activeSection, onSectionChange }) => {
   };
 
   return (
-    <div className={`admin-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+    <div className={`admin-sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobile ? 'mobile' : ''} ${isMobile && isOpen ? 'mobile-open' : ''}`}>
       <div className="sidebar-header">
         <div className="sidebar-logo">
           {!isCollapsed && (
@@ -82,13 +82,15 @@ const AdminSidebar = ({ activeSection, onSectionChange }) => {
             </div>
           )}
         </div>
-        <button 
-          className="sidebar-toggle"
-          onClick={toggleSidebar}
-          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          {isCollapsed ? <FaChevronRight /> : <FaChevronLeft />}
-        </button>
+        {!isMobile && (
+          <button 
+            className="sidebar-toggle"
+            onClick={toggleSidebar}
+            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {isCollapsed ? <FaChevronRight /> : <FaChevronLeft />}
+          </button>
+        )}
       </div>
 
       <nav className="sidebar-nav">
@@ -100,12 +102,12 @@ const AdminSidebar = ({ activeSection, onSectionChange }) => {
                 <button
                   className={`sidebar-link ${activeSection === item.id ? 'active' : ''}`}
                   onClick={() => onSectionChange(item.id)}
-                  title={isCollapsed ? item.label : ''}
+                  title={isCollapsed && !isMobile ? item.label : ''}
                 >
                   <div className="sidebar-icon">
                     <IconComponent />
                   </div>
-                  {!isCollapsed && (
+                  {(!isCollapsed || isMobile) && (
                     <div className="sidebar-content">
                       <span className="sidebar-label">{item.label}</span>
                       <span className="sidebar-description">{item.description}</span>

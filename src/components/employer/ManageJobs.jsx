@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import CreateJobSidebar from '../../components/dashboard/CreateJobSidebar';
 import '../../css/ManageJobs.css';
 
 const ManageJobs = () => {
@@ -30,7 +29,6 @@ const ManageJobs = () => {
 
   return (
     <div className="manage-jobs-page">
-      <CreateJobSidebar />
       <div className="manage-jobs-container">
         <h1>Manage Jobs</h1>
         <div className="job-list">

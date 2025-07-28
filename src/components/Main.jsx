@@ -28,7 +28,7 @@ const Main = () => {
           <p>Your premier destination for career growth and talent acquisition. We bridge the gap between exceptional candidates and leading employers.</p>
           <div className="hero-buttons">
             <Link to="/jobseekers"><button className="cta-button primary">Find Jobs</button></Link>
-            <Link to="/jobseekers"><button className="cta-button secondary">Hire Talent</button></Link>
+            <Link to="/employers"><button className="cta-button secondary">Hire Talent</button></Link>
           </div>
         </div>
       </section>
