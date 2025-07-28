@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import EditUserModal from '../components/EditUserModal';
+import AdminSidebar from '../components/admin/AdminSidebar';
 import UserManagement from '../components/admin/UserManagement';
 import JobManagement from '../components/admin/JobManagement';
 import ApplicationManagement from '../components/admin/ApplicationManagement';
@@ -9,7 +10,7 @@ import ContactManagement from '../components/admin/ContactManagement';
 import TeamManagement from '../components/admin/TeamManagement';
 import { useNavigate } from 'react-router-dom';
 import '../css/AdminDashboard.css';
-import { FaEdit, FaTrash, FaKey, FaEye, FaCheck, FaTimes, FaStar, FaUser, FaSearch, FaSyncAlt } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaKey, FaEye, FaCheck, FaTimes, FaStar, FaUser, FaSearch, FaSyncAlt, FaChartBar, FaUsers, FaBriefcase } from 'react-icons/fa';
 
 const AdminDashboard = () => {
   const { token, loading: authLoading } = useAuth();
@@ -17,6 +18,7 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeSection, setActiveSection] = useState('overview');
 
   // Controllers
   const [userSearch, setUserSearch] = useState('');
@@ -309,41 +311,138 @@ const AdminDashboard = () => {
     }
   };
 
+  const renderOverview = () => (
+    <div className="dashboard-overview">
+      <div className="overview-cards">
+        <div className="overview-card">
+          <div className="card-icon users">
+            <FaUsers />
+          </div>
+          <div className="card-content">
+            <h3>Total Users</h3>
+            <p className="card-number">{users.length}</p>
+            <span className="card-label">Registered users</span>
+          </div>
+        </div>
+        <div className="overview-card">
+          <div className="card-icon jobs">
+            <FaBriefcase />
+          </div>
+          <div className="card-content">
+            <h3>Active Jobs</h3>
+            <p className="card-number">{jobs.filter(job => job.status === 'active').length}</p>
+            <span className="card-label">Job postings</span>
+          </div>
+        </div>
+        <div className="overview-card">
+          <div className="card-icon applications">
+            <FaChartBar />
+          </div>
+          <div className="card-content">
+            <h3>Applications</h3>
+            <p className="card-number">{applications.length}</p>
+            <span className="card-label">Total applications</span>
+          </div>
+        </div>
+        <div className="overview-card">
+          <div className="card-icon articles">
+            <FaEdit />
+          </div>
+          <div className="card-content">
+            <h3>Articles</h3>
+            <p className="card-number">{articles.length}</p>
+            <span className="card-label">Published articles</span>
+          </div>
+        </div>
+      </div>
+      <div className="recent-activity">
+        <h3>Recent Activity</h3>
+        <div className="activity-list">
+          <div className="activity-item">
+            <span className="activity-time">2 hours ago</span>
+            <span className="activity-text">New user registration</span>
+          </div>
+          <div className="activity-item">
+            <span className="activity-time">4 hours ago</span>
+            <span className="activity-text">Job application submitted</span>
+          </div>
+          <div className="activity-item">
+            <span className="activity-time">1 day ago</span>
+            <span className="activity-text">New article published</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderContent = () => {
+    switch (activeSection) {
+      case 'overview':
+        return renderOverview();
+      case 'users':
+        return (
+          <UserManagement
+            users={users}
+            handleEditUser={handleEditUser}
+            handleDeleteUser={handleDeleteUser}
+            handleResetPassword={handleResetPassword}
+            onAuthorizeUser={handleAuthorizeUser}
+          />
+        );
+      case 'jobs':
+        return <JobManagement jobs={jobs} />;
+      case 'applications':
+        return <ApplicationManagement applications={applications} />;
+      case 'articles':
+        return <ArticleManagement articles={articles} setArticles={setArticles} />;
+      case 'contacts':
+        return <ContactManagement contacts={contacts} setContacts={setContacts} />;
+      case 'team':
+        return <TeamManagement team={team} />;
+      case 'settings':
+        return (
+          <div className="settings-section">
+            <h2>System Settings</h2>
+            <p>Settings panel coming soon...</p>
+          </div>
+        );
+      default:
+        return renderOverview();
+    }
+  };
+
   if (loading || authLoading) {
-    return <div className="dashboard-container">Loading...</div>;
+    return (
+      <div className="admin-layout">
+        <AdminSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+        <div className="admin-content">
+          <div className="dashboard-container">Loading...</div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="dashboard-container">{error}</div>;
+    return (
+      <div className="admin-layout">
+        <AdminSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+        <div className="admin-content">
+          <div className="dashboard-container">{error}</div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="dashboard-container">
-      <h1 className="dashboard-title" style={{ marginBottom: 32 }}>Admin Dashboard</h1>
-
-      <UserManagement
-        users={users}
-        handleEditUser={handleEditUser}
-        handleDeleteUser={handleDeleteUser}
-        handleResetPassword={handleResetPassword}
-        onAuthorizeUser={handleAuthorizeUser}
-      />
-      <hr style={{ border: 'none', borderTop: '1.5px solid #e0e7ef', margin: '2.5rem 0' }} />
-
-      <JobManagement jobs={jobs} />
-      <hr style={{ border: 'none', borderTop: '1.5px solid #e0e7ef', margin: '2.5rem 0' }} />
-
-      <ApplicationManagement applications={applications} />
-      <hr style={{ border: 'none', borderTop: '1.5px solid #e0e7ef', margin: '2.5rem 0' }} />
-
-      <ArticleManagement articles={articles} setArticles={setArticles} />
-      <hr style={{ border: 'none', borderTop: '1.5px solid #e0e7ef', margin: '2.5rem 0' }} />
-
-      <ContactManagement contacts={contacts} setContacts={setContacts} />
-      <hr style={{ border: 'none', borderTop: '1.5px solid #e0e7ef', margin: '2.5rem 0' }} />
-
-      <TeamManagement team={team} />
-
+    <div className="admin-layout">
+      <AdminSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+      <div className="admin-content">
+        <div className="dashboard-container">
+          <h1 className="dashboard-title">Admin Dashboard</h1>
+          {renderContent()}
+        </div>
+      </div>
+      
       {selectedUser && (
         <EditUserModal
           isOpen={isEditModalOpen}

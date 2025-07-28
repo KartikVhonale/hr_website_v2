@@ -109,12 +109,6 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
-      <div className="dashboard-header">
-        <h1 className="dashboard-title">{role === 'jobseeker' ? 'Jobseeker Dashboard' : 'Employer Dashboard'}</h1>
-        {role === 'employer' && (
-          <Button onClick={() => navigate('/create-article')}>Create Article</Button>
-        )}
-      </div>
       {role === 'jobseeker' ? (
         <JobseekerDashboard userData={userData} />
       ) : (
