@@ -176,7 +176,7 @@ const AdminDashboard = () => {
       }
 
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/contacts`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/contact`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -339,7 +339,7 @@ const AdminDashboard = () => {
       <ArticleManagement articles={articles} setArticles={setArticles} />
       <hr style={{ border: 'none', borderTop: '1.5px solid #e0e7ef', margin: '2.5rem 0' }} />
 
-      <ContactManagement contacts={contacts} />
+      <ContactManagement contacts={contacts} setContacts={setContacts} />
       <hr style={{ border: 'none', borderTop: '1.5px solid #e0e7ef', margin: '2.5rem 0' }} />
 
       <TeamManagement team={team} />

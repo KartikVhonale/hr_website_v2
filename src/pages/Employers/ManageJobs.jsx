@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import CreateJobSidebar from '../components/dashboard/CreateJobSidebar';
-import '../css/ManageJobs.css';
+import { useAuth } from '../../context/AuthContext';
+import CreateJobSidebar from '../../components/dashboard/CreateJobSidebar';
+import '../../css/ManageJobs.css';
 
 const ManageJobs = () => {
   const [jobs, setJobs] = useState([]);

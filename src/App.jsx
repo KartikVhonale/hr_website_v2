@@ -18,7 +18,7 @@ import EditArticle from './pages/EditArticle';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import CreateJob from './pages/Employers/CreateJob';
-import ManageJobs from './pages/ManageJobs';
+import ManageJobs from './pages/Employers/ManageJobs';
 import './App.css';
 import { Routes, Route } from 'react-router-dom';
 

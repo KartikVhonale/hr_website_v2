@@ -11,22 +11,41 @@ const Contact = () => {
 
   const [form, setForm] = useState({ name: '', email: '', phone: '', role: '', subject: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    setSubmitted(true);
-    
-    // Show success message for 2 seconds, then reset the form
-    setTimeout(() => {
-      setForm({ name: '', email: '', phone: '', role: '', subject: '', message: '' });
-      setSubmitted(false);
-    }, 2000);
-    
-    // Here you would send the form data to your backend or email service
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      });
+
+      if (!response.ok) {
+        throw new Error('Something went wrong');
+      }
+
+      setSubmitted(true);
+      setTimeout(() => {
+        setForm({ name: '', email: '', phone: '', role: '', subject: '', message: '' });
+        setSubmitted(false);
+      }, 2000);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -79,8 +98,11 @@ const Contact = () => {
               <textarea className="contact-textarea" id="message" name="message" rows="5" value={form.message} onChange={handleChange} required aria-label="Message" placeholder=" "></textarea>
               <label htmlFor="message">Message</label>
             </div>
-            <button className="contact-btn contact-btn-primary" type="submit">Send Message</button>
+            <button className="contact-btn contact-btn-primary" type="submit" disabled={loading}>
+              {loading ? 'Sending...' : 'Send Message'}
+            </button>
             {submitted && <div className="contact-success">Thank you! We'll be in touch soon.</div>}
+            {error && <div className="contact-error">{error}</div>}
           </form>
 
           {/* INFO CARD */}
@@ -117,4 +139,4 @@ const Contact = () => {
   );
 };
 
-export default Contact; 
+export default Contact;
