@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import Button from '../components/ui/button';
 import EmployerDashboard from '../components/employer/EmployerDashboard';
 import JobseekerDashboard from '../components/jobseeker/JobseekerDashboard';
 import '../css/Dashboard.css';
@@ -65,13 +64,11 @@ const Dashboard = () => {
   const { role } = userData;
 
   return (
-    <div className="dashboard-container">
-      {role === 'jobseeker' ? (
-        <JobseekerDashboard userData={userData} />
-      ) : (
-        <EmployerDashboard userData={userData} />
-      )}
-    </div>
+    role === 'jobseeker' ? (
+      <JobseekerDashboard userData={userData} />
+    ) : (
+      <EmployerDashboard userData={userData} />
+    )
   );
 };
 

@@ -1,0 +1,283 @@
+/* Jobseeker Sidebar Styles */
+
+.jobseeker-sidebar {
+  position: relative;
+  min-height: calc(100vh - 80px);
+  margin-top: 80px;
+  width: 280px;
+  background: linear-gradient(135deg, rgba(59,130,246,0.85) 0%, rgba(99,102,241,0.75) 100%);
+  border-right: 1.5px solid rgba(59,130,246,0.15);
+  box-shadow: 8px 0 32px 0 rgba(59,130,246,0.08), 0 1.5px 6px 0 rgba(0,0,0,0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.jobseeker-sidebar.collapsed {
+  width: 70px;
+}
+
+/* Dark theme adjustments */
+:root[data-theme='dark'] .jobseeker-sidebar {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+  border-right: 1px solid #1d4ed8;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Sidebar Header */
+.jobseeker-sidebar .sidebar-header {
+  padding: 1.5rem 1rem;
+  border-bottom: 1px solid rgba(59,130,246,0.10);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 80px;
+}
+
+.jobseeker-sidebar .sidebar-logo .logo-content h2 {
+  color: #fff;
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -1px;
+  text-shadow: 0 2px 8px rgba(59,130,246,0.10);
+}
+
+.jobseeker-sidebar .sidebar-logo .logo-content span {
+  color: #dbeafe;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.jobseeker-sidebar .sidebar-toggle {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.jobseeker-sidebar .sidebar-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+/* Sidebar Navigation */
+.jobseeker-sidebar .sidebar-nav {
+  flex: 1;
+  padding: 1rem 0;
+  overflow-y: auto;
+}
+
+.jobseeker-sidebar .sidebar-menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.jobseeker-sidebar .sidebar-item {
+  margin: 0.25rem 0;
+}
+
+.jobseeker-sidebar .sidebar-link {
+  display: flex;
+  align-items: center;
+  padding: 0.875rem 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 0 25px 25px 0;
+  margin-right: 1rem;
+  position: relative;
+}
+
+.jobseeker-sidebar .sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transform: translateX(4px);
+}
+
+.jobseeker-sidebar .sidebar-link.active {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(59,130,246,0.15);
+}
+
+.jobseeker-sidebar .sidebar-link.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(to bottom, #60a5fa, #3b82f6);
+  border-radius: 0 4px 4px 0;
+}
+
+.jobseeker-sidebar .sidebar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 1rem;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.jobseeker-sidebar .sidebar-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.jobseeker-sidebar .sidebar-label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 0.125rem;
+}
+
+.jobseeker-sidebar .sidebar-description {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  line-height: 1.2;
+}
+
+/* Quick Actions */
+.jobseeker-sidebar .sidebar-quick-actions {
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: auto;
+}
+
+.jobseeker-sidebar .sidebar-quick-actions h4 {
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 0.75rem 0;
+  opacity: 0.8;
+}
+
+.jobseeker-sidebar .quick-action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.jobseeker-sidebar .quick-action-btn {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.jobseeker-sidebar .quick-action-btn.primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: #fff;
+}
+
+.jobseeker-sidebar .quick-action-btn.primary:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+}
+
+.jobseeker-sidebar .quick-action-btn.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.jobseeker-sidebar .quick-action-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.jobseeker-sidebar .quick-action-btn svg {
+  margin-right: 0.5rem;
+  font-size: 0.875rem;
+}
+
+/* Collapsed state adjustments */
+.jobseeker-sidebar.collapsed .sidebar-link {
+  justify-content: center;
+  padding: 0.875rem 0.5rem;
+  margin-right: 0;
+  border-radius: 8px;
+  margin: 0.25rem 0.5rem;
+}
+
+.jobseeker-sidebar.collapsed .sidebar-icon {
+  margin-right: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .jobseeker-sidebar {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s ease;
+  }
+
+  .jobseeker-sidebar.mobile-open {
+    left: 0;
+  }
+
+  .jobseeker-sidebar.collapsed {
+    width: 280px;
+    left: -280px;
+  }
+
+  .jobseeker-sidebar.collapsed.mobile-open {
+    left: 0;
+  }
+}
+
+/* Scrollbar styling */
+.jobseeker-sidebar .sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.jobseeker-sidebar .sidebar-nav::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.jobseeker-sidebar .sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+}
+
+.jobseeker-sidebar .sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
