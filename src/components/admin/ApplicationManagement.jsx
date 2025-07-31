@@ -1,6 +1,6 @@
 import React from 'react';
-import Card from '../ui/card';
-import Button from '../ui/button';
+import Card from '../ui/Card.jsx';
+import Button from '../ui/button.tsx';
 import { FaEye, FaSyncAlt, FaSearch } from 'react-icons/fa';
 import '../../css/AdminComponents-mobile.css';
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Card from '../ui/card';
-import Button from '../ui/button';
+import Card from '../ui/Card.jsx';
+import Button from '../ui/button.tsx';
 import { FaEye, FaCheck, FaSearch, FaTrash } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../ui/Card.jsx';
-import Button from '../ui/Button';
+import Button from '../ui/button.tsx';
 import TextInput from '../ui/TextInput.jsx';
 import SelectInput from '../ui/SelectInput.jsx';
 import TextArea from '../ui/TextArea.jsx';

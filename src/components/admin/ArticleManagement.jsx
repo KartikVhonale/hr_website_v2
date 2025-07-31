@@ -1,8 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import Card from '../ui/card';
-import Button from '../ui/button';
+import Card from '../ui/Card.jsx';
+import Button from '../ui/button.tsx';
 import { FaEdit, FaTrash, FaStar, FaSearch } from 'react-icons/fa';
 import '../../css/AdminComponents-mobile.css';
 

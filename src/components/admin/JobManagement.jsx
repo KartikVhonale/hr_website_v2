@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getAllJobs, deleteJob, updateJob } from '../../services/adminService';
-import Card from '../ui/Card';
-import Button from '../ui/Button';
+import Card from '../ui/Card.jsx';
+import Button from '../ui/button.tsx';
 import { FaEye, FaTrash, FaCheck, FaSearch, FaPlus } from 'react-icons/fa';
 import AddJobModal from '../modal/AddJobModal';
 import '../../css/AdminComponents-mobile.css';
