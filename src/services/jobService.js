@@ -1,13 +1,13 @@
-import { default as axios } from 'axios';
+import httpClient from '../utils/httpClient.js';
 
-const API_URL = 'http://localhost:3000/api/jobs';
+const API_URL = '/api/jobs';
 
 const getAllJobs = (params) => {
-    return axios.get(API_URL, { params });
+    return httpClient.get(API_URL, { params });
 };
 
 const getJobById = (id) => {
-    return axios.get(`${API_URL}/${id}`);
+    return httpClient.get(`${API_URL}/${id}`);
 };
 
 export {

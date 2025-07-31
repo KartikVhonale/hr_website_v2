@@ -1,6 +1,6 @@
-import { default as axios } from 'axios';
+import httpClient from '../utils/httpClient.js';
 
-const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/jobseeker`;
+const API_URL = `/api/jobseeker`;
 
 const getAuthToken = () => {
     const token = localStorage.getItem('token');
@@ -11,7 +11,7 @@ const getAuthToken = () => {
 };
 
 const getJobseekerProfile = () => {
-    return axios.get(`${API_URL}/profile`, {
+    return httpClient.get(`${API_URL}/profile`, {
         headers: {
             Authorization: `Bearer ${getAuthToken()}`,
         },
@@ -24,7 +24,7 @@ const updateJobseekerProfile = async (profileData) => {
         console.log('Auth Token:', getAuthToken() ? 'Present' : 'Missing');
         console.log('Profile Data being sent:', profileData);
 
-        const response = await axios.put(`${API_URL}/profile`, profileData, {
+        const response = await httpClient.put(`${API_URL}/profile`, profileData, {
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${getAuthToken()}`,
@@ -41,7 +41,7 @@ const updateJobseekerProfile = async (profileData) => {
 };
 
 const getSavedJobs = () => {
-    return axios.get(`${API_URL}/saved-jobs`, {
+    return httpClient.get(`${API_URL}/saved-jobs`, {
         headers: {
             Authorization: `Bearer ${getAuthToken()}`,
         },
@@ -49,7 +49,7 @@ const getSavedJobs = () => {
 };
 
 const saveJob = (jobId) => {
-    return axios.post(`${API_URL}/saved-jobs/${jobId}`, null, {
+    return httpClient.post(`${API_URL}/saved-jobs/${jobId}`, null, {
         headers: {
             Authorization: `Bearer ${getAuthToken()}`,
         },
@@ -57,7 +57,7 @@ const saveJob = (jobId) => {
 };
 
 const unsaveJob = (jobId) => {
-    return axios.delete(`${API_URL}/saved-jobs/${jobId}`, {
+    return httpClient.delete(`${API_URL}/saved-jobs/${jobId}`, {
         headers: {
             Authorization: `Bearer ${getAuthToken()}`,
         },
@@ -65,7 +65,7 @@ const unsaveJob = (jobId) => {
 };
 
 const getAppliedJobs = () => {
-    return axios.get(`${API_URL}/applied-jobs`, {
+    return httpClient.get(`${API_URL}/applied-jobs`, {
         headers: {
             Authorization: `Bearer ${getAuthToken()}`,
         },
@@ -73,7 +73,7 @@ const getAppliedJobs = () => {
 };
 
 const updateApplicationStatus = (applicationId, status) => {
-    return axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/applications/${applicationId}`, { status }, {
+    return httpClient.put(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/applications/${applicationId}`, { status }, {
         headers: {
             Authorization: `Bearer ${getAuthToken()}`,
         },
@@ -87,7 +87,7 @@ const uploadResume = async (file) => {
         const formData = new FormData();
         formData.append('resume', file);
 
-        const response = await axios.post(`${API_URL}/upload-resume`, formData, {
+        const response = await httpClient.post(`${API_URL}/upload-resume`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 Authorization: `Bearer ${getAuthToken()}`,
@@ -107,7 +107,7 @@ const deleteResume = async () => {
     try {
         console.log('Deleting resume');
 
-        const response = await axios.delete(`${API_URL}/resume`, {
+        const response = await httpClient.delete(`${API_URL}/resume`, {
             headers: {
                 Authorization: `Bearer ${getAuthToken()}`,
             },

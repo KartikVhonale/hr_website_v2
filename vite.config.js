@@ -20,8 +20,5 @@ export default defineConfig({
         globals: {}
       }
     }
-  },
-  optimizeDeps: {
-    include: ['axios']
   }
 })
