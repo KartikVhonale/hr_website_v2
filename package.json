@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && robocopy dist backend/public /E /MOVE & exit 0",
+    "build": "vite build",
+    "build:local": "vite build && npm run copy:dist",
+    "copy:dist": "node -e \"const fs=require('fs'); const path=require('path'); if(fs.existsSync('../backend/public')){fs.rmSync('../backend/public',{recursive:true,force:true});} fs.cpSync('dist','../backend/public',{recursive:true});\"",
     "lint": "eslint .",
     "preview": "vite preview"
   },
