@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { default as axios } from 'axios';
 
 const API_URL = 'http://localhost:3000/api/jobs';
 

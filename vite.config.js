@@ -14,5 +14,14 @@ export default defineConfig({
   },
   build: {
     outDir: 'build',
+    rollupOptions: {
+      external: [],
+      output: {
+        globals: {}
+      }
+    }
   },
+  optimizeDeps: {
+    include: ['axios']
+  }
 })
