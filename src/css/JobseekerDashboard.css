@@ -95,7 +95,8 @@
 .dashboard-container {
   padding: 2rem;
   max-width: 1400px;
-  margin: 0 auto;
+  margin-left: auto;
+  margin-right: auto;
   animation: fadeInUp 0.6s ease-out;
   position: relative;
 }
@@ -715,10 +716,12 @@
 @media (max-width: 768px) {
   .jobseeker-content {
     margin-left: 0;
+    padding-top: 80px !important; /* Add 80px top spacing */
   }
   
   .dashboard-container {
     padding: 1rem;
+    margin-top: 80px !important; /* Force 80px top margin */
   }
   
   .dashboard-title {
@@ -803,16 +806,19 @@
   .jobseeker-content {
     margin-left: 0;
     padding-left: 0;
+    padding-top: 80px !important; /* Add 80px top spacing */
   }
   
   .dashboard-container {
     padding: 1rem;
+    margin-top: 80px !important; /* Force 80px top margin */
   }
 }
 
 @media (max-width: 480px) {
   .dashboard-container {
     padding: 0.5rem;
+    margin-top: 80px !important; /* Force 80px top margin */
   }
   
   .overview-card {
@@ -823,6 +829,18 @@
   .job-recommendations,
   .profile-completion {
     padding: 1rem;
+  }
+}
+
+/* ===== FORCE 80PX TOP SPACING ===== */
+.jobseeker-layout .jobseeker-content {
+  padding-top: 80px !important;
+}
+
+/* Override any conflicting mobile styles */
+@media (max-width: 768px) {
+  .jobseeker-layout .jobseeker-content {
+    padding-top: 80px !important;
   }
 }
 

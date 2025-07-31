@@ -1,7 +1,7 @@
 .job-portal-page {
-  padding: 4rem 3rem;
+  padding: 4rem 3rem; 
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 80px auto;
   background-color: var(--bg-primary, #f9fafb);
   min-height: calc(100vh - 80px); /* Adjust based on header height */
 }

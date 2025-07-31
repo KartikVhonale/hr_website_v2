@@ -80,13 +80,24 @@ const EmployerDashboard = ({ userData }) => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      await Promise.all([
+      setError(''); // Clear any previous errors
+
+      // Use Promise.allSettled to handle individual failures gracefully
+      const results = await Promise.allSettled([
         fetchJobs(),
         fetchApplications(),
         fetchArticles(),
         fetchSavedCandidates()
       ]);
+
+      // Check for any rejected promises and log them
+      const failures = results.filter(result => result.status === 'rejected');
+      if (failures.length > 0) {
+        console.warn('Some data failed to load:', failures);
+        // Don't set error for partial failures, just log them
+      }
     } catch (err) {
+      console.error('Dashboard data fetch error:', err);
       setError('Failed to load dashboard data');
     } finally {
       setLoading(false);
@@ -136,17 +147,23 @@ const EmployerDashboard = ({ userData }) => {
   const fetchSavedCandidates = async () => {
     try {
       const data = await userService.getSavedCandidates(token);
-      if (data.success) {
-        setSavedCandidates(data.data);
+      if (data && data.success) {
+        setSavedCandidates(data.data || []);
         // Initialize status and notes state
         const statusMap = {};
         const notesMap = {};
-        data.data.forEach(candidate => {
-          statusMap[candidate._id] = candidate.status;
-          notesMap[candidate._id] = candidate.notes;
+        (data.data || []).forEach(candidate => {
+          if (candidate && candidate._id) {
+            statusMap[candidate._id] = candidate.status || 'new';
+            notesMap[candidate._id] = candidate.notes || '';
+          }
         });
         setCandidateStatus(statusMap);
         setCandidateNotes(notesMap);
+      } else {
+        setSavedCandidates([]);
+        setCandidateStatus({});
+        setCandidateNotes({});
       }
     } catch (err) {
       console.error('Failed to fetch saved candidates:', err);

@@ -3,12 +3,21 @@ import httpClient from '../utils/httpClient.js';
 const API_URL = '/api';
 
 const getSavedCandidates = async (token) => {
-  const response = await httpClient.get(`${API_URL}/users/saved-candidates`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
-  return response.data;
+  try {
+    const response = await httpClient.get(`${API_URL}/users/saved-candidates`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching saved candidates:', error);
+    // Return a default structure to prevent crashes
+    return {
+      success: true,
+      data: []
+    };
+  }
 };
 
 const saveCandidate = async (candidateId, token) => {
