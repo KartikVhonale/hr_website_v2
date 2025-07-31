@@ -1,32 +1,173 @@
+/* ============================================
+   GLOBAL CSS VARIABLES
+   ============================================ */
+
 :root {
-  /* Light mode colors */
+  /* === COLORS - LIGHT MODE === */
+  /* Background Colors */
   --bg-primary: #ffffff;
   --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+
+  /* Text Colors */
   --text-primary: #1e293b;
   --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --text-inverse: #ffffff;
+
+  /* Accent Colors */
   --accent-primary: #3b82f6;
+  --accent-primary-rgb: 59, 130, 246;
   --accent-hover: #2563eb;
+  --accent-light: #dbeafe;
+
+  /* Card & Surface Colors */
   --card-bg: #ffffff;
   --card-border: rgba(0, 0, 0, 0.1);
+  --surface-elevated: #ffffff;
+
+  /* Footer Colors */
+  --footer-bg: #f8fafc;
+  --footer-text: #1e293b;
+  --footer-text-secondary: #64748b;
+
+  /* Status Colors */
+  --success: #10b981;
+  --success-light: #d1fae5;
+  --warning: #f59e0b;
+  --warning-light: #fef3c7;
+  --error: #ef4444;
+  --error-light: #fee2e2;
+  --info: #3b82f6;
+  --info-light: #dbeafe;
+
+  /* Gradient Colors */
   --hero-gradient-start: #6366f1;
   --hero-gradient-end: #3b82f6;
+
+  /* Shadow Colors */
   --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-color-light: rgba(0, 0, 0, 0.05);
+  --shadow-color-dark: rgba(0, 0, 0, 0.15);
 }
 
 [data-theme='dark'] {
-  /* Dark mode colors */
+  /* === COLORS - DARK MODE === */
+  /* Background Colors */
   --bg-primary: #121212;
   --bg-secondary: #1e1e1e;
+  --bg-tertiary: #2a2a2a;
+
+  /* Text Colors */
   --text-primary: #e2e8f0;
   --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-inverse: #1e293b;
+
+  /* Accent Colors */
   --accent-primary: #60a5fa;
+  --accent-primary-rgb: 96, 165, 250;
   --accent-hover: #3b82f6;
+  --accent-light: #1e3a8a;
+
+  /* Card & Surface Colors */
   --card-bg: #242424;
   --card-border: rgba(255, 255, 255, 0.1);
+  --surface-elevated: #2a2a2a;
+
+  /* Footer Colors */
+  --footer-bg: #1e1e1e;
+  --footer-text: #e2e8f0;
+  --footer-text-secondary: #94a3b8;
+
+  /* Status Colors */
+  --success: #10b981;
+  --success-light: #064e3b;
+  --warning: #f59e0b;
+  --warning-light: #78350f;
+  --error: #ef4444;
+  --error-light: #7f1d1d;
+  --info: #60a5fa;
+  --info-light: #1e3a8a;
+
+  /* Gradient Colors */
   --hero-gradient-start: #4f46e5;
   --hero-gradient-end: #3b82f6;
+
+  /* Shadow Colors */
   --shadow-color: rgba(0, 0, 0, 0.3);
+  --shadow-color-light: rgba(0, 0, 0, 0.2);
+  --shadow-color-dark: rgba(0, 0, 0, 0.4);
 }
+
+/* Add design tokens after color variables */
+:root {
+  /* === SPACING === */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+
+  /* === TYPOGRAPHY === */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* === BORDERS === */
+  --border-radius-sm: 0.25rem;
+  --border-radius-md: 0.5rem;
+  --border-radius-lg: 0.75rem;
+  --border-radius-xl: 1rem;
+  --border-radius-2xl: 1.5rem;
+  --border-radius-full: 9999px;
+
+  --border-width-thin: 1px;
+  --border-width-medium: 2px;
+  --border-width-thick: 3px;
+
+  /* === SHADOWS === */
+  --shadow-sm: 0 1px 2px 0 var(--shadow-color-light);
+  --shadow-md: 0 4px 6px -1px var(--shadow-color);
+  --shadow-lg: 0 10px 15px -3px var(--shadow-color);
+  --shadow-xl: 0 20px 25px -5px var(--shadow-color);
+  --shadow-2xl: 0 25px 50px -12px var(--shadow-color-dark);
+
+  /* === TRANSITIONS === */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
+  --transition-bounce: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* === Z-INDEX === */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
 
 body {
   margin: 0;
@@ -37,15 +178,40 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color var(--transition-slow), color var(--transition-slow);
+  line-height: var(--line-height-normal);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 * {
-  box-sizing: border-box;
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: background-color var(--transition-slow),
+              color var(--transition-slow),
+              border-color var(--transition-slow),
+              box-shadow var(--transition-slow);
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
-} 
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

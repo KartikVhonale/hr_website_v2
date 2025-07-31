@@ -99,3 +99,65 @@ body.dark .modal-content button:disabled {
   background: #2d3748;
   cursor: not-allowed;
 }
+
+/* Form layout styles for AddJobModal */
+.modal-content .form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.modal-content .form-row .form-group {
+  flex: 1;
+}
+
+.modal-content .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.modal-content textarea {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 0.25rem;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.modal-content .form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.modal-content .error-message {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin: 0.5rem 0;
+}
+
+.modal-content .success-message {
+  color: #16a34a;
+  font-size: 0.875rem;
+  margin: 0.5rem 0;
+}
+
+/* Dark mode styles for new elements */
+body.dark .modal-content textarea {
+  background: #151515;
+  border-color: #232b36;
+  color: #f2f2f2;
+}
+
+body.dark .modal-content textarea:focus {
+  border-color: #66b2ff;
+  box-shadow: 0 0 0 2px #66b2ff22;
+}
+
+/* Responsive design for form rows */
+@media (max-width: 768px) {
+  .modal-content .form-row {
+    flex-direction: column;
+  }
+}

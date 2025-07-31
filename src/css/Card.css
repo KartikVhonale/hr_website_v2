@@ -1,0 +1,345 @@
+/* Card-specific CSS variables */
+:root {
+  --card-radius: 8px;
+  --card-padding: 1.5rem;
+  --card-header-padding: 1rem 1.5rem;
+  --card-footer-padding: 1rem 1.5rem;
+  --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.data-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.data-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+  padding: var(--card-header-padding);
+  border-bottom: 1px solid var(--card-border);
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.card-body {
+  padding: var(--card-padding);
+}
+
+.card-footer {
+  padding: var(--card-footer-padding);
+  border-top: 1px solid var(--card-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Job Card Specific Styles */
+.featured-job {
+  border-left: 4px solid var(--accent-primary, #3b82f6);
+}
+
+.job-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.company-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.company-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.job-company {
+  font-weight: 600;
+  color: var(--text-secondary, #555);
+}
+
+.job-meta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  color: var(--text-muted, #777);
+  font-size: 0.9rem;
+}
+
+.job-posted {
+  font-size: 0.8rem;
+  color: var(--text-muted, #777);
+}
+
+.job-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.apply-btn, .save-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.apply-btn {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+.save-btn {
+  background-color: transparent;
+  border: 1px solid var(--accent-primary);
+  color: var(--accent-primary);
+  transition: all 0.3s ease;
+}
+
+.save-btn:hover {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+.save-btn.saved {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+.save-btn:disabled,
+.apply-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Job description styles */
+.job-description {
+  margin-top: 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Job skills styles */
+.job-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.skill-tag {
+  background-color: var(--accent-light);
+  color: var(--accent-primary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.skill-more {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --card-padding: 1rem;
+    --card-header-padding: 0.75rem 1rem;
+    --card-footer-padding: 0.75rem 1rem;
+  }
+
+  .job-meta {
+    gap: 0.5rem;
+  }
+
+  .job-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+/* Application Card Specific Styles */
+.application-card {
+  position: relative;
+}
+
+/* ============================================
+   DARK MODE STYLES
+   ============================================ */
+
+/* Dark mode for data cards */
+:root[data-theme='dark'] .data-card {
+  background: var(--card-bg);
+  border-color: var(--card-border);
+}
+
+:root[data-theme='dark'] .data-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme='dark'] .card-header {
+  border-bottom-color: var(--card-border);
+}
+
+:root[data-theme='dark'] .card-header h3 {
+  color: var(--text-primary);
+}
+
+:root[data-theme='dark'] .card-footer {
+  border-top-color: var(--card-border);
+}
+
+/* Dark mode for job cards */
+:root[data-theme='dark'] .job-company {
+  color: var(--text-secondary);
+}
+
+:root[data-theme='dark'] .job-meta {
+  color: var(--text-muted);
+}
+
+:root[data-theme='dark'] .job-posted {
+  color: var(--text-muted);
+}
+
+:root[data-theme='dark'] .apply-btn {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+:root[data-theme='dark'] .apply-btn:hover {
+  background-color: var(--accent-hover);
+}
+
+:root[data-theme='dark'] .save-btn {
+  background-color: transparent;
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+:root[data-theme='dark'] .save-btn:hover {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+/* Dark mode for featured jobs */
+:root[data-theme='dark'] .featured-job {
+  border-left-color: var(--accent-primary);
+}
+
+/* Dark mode for job description and skills */
+:root[data-theme='dark'] .job-description {
+  color: var(--text-secondary);
+}
+
+:root[data-theme='dark'] .skill-tag {
+  background-color: var(--accent-light);
+  color: var(--accent-primary);
+}
+
+:root[data-theme='dark'] .skill-more {
+  color: var(--text-muted);
+}
+
+:root[data-theme='dark'] .save-btn.saved {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+.application-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.application-company {
+  font-weight: 600;
+  color: var(--text-secondary, #555);
+}
+
+.application-meta {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.application-status {
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  background-color: rgba(0,0,0,0.05);
+}
+
+.application-date {
+  color: var(--text-muted, #777);
+}
+
+.application-notes {
+  font-size: 0.9rem;
+  color: var(--text-muted, #666);
+  padding: 0.5rem;
+  background-color: rgba(0,0,0,0.03);
+  border-radius: 4px;
+}
+
+.application-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.view-btn, .update-btn, .withdraw-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.view-btn {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+.update-btn {
+  background-color: #ffb74d;
+  color: white;
+}
+
+.withdraw-btn {
+  background-color: transparent;
+  border: 1px solid #f44336;
+  color: #f44336;
+}
+
+@media (max-width: 768px) {
+  .application-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

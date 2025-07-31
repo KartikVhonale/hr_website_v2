@@ -17,6 +17,19 @@
   transition: all 0.3s ease;
 }
 
+/* Mobile Sidebar Styles */
+.jobseeker-sidebar.mobile {
+  position: fixed;
+  left: -280px;
+  z-index: 999;
+  box-shadow: none;
+}
+
+.jobseeker-sidebar.mobile-open {
+  left: 0;
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.3);
+}
+
 .jobseeker-sidebar.collapsed {
   width: 70px;
 }
@@ -36,6 +49,30 @@
   align-items: center;
   justify-content: space-between;
   min-height: 80px;
+  position: relative;
+}
+
+.jobseeker-sidebar .mobile-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #f8fafc;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.jobseeker-sidebar .mobile-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
 }
 
 .jobseeker-sidebar .sidebar-logo .logo-content h2 {
@@ -178,6 +215,9 @@
   letter-spacing: 1px;
   margin: 0 0 0.75rem 0;
   opacity: 0.8;
+  position: relative;
+  padding-left: 0.5rem;
+  border-left: 2px solid rgba(255, 255, 255, 0.4);
 }
 
 .jobseeker-sidebar .quick-action-buttons {

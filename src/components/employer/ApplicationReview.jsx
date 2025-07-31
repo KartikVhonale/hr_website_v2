@@ -1,103 +1,69 @@
 import React, { useState, useEffect } from 'react';
+import { getApplicationsForJob, updateApplicationStatus } from '../../services/employerService';
 import { FileText, User, Calendar, MapPin, Briefcase, DollarSign, Clock, Star, Eye, Check, X, MessageSquare, Download, Filter, Search } from 'lucide-react';
 
-const ApplicationReview = () => {
+const ApplicationReview = ({ jobId }) => {
   const [applications, setApplications] = useState([]);
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortBy, setSortBy] = useState('dateApplied');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Mock applications data
   useEffect(() => {
-    const mockApplications = [
-      {
-        id: 1,
-        candidateName: 'Sarah Johnson',
-        candidateEmail: 'sarah.johnson@email.com',
-        candidatePhone: '+1 (555) 123-4567',
-        jobTitle: 'Senior Software Engineer',
-        jobId: 'job-001',
-        dateApplied: '2024-01-15',
-        status: 'pending',
-        rating: 4.8,
-        experience: '5+ years',
-        location: 'San Francisco, CA',
-        expectedSalary: '$120,000 - $150,000',
-        skills: ['React', 'Node.js', 'Python', 'AWS'],
-        coverLetter: 'I am excited to apply for the Senior Software Engineer position. With over 5 years of experience in full-stack development...',
-        resumeUrl: '/resumes/sarah-johnson.pdf',
-        profileImage: '/api/placeholder/60/60',
-        notes: '',
-        interviewScheduled: false
-      },
-      {
-        id: 2,
-        candidateName: 'Michael Chen',
-        candidateEmail: 'michael.chen@email.com',
-        candidatePhone: '+1 (555) 234-5678',
-        jobTitle: 'UX/UI Designer',
-        jobId: 'job-002',
-        dateApplied: '2024-01-12',
-        status: 'approved',
-        rating: 4.6,
-        experience: '3+ years',
-        location: 'New York, NY',
-        expectedSalary: '$80,000 - $100,000',
-        skills: ['Figma', 'Adobe XD', 'Prototyping', 'User Research'],
-        coverLetter: 'As a passionate UX/UI designer with 3 years of experience, I am thrilled to apply for this position...',
-        resumeUrl: '/resumes/michael-chen.pdf',
-        profileImage: '/api/placeholder/60/60',
-        notes: 'Strong portfolio, good communication skills',
-        interviewScheduled: true
-      },
-      {
-        id: 3,
-        candidateName: 'Emily Rodriguez',
-        candidateEmail: 'emily.rodriguez@email.com',
-        candidatePhone: '+1 (555) 345-6789',
-        jobTitle: 'Data Scientist',
-        jobId: 'job-003',
-        dateApplied: '2024-01-10',
-        status: 'rejected',
-        rating: 4.2,
-        experience: '4+ years',
-        location: 'Austin, TX',
-        expectedSalary: '$110,000 - $130,000',
-        skills: ['Python', 'Machine Learning', 'SQL', 'Tableau'],
-        coverLetter: 'I am writing to express my interest in the Data Scientist position. My background in machine learning...',
-        resumeUrl: '/resumes/emily-rodriguez.pdf',
-        profileImage: '/api/placeholder/60/60',
-        notes: 'Good technical skills but not the right fit for team culture',
-        interviewScheduled: false
-      }
-    ];
-    setApplications(mockApplications);
-  }, []);
+    fetchApplications();
+  }, [jobId]);
 
-  const handleStatusChange = (applicationId, newStatus) => {
-    setApplications(applications.map(app => 
-      app.id === applicationId 
-        ? { ...app, status: newStatus }
-        : app
-    ));
+  const fetchApplications = async () => {
+    if (!jobId) return;
+    setLoading(true);
+    try {
+      const res = await getApplicationsForJob(jobId);
+      setApplications(res.data);
+    } catch (err) {
+      setError('Failed to fetch applications');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleAddNotes = (applicationId, notes) => {
-    setApplications(applications.map(app => 
-      app.id === applicationId 
-        ? { ...app, notes }
-        : app
-    ));
+  const handleStatusChange = async (applicationId, newStatus) => {
+    try {
+      await updateApplicationStatus(applicationId, newStatus);
+      fetchApplications();
+    } catch (err) {
+      console.error('Failed to update status', err);
+    }
+  };
+
+  const handleAddNotes = async (applicationId, notes) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/applications/${applicationId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ notes }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setApplications(applications.map(app =>
+          app._id === applicationId
+            ? { ...app, notes }
+            : app
+        ));
+      }
+    } catch (err) {
+      console.error('Failed to add notes', err);
+    }
   };
 
   const handleScheduleInterview = (applicationId) => {
-    setApplications(applications.map(app => 
-      app.id === applicationId 
-        ? { ...app, interviewScheduled: true }
-        : app
-    ));
+    // Placeholder for scheduling interview
+    console.log('Scheduling interview for application:', applicationId);
   };
 
   const getStatusColor = (status) => {
@@ -116,9 +82,9 @@ const ApplicationReview = () => {
       return app.status === statusFilter;
     })
     .filter(app =>
-      app.candidateName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.jobTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()))
+      (app.applicant.name && app.applicant.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (app.job.title && app.job.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (app.skills && app.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase())))
     )
     .sort((a, b) => {
       switch (sortBy) {
@@ -138,13 +104,13 @@ const ApplicationReview = () => {
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
           <img
-            src={application.profileImage}
-            alt={application.candidateName}
+            src={application.applicant.profileImage || '/api/placeholder/60/60'}
+            alt={application.applicant.name}
             className="w-12 h-12 rounded-full object-cover"
           />
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">{application.candidateName}</h3>
-            <p className="text-gray-600 dark:text-gray-300">{application.jobTitle}</p>
+            <h3 className="font-semibold text-gray-900 dark:text-white">{application.applicant.name}</h3>
+            <p className="text-gray-600 dark:text-gray-300">{application.job.title}</p>
           </div>
         </div>
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(application.status)}`}>
@@ -155,23 +121,23 @@ const ApplicationReview = () => {
       <div className="space-y-2 mb-4">
         <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
           <Calendar className="w-4 h-4 mr-2" />
-          Applied: {new Date(application.dateApplied).toLocaleDateString()}
+          Applied: {new Date(application.createdAt).toLocaleDateString()}
         </div>
         <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
           <MapPin className="w-4 h-4 mr-2" />
-          {application.location}
+          {application.job.location}
         </div>
         <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
           <Briefcase className="w-4 h-4 mr-2" />
-          {application.experience}
+          {application.experience || 'N/A'}
         </div>
         <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
           <DollarSign className="w-4 h-4 mr-2" />
-          {application.expectedSalary}
+          {application.expectedSalary || 'N/A'}
         </div>
         <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
           <Star className="w-4 h-4 mr-2 text-yellow-400 fill-current" />
-          {application.rating}
+          {application.rating || 'N/A'}
         </div>
       </div>
 
@@ -216,14 +182,14 @@ const ApplicationReview = () => {
       {application.status === 'pending' && (
         <div className="flex space-x-2">
           <button
-            onClick={() => handleStatusChange(application.id, 'approved')}
+            onClick={() => handleStatusChange(application._id, 'approved')}
             className="flex-1 flex items-center justify-center px-3 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 transition-colors"
           >
             <Check className="w-4 h-4 mr-2" />
             Approve
           </button>
           <button
-            onClick={() => handleStatusChange(application.id, 'rejected')}
+            onClick={() => handleStatusChange(application._id, 'rejected')}
             className="flex-1 flex items-center justify-center px-3 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 transition-colors"
           >
             <X className="w-4 h-4 mr-2" />
@@ -252,18 +218,18 @@ const ApplicationReview = () => {
         <div className="p-6 space-y-6">
           {/* Candidate Info */}
           <div className="flex items-start space-x-4">
-            <img
-              src={application.profileImage}
-              alt={application.candidateName}
-              className="w-20 h-20 rounded-full object-cover"
-            />
-            <div className="flex-1">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{application.candidateName}</h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-2">{application.jobTitle}</p>
-              <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
-                <span>{application.candidateEmail}</span>
-                <span>{application.candidatePhone}</span>
-              </div>
+          <img
+            src={application.applicant.profileImage || '/api/placeholder/60/60'}
+            alt={application.applicant.name}
+            className="w-20 h-20 rounded-full object-cover"
+          />
+          <div className="flex-1">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{application.applicant.name}</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-2">{application.job.title}</p>
+            <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+              <span>{application.applicant.email}</span>
+              <span>{application.applicant.phone || 'N/A'}</span>
+            </div>
             </div>
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(application.status)}`}>
               {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
@@ -278,27 +244,27 @@ const ApplicationReview = () => {
                 <div className="flex items-center text-sm">
                   <Calendar className="w-4 h-4 mr-2 text-gray-400" />
                   <span className="text-gray-600 dark:text-gray-400">Applied:</span>
-                  <span className="ml-2 text-gray-900 dark:text-white">{new Date(application.dateApplied).toLocaleDateString()}</span>
+                  <span className="ml-2 text-gray-900 dark:text-white">{new Date(application.createdAt).toLocaleDateString()}</span>
                 </div>
                 <div className="flex items-center text-sm">
                   <MapPin className="w-4 h-4 mr-2 text-gray-400" />
                   <span className="text-gray-600 dark:text-gray-400">Location:</span>
-                  <span className="ml-2 text-gray-900 dark:text-white">{application.location}</span>
+                  <span className="ml-2 text-gray-900 dark:text-white">{application.job.location}</span>
                 </div>
                 <div className="flex items-center text-sm">
                   <Briefcase className="w-4 h-4 mr-2 text-gray-400" />
                   <span className="text-gray-600 dark:text-gray-400">Experience:</span>
-                  <span className="ml-2 text-gray-900 dark:text-white">{application.experience}</span>
+                  <span className="ml-2 text-gray-900 dark:text-white">{application.experience || 'N/A'}</span>
                 </div>
                 <div className="flex items-center text-sm">
                   <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
                   <span className="text-gray-600 dark:text-gray-400">Expected Salary:</span>
-                  <span className="ml-2 text-gray-900 dark:text-white">{application.expectedSalary}</span>
+                  <span className="ml-2 text-gray-900 dark:text-white">{application.expectedSalary || 'N/A'}</span>
                 </div>
                 <div className="flex items-center text-sm">
                   <Star className="w-4 h-4 mr-2 text-yellow-400 fill-current" />
                   <span className="text-gray-600 dark:text-gray-400">Rating:</span>
-                  <span className="ml-2 text-gray-900 dark:text-white">{application.rating}</span>
+                  <span className="ml-2 text-gray-900 dark:text-white">{application.rating || 'N/A'}</span>
                 </div>
               </div>
             </div>
@@ -330,8 +296,8 @@ const ApplicationReview = () => {
           <div>
             <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Internal Notes</h4>
             <textarea
-              value={application.notes}
-              onChange={(e) => handleAddNotes(application.id, e.target.value)}
+              defaultValue={application.notes}
+              onBlur={(e) => handleAddNotes(application._id, e.target.value)}
               placeholder="Add your notes about this candidate..."
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               rows="3"
@@ -345,7 +311,7 @@ const ApplicationReview = () => {
               Download Resume
             </button>
             <button
-              onClick={() => handleScheduleInterview(application.id)}
+              onClick={() => handleScheduleInterview(application._id)}
               className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
             >
               <Calendar className="w-4 h-4 mr-2" />
@@ -359,7 +325,7 @@ const ApplicationReview = () => {
               <>
                 <button
                   onClick={() => {
-                    handleStatusChange(application.id, 'approved');
+                    handleStatusChange(application._id, 'approved');
                     onClose();
                   }}
                   className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
@@ -369,7 +335,7 @@ const ApplicationReview = () => {
                 </button>
                 <button
                   onClick={() => {
-                    handleStatusChange(application.id, 'rejected');
+                    handleStatusChange(application._id, 'rejected');
                     onClose();
                   }}
                   className="flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
@@ -449,7 +415,7 @@ const ApplicationReview = () => {
         ) : (
           <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
             {filteredAndSortedApplications.map((application) => (
-              <ApplicationCard key={application.id} application={application} />
+              <ApplicationCard key={application._id} application={application} />
             ))}
           </div>
         )}

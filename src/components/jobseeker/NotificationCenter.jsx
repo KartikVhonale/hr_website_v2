@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   FaBell, 
   FaEnvelope,
@@ -10,54 +10,15 @@ import {
   FaTrash,
   FaCog,
   FaEye,
-  FaEyeSlash
+  FaEyeSlash,
+  FaSpinner
 } from 'react-icons/fa';
+import '../../css/NotificationCenter.css';
 
 const NotificationCenter = ({ notifications, setNotifications }) => {
   const [filter, setFilter] = useState('all');
   const [showSettings, setShowSettings] = useState(false);
-
-  // Mock notifications data
-  const mockNotifications = [
-    {
-      id: 1,
-      type: 'application',
-      title: 'Application Status Update',
-      message: 'Your application for Frontend Developer at TechCorp has been reviewed',
-      timestamp: '2024-01-24T10:30:00Z',
-      read: false,
-      priority: 'high'
-    },
-    {
-      id: 2,
-      type: 'interview',
-      title: 'Interview Reminder',
-      message: 'You have an interview tomorrow at 2:00 PM with Design Studio',
-      timestamp: '2024-01-24T09:15:00Z',
-      read: false,
-      priority: 'urgent'
-    },
-    {
-      id: 3,
-      type: 'job',
-      title: 'New Job Match',
-      message: '5 new jobs match your preferences in San Francisco',
-      timestamp: '2024-01-24T08:00:00Z',
-      read: true,
-      priority: 'medium'
-    },
-    {
-      id: 4,
-      type: 'message',
-      title: 'Message from Recruiter',
-      message: 'Sarah from InnovateTech sent you a message about a new opportunity',
-      timestamp: '2024-01-23T16:45:00Z',
-      read: true,
-      priority: 'medium'
-    }
-  ];
-
-  const [displayNotifications, setDisplayNotifications] = useState(mockNotifications);
+  const [loading, setLoading] = useState(false);
 
   const getNotificationIcon = (type) => {
     switch (type) {
@@ -101,24 +62,39 @@ const NotificationCenter = ({ notifications, setNotifications }) => {
     }
   };
 
-  const markAsRead = (id) => {
-    setDisplayNotifications(prev =>
-      prev.map(notif =>
-        notif.id === id ? { ...notif, read: true } : notif
-      )
-    );
+  const markAsRead = async (id) => {
+    try {
+      // In a real implementation, you would call an API to mark notification as read
+      setNotifications(prev =>
+        prev.map(notif =>
+          notif._id === id ? { ...notif, read: true } : notif
+        )
+      );
+    } catch (err) {
+      console.error('Failed to mark notification as read:', err);
+    }
   };
 
-  const markAllAsRead = () => {
-    setDisplayNotifications(prev =>
-      prev.map(notif => ({ ...notif, read: true }))
-    );
+  const markAllAsRead = async () => {
+    try {
+      // In a real implementation, you would call an API to mark all notifications as read
+      setNotifications(prev =>
+        prev.map(notif => ({ ...notif, read: true }))
+      );
+    } catch (err) {
+      console.error('Failed to mark all notifications as read:', err);
+    }
   };
 
-  const deleteNotification = (id) => {
-    setDisplayNotifications(prev =>
-      prev.filter(notif => notif.id !== id)
-    );
+  const deleteNotification = async (id) => {
+    try {
+      // In a real implementation, you would call an API to delete the notification
+      setNotifications(prev =>
+        prev.filter(notif => notif._id !== id)
+      );
+    } catch (err) {
+      console.error('Failed to delete notification:', err);
+    }
   };
 
   const filterNotifications = (notifications, filter) => {
@@ -135,8 +111,8 @@ const NotificationCenter = ({ notifications, setNotifications }) => {
     }
   };
 
-  const filteredNotifications = filterNotifications(displayNotifications, filter);
-  const unreadCount = displayNotifications.filter(notif => !notif.read).length;
+  const filteredNotifications = filterNotifications(notifications, filter);
+  const unreadCount = notifications.filter(notif => !notif.read).length;
 
   return (
     <div className="notification-center-section">
@@ -154,7 +130,7 @@ const NotificationCenter = ({ notifications, setNotifications }) => {
           <button 
             className="action-btn"
             onClick={markAllAsRead}
-            disabled={unreadCount === 0}
+            disabled={unreadCount === 0 || loading}
           >
             <FaCheckCircle /> Mark All Read
           </button>
@@ -218,10 +194,15 @@ const NotificationCenter = ({ notifications, setNotifications }) => {
       )}
 
       <div className="notifications-list">
-        {filteredNotifications.length > 0 ? (
+        {loading ? (
+          <div className="loading-container">
+            <FaSpinner className="spinner" />
+            <p>Loading notifications...</p>
+          </div>
+        ) : filteredNotifications.length > 0 ? (
           filteredNotifications.map((notification) => (
             <div 
-              key={notification.id} 
+              key={notification._id} 
               className={`notification-item ${!notification.read ? 'unread' : ''} ${getPriorityClass(notification.priority)}`}
             >
               <div className="notification-content">
@@ -229,22 +210,24 @@ const NotificationCenter = ({ notifications, setNotifications }) => {
                   {getNotificationIcon(notification.type)}
                   <div className="notification-info">
                     <h4 className="notification-title">{notification.title}</h4>
-                    <span className="notification-time">{formatTimestamp(notification.timestamp)}</span>
+                    <span className="notification-time">{formatTimestamp(notification.createdAt)}</span>
                   </div>
                   <div className="notification-actions">
                     {!notification.read && (
                       <button 
                         className="action-btn read-btn"
-                        onClick={() => markAsRead(notification.id)}
+                        onClick={() => markAsRead(notification._id)}
                         title="Mark as read"
+                        disabled={loading}
                       >
                         <FaEye />
                       </button>
                     )}
                     <button 
                       className="action-btn delete-btn"
-                      onClick={() => deleteNotification(notification.id)}
+                      onClick={() => deleteNotification(notification._id)}
                       title="Delete notification"
+                      disabled={loading}
                     >
                       <FaTrash />
                     </button>

@@ -19,9 +19,11 @@
 }
 
 .job-item {
-  border: 1px solid #ccc;
+  border: 1px solid var(--card-border, rgba(0, 0, 0, 0.1));
   padding: 1rem;
   border-radius: 8px;
+  background: var(--card-bg, #ffffff);
+  box-shadow: var(--card-shadow, 0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .job-actions {

@@ -1,86 +1,97 @@
 import React, { useState, useEffect } from 'react';
+import { getAllJobs } from '../../services/jobService';
+import { saveJob, unsaveJob } from '../../services/jobseekerService';
+import { JobCard } from '../ui/cards';
+import '../../css/JobSearch.css';
 import { 
   FaSearch, 
   FaMapMarkerAlt, 
   FaBriefcase, 
-  FaFilter,
-  FaHeart,
-  FaRegHeart,
-  FaClock,
-  FaDollarSign,
-  FaBuilding
+  FaFilter
 } from 'react-icons/fa';
 
-const JobSearch = ({ jobs, setJobs }) => {
+const JobSearch = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [location, setLocation] = useState('');
   const [jobType, setJobType] = useState('');
   const [salaryRange, setSalaryRange] = useState('');
-  const [filteredJobs, setFilteredJobs] = useState(jobs);
+  const [jobs, setJobs] = useState([]);
   const [savedJobs, setSavedJobs] = useState(new Set());
   const [showFilters, setShowFilters] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    filterJobs();
-  }, [searchTerm, location, jobType, salaryRange, jobs]);
+    fetchJobs();
+  }, []);
 
-  const filterJobs = () => {
-    let filtered = jobs.filter(job => {
-      const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           job.description.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesLocation = !location || job.location.toLowerCase().includes(location.toLowerCase());
-      
-      const matchesJobType = !jobType || job.type === jobType;
-      
-      const matchesSalary = !salaryRange || checkSalaryRange(job.salary, salaryRange);
-      
-      return matchesSearch && matchesLocation && matchesJobType && matchesSalary;
-    });
-    
-    setFilteredJobs(filtered);
-  };
-
-  const checkSalaryRange = (jobSalary, range) => {
-    if (!jobSalary) return false;
-    
-    const salary = parseInt(jobSalary.replace(/[^0-9]/g, ''));
-    
-    switch (range) {
-      case '0-30000':
-        return salary <= 30000;
-      case '30000-50000':
-        return salary >= 30000 && salary <= 50000;
-      case '50000-70000':
-        return salary >= 50000 && salary <= 70000;
-      case '70000+':
-        return salary >= 70000;
-      default:
-        return true;
+  const fetchJobs = async () => {
+    setLoading(true);
+    try {
+      const params = {
+        search: searchTerm,
+        location,
+        jobType,
+      };
+      const res = await getAllJobs(params);
+      setJobs(res.data.data);
+    } catch (err) {
+      console.error('Failed to fetch jobs:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const toggleSaveJob = (jobId) => {
-    const newSavedJobs = new Set(savedJobs);
-    if (newSavedJobs.has(jobId)) {
-      newSavedJobs.delete(jobId);
-    } else {
-      newSavedJobs.add(jobId);
-    }
-    setSavedJobs(newSavedJobs);
+  const handleSearch = () => {
+    fetchJobs();
   };
 
-  const handleApply = (job) => {
-    // This would typically open an application modal or redirect to application page
-    alert(`Applying for ${job.title} at ${job.company}`);
+  const toggleSaveJob = async (jobId) => {
+    setLoading(true);
+    try {
+      const newSavedJobs = new Set(savedJobs);
+      if (newSavedJobs.has(jobId)) {
+        await unsaveJob(jobId);
+        newSavedJobs.delete(jobId);
+      } else {
+        await saveJob(jobId);
+        newSavedJobs.add(jobId);
+      }
+      setSavedJobs(newSavedJobs);
+    } catch (err) {
+      console.error('Failed to save/unsave job:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApply = async (job) => {
+    setLoading(true);
+    try {
+      // In a real implementation, you would collect application data from a form
+      const applicationData = {
+        resume: 'path/to/resume.pdf', // This would be the actual resume file
+        coverLetter: 'path/to/cover-letter.pdf' // This would be the actual cover letter file
+      };
+      
+      const data = await jobseekerService.applyForJob(job._id, applicationData, token);
+      if (data.success) {
+        alert('Application submitted successfully!');
+      }
+    } catch (err) {
+      console.error('Failed to apply for job:', err);
+      alert('Failed to submit application. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="job-search-section">
       <div className="search-header">
-        <h2>Find Your Next Opportunity</h2>
-        <p>Discover jobs that match your skills and interests</p>
+        <div className="header-content">
+          <h2>Find Your Dream Job</h2>
+          <p>Search through thousands of job listings to find your perfect match</p>
+        </div>
       </div>
 
       <div className="search-controls">
@@ -92,18 +103,16 @@ const JobSearch = ({ jobs, setJobs }) => {
               placeholder="Job title, keywords, or company"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
             />
           </div>
           
-          <div className="location-input-group">
-            <FaMapMarkerAlt className="location-icon" />
+          <div className="search-input-group">
+            <FaMapMarkerAlt className="search-icon" />
             <input
               type="text"
-              placeholder="Location"
+              placeholder="City, state, or remote"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="location-input"
             />
           </div>
           
@@ -111,42 +120,45 @@ const JobSearch = ({ jobs, setJobs }) => {
             className="filter-toggle"
             onClick={() => setShowFilters(!showFilters)}
           >
-            <FaFilter />
-            Filters
+            <FaFilter /> Filters
+          </button>
+          
+          <button className="search-btn" onClick={handleSearch}>
+            <FaSearch /> Search
           </button>
         </div>
 
         {showFilters && (
-          <div className="filters-panel">
-            <div className="filter-group">
-              <label>Job Type</label>
-              <select 
-                value={jobType} 
-                onChange={(e) => setJobType(e.target.value)}
-                className="filter-select"
-              >
-                <option value="">All Types</option>
-                <option value="full-time">Full Time</option>
-                <option value="part-time">Part Time</option>
-                <option value="contract">Contract</option>
-                <option value="internship">Internship</option>
-                <option value="remote">Remote</option>
-              </select>
-            </div>
-            
-            <div className="filter-group">
-              <label>Salary Range</label>
-              <select 
-                value={salaryRange} 
-                onChange={(e) => setSalaryRange(e.target.value)}
-                className="filter-select"
-              >
-                <option value="">Any Salary</option>
-                <option value="0-30000">$0 - $30,000</option>
-                <option value="30000-50000">$30,000 - $50,000</option>
-                <option value="50000-70000">$50,000 - $70,000</option>
-                <option value="70000+">$70,000+</option>
-              </select>
+          <div className="advanced-filters">
+            <div className="filter-row">
+              <div className="filter-group">
+                <label>Job Type</label>
+                <select 
+                  value={jobType} 
+                  onChange={(e) => setJobType(e.target.value)}
+                >
+                  <option value="">All Types</option>
+                  <option value="full-time">Full-time</option>
+                  <option value="part-time">Part-time</option>
+                  <option value="contract">Contract</option>
+                  <option value="internship">Internship</option>
+                  <option value="remote">Remote</option>
+                </select>
+              </div>
+              
+              <div className="filter-group">
+                <label>Salary Range</label>
+                <select 
+                  value={salaryRange} 
+                  onChange={(e) => setSalaryRange(e.target.value)}
+                >
+                  <option value="">Any Salary</option>
+                  <option value="0-30000">Up to $30,000</option>
+                  <option value="30000-50000">$30,000 - $50,000</option>
+                  <option value="50000-70000">$50,000 - $70,000</option>
+                  <option value="70000+">$70,000+</option>
+                </select>
+              </div>
             </div>
           </div>
         )}
@@ -154,77 +166,36 @@ const JobSearch = ({ jobs, setJobs }) => {
 
       <div className="search-results">
         <div className="results-header">
-          <h3>{filteredJobs.length} Jobs Found</h3>
-          <div className="sort-controls">
-            <select className="sort-select">
-              <option value="relevance">Most Relevant</option>
-              <option value="date">Most Recent</option>
-              <option value="salary">Highest Salary</option>
+          <h3>{jobs.length} Jobs Found</h3>
+          <div className="sort-options">
+            <span>Sort by:</span>
+            <select>
+              <option>Most Relevant</option>
+              <option>Newest</option>
+              <option>Salary: High to Low</option>
+              <option>Salary: Low to High</option>
             </select>
           </div>
         </div>
 
         <div className="jobs-grid">
-          {filteredJobs.length > 0 ? (
-            filteredJobs.map((job) => (
-              <div key={job._id} className="job-card">
-                <div className="job-card-header">
-                  <div className="company-logo">
-                    <FaBuilding />
-                  </div>
-                  <button 
-                    className={`save-btn ${savedJobs.has(job._id) ? 'saved' : ''}`}
-                    onClick={() => toggleSaveJob(job._id)}
-                  >
-                    {savedJobs.has(job._id) ? <FaHeart /> : <FaRegHeart />}
-                  </button>
-                </div>
-                
-                <div className="job-card-content">
-                  <h4 className="job-title">{job.title}</h4>
-                  <p className="company-name">{job.company}</p>
-                  
-                  <div className="job-details">
-                    <span className="job-location">
-                      <FaMapMarkerAlt />
-                      {job.location}
-                    </span>
-                    <span className="job-type">
-                      <FaBriefcase />
-                      {job.type}
-                    </span>
-                    {job.salary && (
-                      <span className="job-salary">
-                        <FaDollarSign />
-                        {job.salary}
-                      </span>
-                    )}
-                  </div>
-                  
-                  <p className="job-description">
-                    {job.description.substring(0, 150)}...
-                  </p>
-                  
-                  <div className="job-tags">
-                    {job.skills && job.skills.slice(0, 3).map((skill, index) => (
-                      <span key={index} className="skill-tag">{skill}</span>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="job-card-footer">
-                  <span className="posted-date">
-                    <FaClock />
-                    Posted {new Date(job.createdAt).toLocaleDateString()}
-                  </span>
-                  <button 
-                    className="apply-btn"
-                    onClick={() => handleApply(job)}
-                  >
-                    Apply Now
-                  </button>
-                </div>
-              </div>
+          {jobs.length > 0 ? (
+            jobs.map((job) => (
+              <JobCard
+                key={job._id}
+                jobTitle={job.title}
+                company={job.employer.name}
+                location={job.location}
+                jobType={job.jobType}
+                salary={job.salary}
+                postedDate={job.createdAt}
+                description={job.description}
+                skills={job.skills}
+                isSaved={savedJobs.has(job._id)}
+                onSave={() => toggleSaveJob(job._id)}
+                onApply={() => handleApply(job)}
+                loading={loading}
+              />
             ))
           ) : (
             <div className="no-results">

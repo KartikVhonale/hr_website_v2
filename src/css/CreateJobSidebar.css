@@ -1,21 +1,21 @@
 :root {
-  --sidebar-bg: #f8f9fa;
-  --sidebar-text: #343a40;
-  --sidebar-link-hover-bg: #e9ecef;
-  --sidebar-link-active-bg: #007bff;
+  --sidebar-bg: var(--bg-secondary, #f8fafc);
+  --sidebar-text: var(--text-primary, #1e293b);
+  --sidebar-link-hover-bg: var(--bg-hover, #e2e8f0);
+  --sidebar-link-active-bg: var(--accent-primary, #3b82f6);
   --sidebar-link-active-text: #ffffff;
-  --sidebar-border: #dee2e6;
-  --sidebar-title-color: #007bff;
+  --sidebar-border: var(--card-border, rgba(0, 0, 0, 0.1));
+  --sidebar-title-color: var(--accent-primary, #3b82f6);
 }
 
 :root[data-theme='dark'] {
-  --sidebar-bg: #1f2937;
-  --sidebar-text: #f9fafb;
-  --sidebar-link-hover-bg: #374151;
-  --sidebar-link-active-bg: #6366f1;
+  --sidebar-bg: var(--bg-secondary, #1f2937);
+  --sidebar-text: var(--text-primary, #f9fafb);
+  --sidebar-link-hover-bg: var(--bg-hover, #374151);
+  --sidebar-link-active-bg: var(--accent-primary, #6366f1);
   --sidebar-link-active-text: #ffffff;
-  --sidebar-border: #374151;
-  --sidebar-title-color: #6366f1;
+  --sidebar-border: var(--card-border, #374151);
+  --sidebar-title-color: var(--accent-primary, #6366f1);
 }
 
 .create-job-sidebar {
@@ -80,7 +80,7 @@
   background-color: var(--sidebar-link-active-bg);
   color: var(--sidebar-link-active-text);
   font-weight: 600;
-  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
 }
 
 :root[data-theme='dark'] .sidebar-link.active {

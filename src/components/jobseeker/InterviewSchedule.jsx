@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   FaCalendarAlt, 
   FaClock, 
@@ -11,72 +11,15 @@ import {
   FaPlus,
   FaFilter,
   FaCheckCircle,
-  FaExclamationTriangle
+  FaExclamationTriangle,
+  FaSpinner
 } from 'react-icons/fa';
+import '../../css/InterviewSchedule.css';
 
 const InterviewSchedule = ({ interviews, setInterviews }) => {
   const [selectedView, setSelectedView] = useState('upcoming'); // upcoming, past, all
   const [selectedInterview, setSelectedInterview] = useState(null);
-
-  // Mock interview data
-  const mockInterviews = [
-    {
-      _id: '1',
-      jobTitle: 'Senior Frontend Developer',
-      company: 'TechCorp Inc.',
-      interviewer: 'Sarah Johnson',
-      interviewerRole: 'Engineering Manager',
-      date: '2024-01-25',
-      time: '14:00',
-      duration: 60,
-      type: 'video', // video, phone, in-person
-      location: 'Zoom Meeting',
-      status: 'scheduled',
-      round: 1,
-      totalRounds: 3,
-      notes: 'Technical interview focusing on React and JavaScript',
-      preparation: ['Review React hooks', 'Practice coding challenges', 'Prepare questions about team'],
-      meetingLink: 'https://zoom.us/j/123456789'
-    },
-    {
-      _id: '2',
-      jobTitle: 'UX Designer',
-      company: 'Design Studio',
-      interviewer: 'Mike Chen',
-      interviewerRole: 'Design Director',
-      date: '2024-01-28',
-      time: '10:30',
-      duration: 45,
-      type: 'in-person',
-      location: '123 Design Ave, New York, NY',
-      status: 'scheduled',
-      round: 2,
-      totalRounds: 2,
-      notes: 'Portfolio review and design process discussion',
-      preparation: ['Prepare portfolio presentation', 'Research company projects', 'Bring printed portfolio'],
-      address: '123 Design Ave, Suite 500, New York, NY 10001'
-    },
-    {
-      _id: '3',
-      jobTitle: 'Product Manager',
-      company: 'StartupXYZ',
-      interviewer: 'Lisa Wang',
-      interviewerRole: 'VP of Product',
-      date: '2024-01-20',
-      time: '15:00',
-      duration: 30,
-      type: 'phone',
-      location: 'Phone Interview',
-      status: 'completed',
-      round: 1,
-      totalRounds: 2,
-      notes: 'Initial screening call',
-      preparation: ['Research company products', 'Prepare STAR examples'],
-      feedback: 'Positive feedback, moving to next round'
-    }
-  ];
-
-  const [displayInterviews, setDisplayInterviews] = useState(mockInterviews);
+  const [loading, setLoading] = useState(false);
 
   const getInterviewIcon = (type) => {
     switch (type) {
@@ -130,7 +73,7 @@ const InterviewSchedule = ({ interviews, setInterviews }) => {
     }
   };
 
-  const filteredInterviews = filterInterviews(displayInterviews, selectedView);
+  const filteredInterviews = filterInterviews(interviews, selectedView);
 
   const InterviewModal = ({ interview, onClose }) => {
     if (!interview) return null;
@@ -139,7 +82,7 @@ const InterviewSchedule = ({ interviews, setInterviews }) => {
       <div className="modal-overlay" onClick={onClose}>
         <div className="interview-modal" onClick={(e) => e.stopPropagation()}>
           <div className="modal-header">
-            <h3>{interview.jobTitle}</h3>
+            <h3>{interview.job?.title}</h3>
             <button className="close-btn" onClick={onClose}>×</button>
           </div>
           
@@ -150,7 +93,7 @@ const InterviewSchedule = ({ interviews, setInterviews }) => {
                 <div className="detail-grid">
                   <div className="detail-item">
                     <label>Company</label>
-                    <span>{interview.company}</span>
+                    <span>{interview.job?.company}</span>
                   </div>
                   <div className="detail-item">
                     <label>Interviewer</label>
@@ -201,7 +144,7 @@ const InterviewSchedule = ({ interviews, setInterviews }) => {
               <div className="detail-section">
                 <h4>Preparation Checklist</h4>
                 <div className="preparation-list">
-                  {interview.preparation.map((item, index) => (
+                  {interview.preparation?.map((item, index) => (
                     <div key={index} className="preparation-item">
                       <input type="checkbox" id={`prep-${index}`} />
                       <label htmlFor={`prep-${index}`}>{item}</label>
@@ -232,11 +175,11 @@ const InterviewSchedule = ({ interviews, setInterviews }) => {
         </div>
         <div className="header-stats">
           <div className="stat-item">
-            <span className="stat-number">{filterInterviews(displayInterviews, 'upcoming').length}</span>
+            <span className="stat-number">{filterInterviews(interviews, 'upcoming').length}</span>
             <span className="stat-label">Upcoming</span>
           </div>
           <div className="stat-item">
-            <span className="stat-number">{displayInterviews.filter(i => i.status === 'completed').length}</span>
+            <span className="stat-number">{interviews.filter(i => i.status === 'completed').length}</span>
             <span className="stat-label">Completed</span>
           </div>
         </div>
@@ -266,16 +209,21 @@ const InterviewSchedule = ({ interviews, setInterviews }) => {
       </div>
 
       <div className="interviews-list">
-        {filteredInterviews.length > 0 ? (
+        {loading ? (
+          <div className="loading-container">
+            <FaSpinner className="spinner" />
+            <p>Loading interviews...</p>
+          </div>
+        ) : filteredInterviews.length > 0 ? (
           filteredInterviews.map((interview) => (
             <div key={interview._id} className={`interview-card ${interview.status}`}>
               <div className="interview-header">
                 <div className="interview-info">
                   <div className="job-info">
-                    <h4 className="job-title">{interview.jobTitle}</h4>
+                    <h4 className="job-title">{interview.job?.title}</h4>
                     <div className="company-info">
                       <FaBuilding className="company-icon" />
-                      <span className="company-name">{interview.company}</span>
+                      <span className="company-name">{interview.job?.company}</span>
                     </div>
                   </div>
                   <div className="interview-meta">
@@ -317,7 +265,7 @@ const InterviewSchedule = ({ interviews, setInterviews }) => {
                 </button>
                 {interview.status === 'scheduled' && (
                   <>
-                    <button className="action-btn edit-btn">
+                    <button className="action-btn edit-btn" disabled={loading}>
                       <FaEdit />
                       Edit
                     </button>

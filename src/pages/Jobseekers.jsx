@@ -4,6 +4,7 @@ import '../css/Main.css';
 import JobCard from '../components/ui/JobCard';
 import BlogCard from '../components/ui/BlogCard';
 import useScrollAnimation from '../lib/useScrollAnimation';
+import { Link } from 'react-router-dom'
 
 const jobs = [
   {
@@ -69,7 +70,8 @@ const Jobseekers = () => {
       <section className="jobseekers-hero" ref={heroRef}>
         <h1 className="jobseekers-title">Find Your Next Opportunity</h1>
         <p className="jobseekers-desc">Discover jobs tailored to your skills and interests. Apply in one click and take the next step in your career with TalentFlow.</p>
-        <button className="jobseekers-cta">Browse Jobs</button>
+        <Link to="/jobs"><button className="jobseekers-cta">Browse Jobs</button></Link>
+        
       </section>
       
       <section className="jobseekers-featured" ref={featuredRef}>

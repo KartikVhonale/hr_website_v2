@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getSavedCandidates, unsaveCandidate } from '../../services/employerService';
 import { Heart, Search, Filter, MapPin, Briefcase, DollarSign, Clock, Star, Eye, Send, Trash2, Grid, List } from 'lucide-react';
 
 const SavedCandidates = () => {
@@ -7,80 +8,78 @@ const SavedCandidates = () => {
   const [sortBy, setSortBy] = useState('dateAdded');
   const [filterBy, setFilterBy] = useState('all');
   const [viewMode, setViewMode] = useState('grid');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Mock saved candidates data
   useEffect(() => {
-    const mockSavedCandidates = [
-      {
-        id: 1,
-        name: 'Sarah Johnson',
-        title: 'Senior Software Engineer',
-        location: 'San Francisco, CA',
-        experience: '5+ years',
-        skills: ['React', 'Node.js', 'Python', 'AWS'],
-        expectedSalary: '$120,000 - $150,000',
-        availability: 'Immediate',
-        rating: 4.8,
-        profileImage: '/api/placeholder/60/60',
-        summary: 'Experienced full-stack developer with expertise in modern web technologies...',
-        dateAdded: '2024-01-15',
-        status: 'contacted',
-        notes: 'Strong technical background, good cultural fit'
-      },
-      {
-        id: 2,
-        name: 'Michael Chen',
-        title: 'UX/UI Designer',
-        location: 'New York, NY',
-        experience: '3+ years',
-        skills: ['Figma', 'Adobe XD', 'Prototyping', 'User Research'],
-        expectedSalary: '$80,000 - $100,000',
-        availability: '2 weeks notice',
-        rating: 4.6,
-        profileImage: '/api/placeholder/60/60',
-        summary: 'Creative designer focused on user-centered design principles...',
-        dateAdded: '2024-01-10',
-        status: 'new',
-        notes: 'Impressive portfolio, needs follow-up'
-      },
-      {
-        id: 3,
-        name: 'Emily Rodriguez',
-        title: 'Data Scientist',
-        location: 'Austin, TX',
-        experience: '4+ years',
-        skills: ['Python', 'Machine Learning', 'SQL', 'Tableau'],
-        expectedSalary: '$110,000 - $130,000',
-        availability: '1 month notice',
-        rating: 4.9,
-        profileImage: '/api/placeholder/60/60',
-        summary: 'Data scientist with strong background in machine learning and analytics...',
-        dateAdded: '2024-01-08',
-        status: 'interviewed',
-        notes: 'Excellent interview, considering offer'
-      }
-    ];
-    setSavedCandidates(mockSavedCandidates);
+    fetchSavedCandidates();
   }, []);
 
-  const handleRemoveCandidate = (candidateId) => {
-    setSavedCandidates(savedCandidates.filter(candidate => candidate.id !== candidateId));
+  const fetchSavedCandidates = async () => {
+    setLoading(true);
+    try {
+      const res = await getSavedCandidates();
+      setSavedCandidates(res.data);
+    } catch (err) {
+      setError('Failed to fetch saved candidates');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleContactCandidate = (candidateId) => {
-    setSavedCandidates(savedCandidates.map(candidate => 
-      candidate.id === candidateId 
-        ? { ...candidate, status: 'contacted' }
-        : candidate
-    ));
+  const handleRemoveCandidate = async (candidateId) => {
+    try {
+      await unsaveCandidate(candidateId);
+      fetchSavedCandidates();
+    } catch (err) {
+      console.error('Failed to remove candidate', err);
+    }
   };
 
-  const handleUpdateNotes = (candidateId, notes) => {
-    setSavedCandidates(savedCandidates.map(candidate => 
-      candidate.id === candidateId 
-        ? { ...candidate, notes }
-        : candidate
-    ));
+  const handleContactCandidate = async (candidateId) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/update-candidate-status/${candidateId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: 'contacted' }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSavedCandidates(savedCandidates.map(candidate => 
+          candidate._id === candidateId 
+            ? { ...candidate, status: 'contacted' }
+            : candidate
+        ));
+      }
+    } catch (err) {
+      console.error('Failed to update candidate status', err);
+    }
+  };
+
+  const handleUpdateNotes = async (candidateId, notes) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/update-candidate-notes/${candidateId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ notes }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSavedCandidates(savedCandidates.map(candidate => 
+          candidate._id === candidateId 
+            ? { ...candidate, notes }
+            : candidate
+        ));
+      }
+    } catch (err) {
+      console.error('Failed to update candidate notes', err);
+    }
   };
 
   const getStatusColor = (status) => {
@@ -134,10 +133,10 @@ const SavedCandidates = () => {
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(candidate.status)}`}>
             {candidate.status.charAt(0).toUpperCase() + candidate.status.slice(1)}
           </span>
-          <button
-            onClick={() => handleRemoveCandidate(candidate.id)}
-            className="text-red-500 hover:text-red-700 transition-colors"
-          >
+            <button
+              onClick={() => handleRemoveCandidate(candidate._id)}
+              className="text-red-500 hover:text-red-700 transition-colors"
+            >
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
@@ -195,7 +194,7 @@ const SavedCandidates = () => {
           View Profile
         </button>
         <button
-          onClick={() => handleContactCandidate(candidate.id)}
+          onClick={() => handleContactCandidate(candidate._id)}
           className="flex-1 flex items-center justify-center px-3 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 transition-colors"
         >
           <Send className="w-4 h-4 mr-2" />
@@ -207,7 +206,7 @@ const SavedCandidates = () => {
         <textarea
           placeholder="Add notes about this candidate..."
           value={candidate.notes || ''}
-          onChange={(e) => handleUpdateNotes(candidate.id, e.target.value)}
+          onChange={(e) => handleUpdateNotes(candidate._id, e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
           rows="2"
         />
@@ -301,7 +300,7 @@ const SavedCandidates = () => {
         ) : (
           <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
             {filteredAndSortedCandidates.map((candidate) => (
-              <CandidateCard key={candidate.id} candidate={candidate} />
+              <CandidateCard key={candidate._id} candidate={candidate} />
             ))}
           </div>
         )}

@@ -1,31 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { getPostedJobs, deleteJob } from '../../services/employerService';
 import '../../css/ManageJobs.css';
 
 const ManageJobs = () => {
   const [jobs, setJobs] = useState([]);
-  const { user, loading } = useAuth();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchJobs = async () => {
-      if (loading || !user) return;
-      try {
-        const response = await fetch(`/api/jobs/employer/${user._id}`);
-        const data = await response.json();
-        if (data.success) {
-          setJobs(data.data);
-        } else {
-          console.error('Error fetching jobs:', data.message);
-          setJobs([]);
-        }
-      } catch (error) {
-        console.error('Error fetching jobs:', error);
-        setJobs([]);
-      }
-    };
-
     fetchJobs();
-  }, [user, loading]);
+  }, []);
+
+  const fetchJobs = async () => {
+    setLoading(true);
+    try {
+      const res = await getPostedJobs();
+      setJobs(res.data);
+    } catch (error) {
+      console.error('Error fetching jobs:', error);
+      setJobs([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (jobId) => {
+    if (window.confirm('Are you sure you want to delete this job?')) {
+      try {
+        await deleteJob(jobId);
+        fetchJobs();
+      } catch (error) {
+        console.error('Error deleting job:', error);
+      }
+    }
+  };
 
   return (
     <div className="manage-jobs-page">
@@ -40,7 +47,7 @@ const ManageJobs = () => {
                 <p>{job.location}</p>
                 <div className="job-actions">
                   <button>Edit</button>
-                  <button>Delete</button>
+                  <button onClick={() => handleDelete(job._id)}>Delete</button>
                 </div>
               </div>
             ))

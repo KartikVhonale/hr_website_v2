@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   FaChartLine, 
   FaArrowUp, 
@@ -7,11 +7,15 @@ import {
   FaUsers,
   FaLightbulb,
   FaGraduationCap,
-  FaBriefcase
+  FaBriefcase,
+  FaSpinner
 } from 'react-icons/fa';
+import '../../css/CareerInsights.css';
 
 const CareerInsights = () => {
   const [selectedCategory, setSelectedCategory] = useState('salary');
+  const [loading, setLoading] = useState(false);
+  const [insightsData, setInsightsData] = useState(null);
 
   const insights = {
     salary: {
@@ -43,6 +47,25 @@ const CareerInsights = () => {
     }
   };
 
+  useEffect(() => {
+    fetchInsightsData();
+  }, []);
+
+  const fetchInsightsData = async () => {
+    setLoading(true);
+    try {
+      // In a real implementation, you would call an API to fetch insights data
+      // For now, we'll just simulate the data fetch
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setInsightsData(insights);
+    } catch (err) {
+      console.error('Failed to fetch insights data:', err);
+      setInsightsData(insights); // Use mock data as fallback
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="career-insights-section">
       <div className="insights-header">
@@ -69,37 +92,44 @@ const CareerInsights = () => {
       </div>
 
       <div className="insights-content">
-        <div className="insights-placeholder">
-          <FaChartLine className="placeholder-icon" />
-          <h3>Career Insights Coming Soon</h3>
-          <p>We're developing comprehensive career insights including:</p>
-          <div className="features-list">
-            <div className="feature-item">
-              <FaDollarSign />
-              <span>Real-time salary data and trends</span>
-            </div>
-            <div className="feature-item">
-              <FaArrowUp />
-              <span>Skills demand analysis</span>
-            </div>
-            <div className="feature-item">
-              <FaMapMarkerAlt />
-              <span>Geographic job market insights</span>
-            </div>
-            <div className="feature-item">
-              <FaUsers />
-              <span>Industry growth projections</span>
-            </div>
-            <div className="feature-item">
-              <FaLightbulb />
-              <span>Personalized career recommendations</span>
-            </div>
-            <div className="feature-item">
-              <FaGraduationCap />
-              <span>Learning path suggestions</span>
+        {loading ? (
+          <div className="loading-container">
+            <FaSpinner className="spinner" />
+            <p>Loading career insights...</p>
+          </div>
+        ) : (
+          <div className="insights-placeholder">
+            <FaChartLine className="placeholder-icon" />
+            <h3>Career Insights Coming Soon</h3>
+            <p>We're developing comprehensive career insights including:</p>
+            <div className="features-list">
+              <div className="feature-item">
+                <FaDollarSign />
+                <span>Real-time salary data and trends</span>
+              </div>
+              <div className="feature-item">
+                <FaArrowUp />
+                <span>Skills demand analysis</span>
+              </div>
+              <div className="feature-item">
+                <FaMapMarkerAlt />
+                <span>Geographic job market insights</span>
+              </div>
+              <div className="feature-item">
+                <FaUsers />
+                <span>Industry growth projections</span>
+              </div>
+              <div className="feature-item">
+                <FaLightbulb />
+                <span>Personalized career recommendations</span>
+              </div>
+              <div className="feature-item">
+                <FaGraduationCap />
+                <span>Learning path suggestions</span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

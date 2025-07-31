@@ -6,6 +6,7 @@ import CreateJob from './CreateJob';
 import ManageJobs from './ManageJobs';
 import ArticleManagement from './ArticleManagement';
 import '../../css/EmployerDashboard.css';
+import '../../css/EmployerDashboard-responsive.css';
 import { 
   FaBriefcase, 
   FaUsers, 
@@ -16,8 +17,17 @@ import {
   FaClock,
   FaTimes,
   FaBuilding,
-  FaFileAlt
+  FaFileAlt,
+  FaUser,
+  FaBookmark,
+  FaBars,
+  FaTimes as FaClose,
+  FaBell,
+  FaCog,
+  FaHome,
+  FaTachometerAlt
 } from 'react-icons/fa';
+import userService from '../../services/userService';
 
 const EmployerDashboard = ({ userData }) => {
   const { token, loading: authLoading } = useAuth();
@@ -28,21 +38,44 @@ const EmployerDashboard = ({ userData }) => {
   const [error, setError] = useState('');
   const [jobs, setJobs] = useState([]);
   const [applications, setApplications] = useState([]);
-  const [candidates, setCandidates] = useState([]);
+  const [savedCandidates, setSavedCandidates] = useState([]);
+  const [candidateStatus, setCandidateStatus] = useState({});
+  const [candidateNotes, setCandidateNotes] = useState({});
   const [interviews, setInterviews] = useState([]);
   const [articles, setArticles] = useState([]);
+  
+  // Mobile state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
     if (authLoading) return;
 
     if (!user || user.role !== 'employer' || user.status === 'disabled' || !user.isAuthorized) {
       setError('You do not have permission to view this page.');
-      setLoading(false);
       return;
     }
 
     fetchData();
-  }, [user, token, authLoading]);
+  }, [user, authLoading, token]);
+
+  // Handle window resize for mobile detection
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
   const fetchData = async () => {
     try {
@@ -50,7 +83,8 @@ const EmployerDashboard = ({ userData }) => {
       await Promise.all([
         fetchJobs(),
         fetchApplications(),
-        fetchArticles()
+        fetchArticles(),
+        fetchSavedCandidates()
       ]);
     } catch (err) {
       setError('Failed to load dashboard data');
@@ -61,14 +95,12 @@ const EmployerDashboard = ({ userData }) => {
 
   const fetchJobs = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/jobs`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/jobs/employer/${user._id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
       if (data.success) {
-        // Filter jobs by current employer
-        const employerJobs = data.data.filter(job => job.employerId === user._id);
-        setJobs(employerJobs);
+        setJobs(data.data);
       }
     } catch (err) {
       console.error('Failed to fetch jobs:', err);
@@ -77,7 +109,7 @@ const EmployerDashboard = ({ userData }) => {
 
   const fetchApplications = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/applications`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/applications/employer/${user._id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -91,14 +123,71 @@ const EmployerDashboard = ({ userData }) => {
 
   const fetchArticles = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/articles`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/articles/author/${user._id}`);
       const data = await response.json();
       if (data.success) {
-        const userArticles = data.data.filter(article => article.author && article.author._id === user._id);
-        setArticles(userArticles);
+        setArticles(data.data);
       }
     } catch (err) {
       console.error('Failed to fetch articles:', err);
+    }
+  };
+
+  const fetchSavedCandidates = async () => {
+    try {
+      const data = await userService.getSavedCandidates(token);
+      if (data.success) {
+        setSavedCandidates(data.data);
+        // Initialize status and notes state
+        const statusMap = {};
+        const notesMap = {};
+        data.data.forEach(candidate => {
+          statusMap[candidate._id] = candidate.status;
+          notesMap[candidate._id] = candidate.notes;
+        });
+        setCandidateStatus(statusMap);
+        setCandidateNotes(notesMap);
+      }
+    } catch (err) {
+      console.error('Failed to fetch saved candidates:', err);
+    }
+  };
+
+  const handleRemoveCandidate = async (candidateId) => {
+    try {
+      await userService.removeSavedCandidate(candidateId, token);
+      setSavedCandidates(savedCandidates.filter(c => c._id !== candidateId));
+    } catch (err) {
+      console.error('Failed to remove candidate:', err);
+    }
+  };
+
+  const handleStatusChange = (candidateId, status) => {
+    setCandidateStatus(prev => ({
+      ...prev,
+      [candidateId]: status
+    }));
+    // Auto-save status change
+    userService.updateCandidateStatus(candidateId, status, token)
+      .catch(err => console.error('Failed to update status:', err));
+  };
+
+  const handleNotesChange = (candidateId, notes) => {
+    setCandidateNotes(prev => ({
+      ...prev,
+      [candidateId]: notes
+    }));
+  };
+
+  const handleSaveNotes = async (candidateId) => {
+    try {
+      await userService.updateCandidateNotes(
+        candidateId, 
+        candidateNotes[candidateId], 
+        token
+      );
+    } catch (err) {
+      console.error('Failed to save notes:', err);
     }
   };
 
@@ -160,8 +249,8 @@ const EmployerDashboard = ({ userData }) => {
               {applications.slice(0, 5).map((app, index) => (
                 <div key={index} className="application-item">
                   <div className="applicant-info">
-                    <span className="applicant-name">John Doe</span>
-                    <span className="job-title">Frontend Developer</span>
+                    <span className="applicant-name">{app.applicant.name}</span>
+                    <span className="job-title">{app.job.title}</span>
                   </div>
                   <div className="application-status">
                     <span className={`status-badge ${app.status || 'pending'}`}>
@@ -177,16 +266,16 @@ const EmployerDashboard = ({ userData }) => {
             <h3>Quick Stats</h3>
             <div className="stats-list">
               <div className="stat-item">
-                <span className="stat-label">Profile Views</span>
-                <span className="stat-value">1,234</span>
+                <span className="stat-label">Total Jobs</span>
+                <span className="stat-value">{jobs.length}</span>
               </div>
               <div className="stat-item">
-                <span className="stat-label">Job Views</span>
-                <span className="stat-value">5,678</span>
+                <span className="stat-label">Total Applications</span>
+                <span className="stat-value">{applications.length}</span>
               </div>
               <div className="stat-item">
-                <span className="stat-label">Application Rate</span>
-                <span className="stat-value">12.5%</span>
+                <span className="stat-label">Total Articles</span>
+                <span className="stat-value">{articles.length}</span>
               </div>
             </div>
           </div>
@@ -234,12 +323,12 @@ const EmployerDashboard = ({ userData }) => {
           applications.map((app, index) => (
             <div key={index} className="application-card">
               <div className="application-header">
-                <h4>John Doe</h4>
+                <h4>{app.applicant.name}</h4>
                 <span className={`status-badge ${app.status || 'pending'}`}>
                   {app.status || 'Pending'}
                 </span>
               </div>
-              <p className="job-title">Frontend Developer</p>
+              <p className="job-title">{app.job.title}</p>
               <div className="application-actions">
                 <button className="btn-view">
                   <FaEye /> View
@@ -322,8 +411,60 @@ const EmployerDashboard = ({ userData }) => {
       case 'candidates':
         return (
           <div className="candidates-section">
-            <h2>Candidate Database</h2>
-            <p>Candidate management coming soon...</p>
+            <h2>Saved Candidates</h2>
+            {savedCandidates.length > 0 ? (
+              <div className="candidates-grid">
+                {savedCandidates.map((candidate) => (
+                  <div key={candidate._id} className="candidate-card">
+                    <div className="candidate-header">
+                      <div className="candidate-avatar">
+                        <FaUser />
+                      </div>
+                      <div className="candidate-info">
+                        <h4>{candidate.name}</h4>
+                        <p>{candidate.jobTitle || 'Job Seeker'}</p>
+                      </div>
+                      <button 
+                        className="remove-btn"
+                        onClick={() => handleRemoveCandidate(candidate._id)}
+                      >
+                        <FaTimes />
+                      </button>
+                    </div>
+                    <div className="candidate-status">
+                      <select
+                        value={candidateStatus[candidate._id] || candidate.status}
+                        onChange={(e) => handleStatusChange(candidate._id, e.target.value)}
+                      >
+                        <option value="new">New</option>
+                        <option value="review">In Review</option>
+                        <option value="interview">Interview</option>
+                        <option value="hired">Hired</option>
+                        <option value="rejected">Rejected</option>
+                      </select>
+                    </div>
+                    <div className="candidate-notes">
+                      <textarea
+                        placeholder="Add notes about this candidate..."
+                        value={candidateNotes[candidate._id] || candidate.notes || ''}
+                        onChange={(e) => handleNotesChange(candidate._id, e.target.value)}
+                      />
+                      <button 
+                        className="save-btn"
+                        onClick={() => handleSaveNotes(candidate._id)}
+                      >
+                        Save Notes
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="empty-state">
+                <FaBookmark />
+                <p>No saved candidates yet.</p>
+              </div>
+            )}
           </div>
         );
       case 'interviews':
@@ -354,13 +495,90 @@ const EmployerDashboard = ({ userData }) => {
     }
   };
 
+  const getSectionTitle = () => {
+    switch (activeSection) {
+      case 'overview': return 'Dashboard';
+      case 'jobs': return 'Job Management';
+      case 'applications': return 'Applications';
+      case 'candidates': return 'Candidates';
+      case 'interviews': return 'Interviews';
+      case 'analytics': return 'Analytics';
+      case 'articles': return 'Articles';
+      case 'profile': return 'Company Profile';
+      case 'create-job': return 'Create Job';
+      default: return 'Dashboard';
+    }
+  };
+
   if (loading || authLoading) {
     return (
       <div className="employer-layout">
-        <EmployerSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+        {isMobile && (
+          <>
+            <div className="mobile-header">
+              <button className="mobile-menu-btn" onClick={toggleSidebar}>
+                <FaBars />
+              </button>
+              <h1 className="mobile-title">Employer Dashboard</h1>
+              <div className="mobile-header-actions">
+                <button><FaBell /></button>
+                <button><FaCog /></button>
+              </div>
+            </div>
+            {isSidebarOpen && <div className="sidebar-overlay" onClick={toggleSidebar}></div>}
+          </>
+        )}
+        <EmployerSidebar 
+          activeSection={activeSection} 
+          onSectionChange={setActiveSection}
+          isMobile={isMobile}
+          isOpen={isSidebarOpen}
+          onToggle={toggleSidebar}
+        />
         <div className="employer-content">
           <div className="dashboard-container">Loading...</div>
         </div>
+        {isMobile && (
+          <div className="mobile-bottom-nav">
+            <div className="mobile-nav-items">
+              <button 
+                className={`mobile-nav-item ${activeSection === 'overview' ? 'active' : ''}`}
+                onClick={() => setActiveSection('overview')}
+              >
+                <FaHome />
+                <span>Home</span>
+              </button>
+              <button 
+                className={`mobile-nav-item ${activeSection === 'jobs' ? 'active' : ''}`}
+                onClick={() => setActiveSection('jobs')}
+              >
+                <FaBriefcase />
+                <span>Jobs</span>
+              </button>
+              <button 
+                className={`mobile-nav-item ${activeSection === 'applications' ? 'active' : ''}`}
+                onClick={() => setActiveSection('applications')}
+              >
+                <FaUsers />
+                <span>Applications</span>
+              </button>
+              <button 
+                className={`mobile-nav-item ${activeSection === 'analytics' ? 'active' : ''}`}
+                onClick={() => setActiveSection('analytics')}
+              >
+                <FaChartBar />
+                <span>Analytics</span>
+              </button>
+              <button 
+                className={`mobile-nav-item ${activeSection === 'profile' ? 'active' : ''}`}
+                onClick={() => setActiveSection('profile')}
+              >
+                <FaBuilding />
+                <span>Profile</span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -368,7 +586,28 @@ const EmployerDashboard = ({ userData }) => {
   if (error) {
     return (
       <div className="employer-layout">
-        <EmployerSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+        {isMobile && (
+          <>
+            <div className="mobile-header">
+              <button className="mobile-menu-btn" onClick={toggleSidebar}>
+                <FaBars />
+              </button>
+              <h1 className="mobile-title">Employer Dashboard</h1>
+              <div className="mobile-header-actions">
+                <button><FaBell /></button>
+                <button><FaCog /></button>
+              </div>
+            </div>
+            {isSidebarOpen && <div className="sidebar-overlay" onClick={toggleSidebar}></div>}
+          </>
+        )}
+        <EmployerSidebar 
+          activeSection={activeSection} 
+          onSectionChange={setActiveSection}
+          isMobile={isMobile}
+          isOpen={isSidebarOpen}
+          onToggle={toggleSidebar}
+        />
         <div className="employer-content">
           <div className="dashboard-container">{error}</div>
         </div>
@@ -378,13 +617,75 @@ const EmployerDashboard = ({ userData }) => {
 
   return (
     <div className="employer-layout">
-      <EmployerSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+      {isMobile && (
+        <>
+          <div className="mobile-header">
+            <button className="mobile-menu-btn" onClick={toggleSidebar}>
+              <FaBars />
+            </button>
+            <h1 className="mobile-title">{getSectionTitle()}</h1>
+            <div className="mobile-header-actions">
+              <button><FaBell /></button>
+              <button><FaCog /></button>
+            </div>
+          </div>
+          {isSidebarOpen && <div className="sidebar-overlay" onClick={toggleSidebar}></div>}
+        </>
+      )}
+      <EmployerSidebar 
+        activeSection={activeSection} 
+        onSectionChange={setActiveSection}
+        isMobile={isMobile}
+        isOpen={isSidebarOpen}
+        onToggle={toggleSidebar}
+      />
       <div className="employer-content">
         <div className="dashboard-container">
           <h1 className="dashboard-title">Employer Dashboard</h1>
           {renderContent()}
         </div>
       </div>
+      {isMobile && (
+        <div className="mobile-bottom-nav">
+          <div className="mobile-nav-items">
+            <button 
+              className={`mobile-nav-item ${activeSection === 'overview' ? 'active' : ''}`}
+              onClick={() => setActiveSection('overview')}
+            >
+              <FaHome />
+              <span>Home</span>
+            </button>
+            <button 
+              className={`mobile-nav-item ${activeSection === 'jobs' ? 'active' : ''}`}
+              onClick={() => setActiveSection('jobs')}
+            >
+              <FaBriefcase />
+              <span>Jobs</span>
+            </button>
+            <button 
+              className={`mobile-nav-item ${activeSection === 'applications' ? 'active' : ''}`}
+              onClick={() => setActiveSection('applications')}
+            >
+              <FaUsers />
+              <span>Applications</span>
+            </button>
+            <button 
+              className={`mobile-nav-item ${activeSection === 'analytics' ? 'active' : ''}`}
+              onClick={() => setActiveSection('analytics')}
+            >
+              <FaChartBar />
+              <span>Analytics</span>
+            </button>
+            <button 
+              className={`mobile-nav-item ${activeSection === 'profile' ? 'active' : ''}`}
+              onClick={() => setActiveSection('profile')}
+            >
+              <FaBuilding />
+              <span>Profile</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

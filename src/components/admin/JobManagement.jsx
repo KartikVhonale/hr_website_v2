@@ -1,16 +1,61 @@
-import React from 'react';
-import Card from '../ui/card';
-import Button from '../ui/button';
-import { FaEye, FaTrash, FaCheck, FaSearch } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { getAllJobs, deleteJob, updateJob } from '../../services/adminService';
+import Card from '../ui/Card';
+import Button from '../ui/Button';
+import { FaEye, FaTrash, FaCheck, FaSearch, FaPlus } from 'react-icons/fa';
+import AddJobModal from '../modal/AddJobModal';
 import '../../css/AdminComponents-mobile.css';
 
-const JobManagement = ({ jobs }) => {
-  const [jobSearch, setJobSearch] = React.useState('');
-  const [jobStatus, setJobStatus] = React.useState('all');
+const JobManagement = () => {
+  const [jobs, setJobs] = useState([]);
+  const [jobSearch, setJobSearch] = useState('');
+  const [jobStatus, setJobStatus] = useState('all');
+  const [loading, setLoading] = useState(false);
+  const [isAddJobModalOpen, setIsAddJobModalOpen] = useState(false);
+
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+
+  const fetchJobs = async () => {
+    setLoading(true);
+    try {
+      const res = await getAllJobs();
+      setJobs(res.data);
+    } catch (error) {
+      console.error('Error fetching jobs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (jobId) => {
+    if (window.confirm('Are you sure you want to delete this job?')) {
+      try {
+        await deleteJob(jobId);
+        fetchJobs();
+      } catch (error) {
+        console.error('Error deleting job:', error);
+      }
+    }
+  };
+
+  const handleApprove = async (jobId) => {
+    try {
+      await updateJob(jobId, { status: 'approved' });
+      fetchJobs();
+    } catch (error) {
+      console.error('Error approving job:', error);
+    }
+  };
+
+  const handleJobAdded = (newJob) => {
+    fetchJobs(); // Refresh the job list
+  };
 
   const filteredJobs = jobs.filter(j =>
     (jobStatus === 'all' || j.status === jobStatus) &&
-    (j.title.toLowerCase().includes(jobSearch.toLowerCase()) || j.company.toLowerCase().includes(jobSearch.toLowerCase()))
+    (j.title.toLowerCase().includes(jobSearch.toLowerCase()) || j.employer.name.toLowerCase().includes(jobSearch.toLowerCase()))
   );
 
   return (
@@ -19,7 +64,13 @@ const JobManagement = ({ jobs }) => {
         <div className="section-header">
           <h2>Job Post Management</h2>
           <div className="btn-group">
-            <button className="btn btn-primary btn-icon">
+            <button
+              className="btn btn-primary btn-icon"
+              onClick={() => setIsAddJobModalOpen(true)}
+            >
+              <FaPlus /> <span>Post Job</span>
+            </button>
+            <button className="btn btn-secondary btn-icon">
               <FaSearch /> <span>Search Jobs</span>
             </button>
           </div>
@@ -52,7 +103,7 @@ const JobManagement = ({ jobs }) => {
                     </div>
                   </td>
                   <td>
-                    <div className="company-name">{job.company}</div>
+                    <div className="company-name">{job.employer.name}</div>
                   </td>
                   <td>
                     <StatusBadge status={job.status} />
@@ -65,12 +116,14 @@ const JobManagement = ({ jobs }) => {
                       <button className="btn btn-info btn-sm btn-icon">
                         <FaEye /> <span>View</span>
                       </button>
-                      <button className="btn btn-danger btn-sm btn-icon">
+                      <button className="btn btn-danger btn-sm btn-icon" onClick={() => handleDelete(job._id)}>
                         <FaTrash /> <span>Delete</span>
                       </button>
-                      <button className="btn btn-success btn-sm btn-icon">
-                        <FaCheck /> <span>Approve</span>
-                      </button>
+                      {job.status !== 'approved' && (
+                        <button className="btn btn-success btn-sm btn-icon" onClick={() => handleApprove(job._id)}>
+                          <FaCheck /> <span>Approve</span>
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -79,6 +132,12 @@ const JobManagement = ({ jobs }) => {
           </table>
         </div>
       </Card>
+
+      <AddJobModal
+        isOpen={isAddJobModalOpen}
+        onRequestClose={() => setIsAddJobModalOpen(false)}
+        onJobAdded={handleJobAdded}
+      />
     </div>
   );
 };

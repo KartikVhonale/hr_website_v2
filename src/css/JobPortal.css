@@ -1,0 +1,208 @@
+.job-portal-page {
+  padding: 4rem 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: var(--bg-primary, #f9fafb);
+  min-height: calc(100vh - 80px); /* Adjust based on header height */
+}
+
+.featured-jobs-section {
+  margin: 2.5rem 0;
+  position: relative;
+  padding: 1.5rem;
+  background: linear-gradient(to right, rgba(59, 130, 246, 0.05), rgba(59, 130, 246, 0.02));
+  border-radius: 12px;
+}
+
+.featured-jobs-section h2 {
+  font-size: 1.75rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+  font-weight: 700;
+  position: relative;
+  padding-left: 1rem;
+  border-left: 4px solid var(--accent-primary, #3b82f6);
+}
+
+.featured-jobs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.job-categories {
+  margin: 3.5rem 0;
+  padding: 1.5rem;
+  background-color: var(--bg-secondary, #ffffff);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.job-categories h2 {
+  font-size: 1.75rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+  font-weight: 700;
+  position: relative;
+  padding-left: 1rem;
+  border-left: 4px solid var(--accent-primary, #3b82f6);
+}
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.category-card {
+  padding: 1.75rem;
+  background: var(--card-bg, #ffffff);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid var(--card-border, #e0e0e0);
+  position: relative;
+  overflow: hidden;
+}
+
+.category-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+  border-color: var(--accent-primary, #3b82f6);
+}
+
+.category-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 0;
+  background-color: var(--accent-primary, #3b82f6);
+  transition: height 0.3s ease;
+}
+
+.category-card:hover::before {
+  height: 100%;
+}
+
+.category-card h3 {
+  margin: 0 0 0.75rem;
+  color: var(--text-primary, #333);
+  font-size: 1.25rem;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.category-card:hover h3 {
+  color: var(--accent-primary, #3b82f6);
+}
+
+.category-card p {
+  margin: 0;
+  color: var(--text-muted, #777);
+  font-size: 0.95rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.category-card p::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--accent-primary, #3b82f6);
+}
+
+.page-title {
+  font-size: 2.75rem;
+  color: var(--text-primary, #2c3e50);
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, var(--accent-primary, #3b82f6), var(--hero-gradient-start, #6366f1));
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.portal-description {
+  font-size: 1.25rem;
+  color: var(--text-secondary, #7f8c8d);
+  text-align: center;
+  margin-bottom: 2.5rem;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+.loading {
+  text-align: center;
+  font-size: 1.2rem;
+  padding: 3rem;
+  color: var(--text-secondary, #7f8c8d);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.loading::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 40px;
+  margin-top: 1rem;
+  border-radius: 50%;
+  border: 3px solid var(--card-border, #e0e0e0);
+  border-top-color: var(--accent-primary, #3b82f6);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .job-portal-page {
+    padding: 1rem;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+  }
+  
+  .featured-jobs-grid,
+  .categories-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .featured-jobs-section,
+  .job-categories {
+    padding: 1rem;
+  }
+  
+  .portal-description {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 1.75rem;
+  }
+  
+  .featured-jobs-section h2,
+  .job-categories h2 {
+    font-size: 1.5rem;
+  }
+}

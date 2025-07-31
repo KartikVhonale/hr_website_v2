@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   FaSearch, 
   FaBookmark, 
@@ -21,6 +21,22 @@ import '../../css/JobseekerSidebar.css';
 
 const JobseekerSidebar = ({ activeSection, onSectionChange }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        setIsCollapsed(true);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); 
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const sidebarItems = [
     {
@@ -96,17 +112,19 @@ const JobseekerSidebar = ({ activeSection, onSectionChange }) => {
           {!isCollapsed && (
             <div className="logo-content">
               <h2>Career Hub</h2>
-              <span>Your Job Journey</span>
+              <span>Professional Dashboard</span>
             </div>
           )}
         </div>
-        <button 
-          className="sidebar-toggle"
-          onClick={toggleSidebar}
-          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          {isCollapsed ? <FaChevronRight /> : <FaChevronLeft />}
-        </button>
+        {!isMobile && (
+          <button 
+            className="sidebar-toggle"
+            onClick={toggleSidebar}
+            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {isCollapsed ? <FaChevronRight /> : <FaChevronLeft />}
+          </button>
+        )}
       </div>
 
       <nav className="sidebar-nav">
@@ -139,7 +157,7 @@ const JobseekerSidebar = ({ activeSection, onSectionChange }) => {
       {/* Quick Actions */}
       {!isCollapsed && (
         <div className="sidebar-quick-actions">
-          <h4>Quick Actions</h4>
+          <h4>Quick Career Actions</h4>
           <div className="quick-action-buttons">
             <button 
               className="quick-action-btn primary"

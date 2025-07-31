@@ -1,99 +1,97 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { Calendar, Clock, Video, MapPin, User, Phone, Mail, Plus, Edit, Trash2, CheckCircle, AlertCircle, Filter, Search } from 'lucide-react';
 
 const InterviewManagement = () => {
+  const { user, token, loading: authLoading } = useAuth();
   const [interviews, setInterviews] = useState([]);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [selectedInterview, setSelectedInterview] = useState(null);
   const [viewMode, setViewMode] = useState('upcoming');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterBy, setFilterBy] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Mock interviews data
   useEffect(() => {
-    const mockInterviews = [
-      {
-        id: 1,
-        candidateName: 'Sarah Johnson',
-        candidateEmail: 'sarah.johnson@email.com',
-        candidatePhone: '+1 (555) 123-4567',
-        jobTitle: 'Senior Software Engineer',
-        date: '2024-02-15',
-        time: '10:00 AM',
-        duration: 60,
-        type: 'video',
-        status: 'scheduled',
-        interviewer: 'John Smith',
-        interviewerEmail: 'john.smith@company.com',
-        location: 'Zoom Meeting',
-        meetingLink: 'https://zoom.us/j/123456789',
-        notes: 'Technical interview focusing on React and Node.js',
-        round: 'Technical Round',
-        profileImage: '/api/placeholder/60/60'
-      },
-      {
-        id: 2,
-        candidateName: 'Michael Chen',
-        candidateEmail: 'michael.chen@email.com',
-        candidatePhone: '+1 (555) 234-5678',
-        jobTitle: 'UX/UI Designer',
-        date: '2024-02-16',
-        time: '2:00 PM',
-        duration: 45,
-        type: 'in-person',
-        status: 'completed',
-        interviewer: 'Jane Doe',
-        interviewerEmail: 'jane.doe@company.com',
-        location: 'Conference Room A',
-        meetingLink: '',
-        notes: 'Portfolio review and design process discussion',
-        round: 'Design Review',
-        profileImage: '/api/placeholder/60/60',
-        feedback: 'Excellent portfolio, strong design thinking skills'
-      },
-      {
-        id: 3,
-        candidateName: 'Emily Rodriguez',
-        candidateEmail: 'emily.rodriguez@email.com',
-        candidatePhone: '+1 (555) 345-6789',
-        jobTitle: 'Data Scientist',
-        date: '2024-02-18',
-        time: '11:30 AM',
-        duration: 90,
-        type: 'video',
-        status: 'scheduled',
-        interviewer: 'David Wilson',
-        interviewerEmail: 'david.wilson@company.com',
-        location: 'Google Meet',
-        meetingLink: 'https://meet.google.com/abc-defg-hij',
-        notes: 'Technical assessment and case study presentation',
-        round: 'Final Round',
-        profileImage: '/api/placeholder/60/60'
+    const fetchInterviews = async () => {
+      if (authLoading || !user) return;
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/interviews/employer/${user._id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setInterviews(data.data);
+        } else {
+          setError('Failed to fetch interviews');
+        }
+      } catch (err) {
+        setError('Failed to fetch interviews');
+      } finally {
+        setLoading(false);
       }
-    ];
-    setInterviews(mockInterviews);
-  }, []);
-
-  const handleScheduleInterview = (interviewData) => {
-    const newInterview = {
-      id: Date.now(),
-      ...interviewData,
-      status: 'scheduled'
     };
-    setInterviews([...interviews, newInterview]);
-    setShowScheduleModal(false);
+
+    fetchInterviews();
+  }, [user, token, authLoading]);
+
+  const handleScheduleInterview = async (interviewData) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/interviews`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(interviewData),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setInterviews([...interviews, data.data]);
+        setShowScheduleModal(false);
+      }
+    } catch (err) {
+      console.error('Failed to schedule interview', err);
+    }
   };
 
-  const handleUpdateInterview = (interviewId, updates) => {
-    setInterviews(interviews.map(interview => 
-      interview.id === interviewId 
-        ? { ...interview, ...updates }
-        : interview
-    ));
+  const handleUpdateInterview = async (interviewId, updates) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/interviews/${interviewId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(updates),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setInterviews(interviews.map(interview =>
+          interview._id === interviewId
+            ? { ...interview, ...updates }
+            : interview
+        ));
+      }
+    } catch (err) {
+      console.error('Failed to update interview', err);
+    }
   };
 
-  const handleDeleteInterview = (interviewId) => {
-    setInterviews(interviews.filter(interview => interview.id !== interviewId));
+  const handleDeleteInterview = async (interviewId) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/interviews/${interviewId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setInterviews(interviews.filter(interview => interview._id !== interviewId));
+      }
+    } catch (err) {
+      console.error('Failed to delete interview', err);
+    }
   };
 
   const getStatusColor = (status) => {
@@ -539,12 +537,12 @@ const InterviewManagement = () => {
 
       {/* Interviews Grid */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        {filteredInterviews.length === 0 ? (
+        {loading ? <p>Loading...</p> : error ? <p>{error}</p> : filteredInterviews.length === 0 ? (
           <div className="text-center py-12">
             <Calendar className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No interviews found</h3>
             <p className="text-gray-600 dark:text-gray-400">
-              {searchQuery || filterBy !== 'all' 
+              {searchQuery || filterBy !== 'all'
                 ? 'No interviews match your current filters.'
                 : 'No interviews have been scheduled yet.'}
             </p>
@@ -552,7 +550,7 @@ const InterviewManagement = () => {
         ) : (
           <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
             {filteredInterviews.map((interview) => (
-              <InterviewCard key={interview.id} interview={interview} />
+              <InterviewCard key={interview._id} interview={interview} />
             ))}
           </div>
         )}

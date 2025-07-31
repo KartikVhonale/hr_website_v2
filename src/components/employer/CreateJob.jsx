@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import Card from '../ui/card';
-import Button from '../ui/button';
-import '../../css/CreateJob.css';
+import Card from '../ui/Card.jsx';
+import Button from '../ui/Button';
+import TextInput from '../ui/TextInput.jsx';
+import SelectInput from '../ui/SelectInput.jsx';
+import TextArea from '../ui/TextArea.jsx';
+import FormGroup from '../ui/FormGroup.jsx';
+import FormRow from '../ui/FormRow.jsx';
 
 const CreateJob = () => {
   const { token } = useAuth();
@@ -66,89 +70,78 @@ const CreateJob = () => {
             <h1 className="create-job-title">Post a New Job</h1>
             {error && <p className="error-message">{error}</p>}
             <form onSubmit={handleSubmit} className="job-form">
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="title">Job Title</label>
-                  <input
-                    type="text"
+              <FormRow>
+                <FormGroup label="Job Title">
+                  <TextInput
                     id="title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     required
                   />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="company">Company</label>
-                  <input
-                    type="text"
+                </FormGroup>
+                <FormGroup label="Company">
+                  <TextInput
                     id="company"
                     value={company}
                     onChange={(e) => setCompany(e.target.value)}
                     required
                   />
-                </div>
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="location">Location</label>
-                  <input
-                    type="text"
+                </FormGroup>
+              </FormRow>
+              <FormRow>
+                <FormGroup label="Location">
+                  <TextInput
                     id="location"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     required
                   />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="ctc">CTC (in LPA)</label>
-                  <input
-                    type="text"
+                </FormGroup>
+                <FormGroup label="CTC (in LPA)">
+                  <TextInput
                     id="ctc"
                     value={ctc}
                     onChange={(e) => setCtc(e.target.value)}
                     required
                   />
-                </div>
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="jobType">Job Type</label>
-                  <select id="jobType" value={jobType} onChange={(e) => setJobType(e.target.value)} required>
-                    <option>Full-time</option>
-                    <option>Part-time</option>
-                    <option>Contract</option>
-                    <option>Internship</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="experienceLevel">Experience Level</label>
-                  <select id="experienceLevel" value={experienceLevel} onChange={(e) => setExperienceLevel(e.target.value)} required>
-                    <option>Entry-level</option>
-                    <option>Mid-level</option>
-                    <option>Senior-level</option>
-                    <option>Lead</option>
-                  </select>
-                </div>
-              </div>
-              <div className="form-group">
-                <label htmlFor="skills">Skills (comma-separated)</label>
-                <input
-                  type="text"
+                </FormGroup>
+              </FormRow>
+              <FormRow>
+                <FormGroup label="Job Type">
+                  <SelectInput
+                    id="jobType"
+                    value={jobType}
+                    onChange={(e) => setJobType(e.target.value)}
+                    options={['Full-time', 'Part-time', 'Contract', 'Internship']}
+                    required
+                  />
+                </FormGroup>
+                <FormGroup label="Experience Level">
+                  <SelectInput
+                    id="experienceLevel"
+                    value={experienceLevel}
+                    onChange={(e) => setExperienceLevel(e.target.value)}
+                    options={['Entry-level', 'Mid-level', 'Senior-level', 'Lead']}
+                    required
+                  />
+                </FormGroup>
+              </FormRow>
+              <FormGroup label="Skills (comma-separated)">
+                <TextInput
                   id="skills"
                   value={skills}
                   onChange={(e) => setSkills(e.target.value)}
                   required
                 />
-              </div>
-              <div className="form-group">
-                <label htmlFor="description">Job Description</label>
-                <textarea
+              </FormGroup>
+              <FormGroup label="Job Description">
+                <TextArea
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   required
                 />
-              </div>
+              </FormGroup>
               <Button type="submit" className="submit-btn" disabled={loading}>
                 {loading ? 'Posting...' : 'Post Job'}
               </Button>

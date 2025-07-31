@@ -1,76 +1,66 @@
 import React, { useState, useEffect } from 'react';
+import { getEmployerProfile, updateEmployerProfile } from '../../services/employerService';
 import { Building, MapPin, Globe, Users, Mail, Phone, Camera, Edit, Save, X, Plus, Trash2 } from 'lucide-react';
 
 const CompanyProfile = () => {
   const [activeTab, setActiveTab] = useState('basic');
   const [isEditing, setIsEditing] = useState(false);
-  const [companyData, setCompanyData] = useState({
-    basic: {
-      name: 'TechCorp Solutions',
-      logo: '/api/placeholder/120/120',
-      tagline: 'Innovation through Technology',
-      description: 'We are a leading technology company focused on creating innovative solutions that transform businesses and improve lives. Our team of experts works tirelessly to deliver cutting-edge products and services.',
-      industry: 'Technology',
-      companySize: '100-500 employees',
-      founded: '2015',
-      website: 'https://techcorp.com',
-      headquarters: 'San Francisco, CA'
-    },
-    contact: {
-      email: 'contact@techcorp.com',
-      phone: '+1 (555) 123-4567',
-      address: '123 Tech Street, San Francisco, CA 94105',
-      socialMedia: {
-        linkedin: 'https://linkedin.com/company/techcorp',
-        twitter: 'https://twitter.com/techcorp',
-        facebook: 'https://facebook.com/techcorp'
-      }
-    },
-    culture: {
-      mission: 'To empower businesses through innovative technology solutions.',
-      vision: 'To be the leading technology partner for businesses worldwide.',
-      values: ['Innovation', 'Integrity', 'Collaboration', 'Excellence'],
-      benefits: [
-        'Health, Dental & Vision Insurance',
-        'Flexible Work Hours',
-        'Remote Work Options',
-        'Professional Development Budget',
-        'Unlimited PTO',
-        'Stock Options',
-        'Gym Membership',
-        'Free Meals'
-      ]
-    },
-    team: [
-      {
-        id: 1,
-        name: 'John Smith',
-        position: 'CEO & Founder',
-        image: '/api/placeholder/80/80',
-        bio: 'Experienced technology leader with 15+ years in the industry.'
-      },
-      {
-        id: 2,
-        name: 'Jane Doe',
-        position: 'CTO',
-        image: '/api/placeholder/80/80',
-        bio: 'Technical visionary driving our product development and innovation.'
-      },
-      {
-        id: 3,
-        name: 'Mike Johnson',
-        position: 'Head of HR',
-        image: '/api/placeholder/80/80',
-        bio: 'People-focused leader building our amazing company culture.'
-      }
-    ]
-  });
+  const [companyData, setCompanyData] = useState(null);
+  const [editData, setEditData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const [editData, setEditData] = useState(companyData);
+  useEffect(() => {
+    fetchCompanyProfile();
+  }, []);
 
-  const handleSave = () => {
-    setCompanyData(editData);
-    setIsEditing(false);
+  const fetchCompanyProfile = async () => {
+    setLoading(true);
+    try {
+      const res = await getEmployerProfile();
+      const initialData = {
+        basic: {
+          name: res.data.company || '',
+          logo: res.data.logo || '/api/placeholder/120/120',
+          tagline: res.data.tagline || '',
+          description: res.data.description || '',
+          industry: res.data.industry || '',
+          companySize: res.data.companySize || '',
+          founded: res.data.founded || '',
+          website: res.data.website || '',
+          headquarters: res.data.headquarters || ''
+        },
+        contact: {
+          email: res.data.email || '',
+          phone: res.data.phone || '',
+          address: res.data.address || '',
+          socialMedia: res.data.socialMedia || { linkedin: '', twitter: '', facebook: '' }
+        },
+        culture: {
+          mission: res.data.mission || '',
+          vision: res.data.vision || '',
+          values: res.data.values || [],
+          benefits: res.data.benefits || []
+        },
+        team: res.data.team || []
+      };
+      setCompanyData(initialData);
+      setEditData(initialData);
+    } catch (err) {
+      setError('Failed to fetch company profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      await updateEmployerProfile(editData);
+      setCompanyData(editData);
+      setIsEditing(false);
+    } catch (err) {
+      setError('Failed to save profile');
+    }
   };
 
   const handleCancel = () => {
@@ -556,6 +546,18 @@ const CompanyProfile = () => {
       </div>
     </div>
   );
+
+  if (loading || authLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
+  
+  if (!companyData) {
+    return <div>Company data not found.</div>
+  }
 
   return (
     <div className="space-y-6">

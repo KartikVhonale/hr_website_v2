@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { Search, Filter, MapPin, Briefcase, DollarSign, Clock, Star, Eye, Heart, Send } from 'lucide-react';
 
 const CandidateSearch = () => {
+  const { user, token, loading: authLoading } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
     location: '',
@@ -14,63 +16,67 @@ const CandidateSearch = () => {
   const [savedCandidates, setSavedCandidates] = useState([]);
   const [viewMode, setViewMode] = useState('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Mock candidate data
   useEffect(() => {
-    const mockCandidates = [
-      {
-        id: 1,
-        name: 'Sarah Johnson',
-        title: 'Senior Software Engineer',
-        location: 'San Francisco, CA',
-        experience: '5+ years',
-        skills: ['React', 'Node.js', 'Python', 'AWS'],
-        expectedSalary: '$120,000 - $150,000',
-        availability: 'Immediate',
-        rating: 4.8,
-        profileImage: '/api/placeholder/60/60',
-        summary: 'Experienced full-stack developer with expertise in modern web technologies...'
-      },
-      {
-        id: 2,
-        name: 'Michael Chen',
-        title: 'UX/UI Designer',
-        location: 'New York, NY',
-        experience: '3+ years',
-        skills: ['Figma', 'Adobe XD', 'Prototyping', 'User Research'],
-        expectedSalary: '$80,000 - $100,000',
-        availability: '2 weeks notice',
-        rating: 4.6,
-        profileImage: '/api/placeholder/60/60',
-        summary: 'Creative designer focused on user-centered design principles...'
-      },
-      {
-        id: 3,
-        name: 'Emily Rodriguez',
-        title: 'Data Scientist',
-        location: 'Austin, TX',
-        experience: '4+ years',
-        skills: ['Python', 'Machine Learning', 'SQL', 'Tableau'],
-        expectedSalary: '$110,000 - $130,000',
-        availability: '1 month notice',
-        rating: 4.9,
-        profileImage: '/api/placeholder/60/60',
-        summary: 'Data scientist with strong background in machine learning and analytics...'
+    const fetchCandidates = async () => {
+      if (authLoading) return;
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/candidates`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setCandidates(data.data);
+        } else {
+          setError('Failed to fetch candidates');
+        }
+      } catch (err) {
+        setError('Failed to fetch candidates');
+      } finally {
+        setLoading(false);
       }
-    ];
-    setCandidates(mockCandidates);
-  }, []);
+    };
 
-  const handleSearch = () => {
-    // Implement search logic
-    console.log('Searching for:', searchQuery, filters);
+    fetchCandidates();
+  }, [authLoading, token]);
+
+  const handleSearch = async () => {
+    setLoading(true);
+    try {
+      const queryParams = new URLSearchParams({
+        search: searchQuery,
+        ...filters
+      }).toString();
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/candidates?${queryParams}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setCandidates(data.data);
+      } else {
+        setError('Failed to search candidates');
+      }
+    } catch (err) {
+      setError('Failed to search candidates');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSaveCandidate = (candidateId) => {
-    if (savedCandidates.includes(candidateId)) {
-      setSavedCandidates(savedCandidates.filter(id => id !== candidateId));
-    } else {
-      setSavedCandidates([...savedCandidates, candidateId]);
+  const handleSaveCandidate = async (candidateId) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/save-candidate/${candidateId}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSavedCandidates(data.data.savedCandidates);
+      }
+    } catch (err) {
+      console.error('Failed to save candidate', err);
     }
   };
 
@@ -294,8 +300,8 @@ const CandidateSearch = () => {
         </div>
 
         <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
-          {candidates.map((candidate) => (
-            <CandidateCard key={candidate.id} candidate={candidate} />
+          {loading ? <p>Loading...</p> : error ? <p>{error}</p> : candidates.map((candidate) => (
+            <CandidateCard key={candidate._id} candidate={candidate} />
           ))}
         </div>
       </div>

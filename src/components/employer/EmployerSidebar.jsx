@@ -13,11 +13,12 @@ import {
   FaPlus,
   FaEye,
   FaUserCheck,
-  FaFileAlt
+  FaFileAlt,
+  FaTimes
 } from 'react-icons/fa';
 import '../../css/EmployerSidebar.css';
 
-const EmployerSidebar = ({ activeSection, onSectionChange }) => {
+const EmployerSidebar = ({ activeSection, onSectionChange, isMobile, isOpen, onToggle }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const sidebarItems = [
@@ -81,46 +82,69 @@ const EmployerSidebar = ({ activeSection, onSectionChange }) => {
     setIsCollapsed(!isCollapsed);
   };
 
+  const handleItemClick = (sectionId) => {
+    onSectionChange(sectionId);
+    if (isMobile && onToggle) {
+      onToggle();
+    }
+  };
+
   return (
-    <div className={`employer-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+    <div className={`employer-sidebar ${
+      isCollapsed ? 'collapsed' : ''
+    } ${
+      isMobile ? 'mobile' : ''
+    } ${
+      isMobile && isOpen ? 'mobile-open' : ''
+    }`}>
       <div className="sidebar-header">
+        {isMobile && (
+          <button className="mobile-close-btn" onClick={onToggle}>
+            <FaTimes />
+          </button>
+        )}
         <div className="sidebar-logo">
-          {!isCollapsed && (
+          {(!isCollapsed || isMobile) && (
             <div className="logo-content">
               <h2>Employer Hub</h2>
               <span>Talent Management</span>
             </div>
           )}
         </div>
-        <button 
-          className="sidebar-toggle"
-          onClick={toggleSidebar}
-          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          {isCollapsed ? <FaChevronRight /> : <FaChevronLeft />}
-        </button>
+        {!isMobile && (
+          <button 
+            className="sidebar-toggle"
+            onClick={toggleSidebar}
+            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {isCollapsed ? <FaChevronRight /> : <FaChevronLeft />}
+          </button>
+        )}
       </div>
 
       <nav className="sidebar-nav">
-        <ul className="sidebar-menu">
+        <ul className="nav-list">
           {sidebarItems.map((item) => {
             const IconComponent = item.icon;
+            const isActive = activeSection === item.id;
+            
             return (
-              <li key={item.id} className="sidebar-item">
+              <li key={item.id} className="nav-item">
                 <button
-                  className={`sidebar-link ${activeSection === item.id ? 'active' : ''}`}
-                  onClick={() => onSectionChange(item.id)}
+                  className={`nav-link ${isActive ? 'active' : ''}`}
+                  onClick={() => handleItemClick(item.id)}
                   title={isCollapsed ? item.label : ''}
                 >
-                  <div className="sidebar-icon">
+                  <div className="nav-icon">
                     <IconComponent />
                   </div>
-                  {!isCollapsed && (
-                    <div className="sidebar-content">
-                      <span className="sidebar-label">{item.label}</span>
-                      <span className="sidebar-description">{item.description}</span>
+                  {(!isCollapsed || isMobile) && (
+                    <div className="nav-content">
+                      <span className="nav-label">{item.label}</span>
+                      <span className="nav-description">{item.description}</span>
                     </div>
                   )}
+                  {isActive && <div className="active-indicator"></div>}
                 </button>
               </li>
             );
@@ -128,28 +152,33 @@ const EmployerSidebar = ({ activeSection, onSectionChange }) => {
         </ul>
       </nav>
 
-      {/* Quick Actions */}
-      {!isCollapsed && (
-        <div className="sidebar-quick-actions">
-          <h4>Quick Actions</h4>
-          <div className="quick-action-buttons">
-            <button 
-              className="quick-action-btn primary"
-              onClick={() => onSectionChange('create-job')}
-            >
-              <FaPlus />
-              <span>Post New Job</span>
-            </button>
-            <button 
-              className="quick-action-btn secondary"
-              onClick={() => onSectionChange('applications')}
-            >
-              <FaEye />
-              <span>View Applications</span>
-            </button>
+      <div className="sidebar-footer">
+        {(!isCollapsed || isMobile) && (
+          <div className="footer-content">
+            <div className="quick-actions">
+              <h4>Quick Actions</h4>
+              <div className="action-buttons">
+                <button 
+                  className="action-btn primary"
+                  onClick={() => handleItemClick('jobs')}
+                  title="Post a new job"
+                >
+                  <FaPlus />
+                  <span>Post Job</span>
+                </button>
+                <button 
+                  className="action-btn secondary"
+                  onClick={() => handleItemClick('applications')}
+                  title="Review applications"
+                >
+                  <FaEye />
+                  <span>Review</span>
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
