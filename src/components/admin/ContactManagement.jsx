@@ -206,9 +206,9 @@ const ContactDetailsModal = ({ contact, onClose }) => {
           </p>
         </div>
         <div className="modal-footer">
-          <button className="btn btn-secondary" onClick={onClose}>
+          <Button onClick={onClose} variant="secondary">
             Close
-          </button>
+          </Button>
         </div>
       </div>
     </div>

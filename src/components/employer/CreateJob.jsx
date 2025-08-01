@@ -19,17 +19,42 @@ const CreateJob = () => {
   const [ctc, setCtc] = useState('');
   const [jobType, setJobType] = useState('Full-time');
   const [experienceLevel, setExperienceLevel] = useState('Entry-level');
-  const [skills, setSkills] = useState('');
+  const [skill, setSkill] = useState('');
+  const [skills, setSkills] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const handleAddSkill = () => {
+    if (skill.trim() && !skills.includes(skill.trim())) {
+      setSkills([...skills, skill.trim()]);
+      setSkill('');
+    }
+  };
+
+  const handleRemoveSkill = (skillToRemove) => {
+    setSkills(skills.filter(s => s !== skillToRemove));
+  };
+
+  const handleSkillKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddSkill();
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
+    // Validate that at least one skill is added
+    if (skills.length === 0) {
+      setError('Please add at least one skill for this job position.');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const skillsArray = skills.split(',').map(skill => skill.trim());
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/jobs`, {
         method: 'POST',
         headers: {
@@ -44,7 +69,7 @@ const CreateJob = () => {
           ctc,
           jobType,
           experienceLevel,
-          skills: skillsArray,
+          skills: skills,
         }),
       });
 
@@ -126,14 +151,57 @@ const CreateJob = () => {
                   />
                 </FormGroup>
               </FormRow>
-              <FormGroup label="Skills (comma-separated)">
-                <TextInput
-                  id="skills"
-                  value={skills}
-                  onChange={(e) => setSkills(e.target.value)}
-                  required
-                />
-              </FormGroup>
+              <div className="form-group">
+                <label htmlFor="skill">Skills</label>
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                  <TextInput
+                    id="skill"
+                    value={skill}
+                    onChange={(e) => setSkill(e.target.value)}
+                    onKeyDown={handleSkillKeyDown}
+                    placeholder="Enter a skill (e.g. JavaScript, React, Node.js)"
+                    list="skill-options"
+                  />
+                  <Button type="button" onClick={handleAddSkill} className="secondary-btn">
+                    Add Skill
+                  </Button>
+                </div>
+                <datalist id="skill-options">
+                  <option value="JavaScript" />
+                  <option value="React" />
+                  <option value="Node.js" />
+                  <option value="Python" />
+                  <option value="Java" />
+                  <option value="HTML/CSS" />
+                  <option value="MongoDB" />
+                  <option value="SQL" />
+                  <option value="Git" />
+                  <option value="AWS" />
+                  <option value="Docker" />
+                  <option value="TypeScript" />
+                  <option value="Angular" />
+                  <option value="Vue.js" />
+                  <option value="PHP" />
+                  <option value="C++" />
+                  <option value="C#" />
+                  <option value="Ruby" />
+                  <option value="Go" />
+                  <option value="Kubernetes" />
+                </datalist>
+                <div className="skills-list">
+                  {skills.map(skillItem => (
+                    <div key={skillItem} className="skill-tag">
+                      {skillItem}
+                      <button type="button" onClick={() => handleRemoveSkill(skillItem)} className="remove-skill-btn">
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                {skills.length === 0 && (
+                  <p className="skills-help">Add at least one skill required for this job position.</p>
+                )}
+              </div>
               <FormGroup label="Job Description">
                 <TextArea
                   id="description"

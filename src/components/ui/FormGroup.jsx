@@ -1,14 +1,22 @@
 import React from 'react';
 import '../../css/FormComponents.css';
 
-const FormGroup = ({ 
+const FormGroup = ({
   label,
   children,
   className = ''
 }) => {
+  // Safely get the id from children if it exists
+  const getChildId = () => {
+    if (React.isValidElement(children) && children.props && children.props.id) {
+      return children.props.id;
+    }
+    return undefined;
+  };
+
   return (
     <div className={`form-group ${className}`}>
-      <label htmlFor={children.props.id}>{label}</label>
+      <label htmlFor={getChildId()}>{label}</label>
       {children}
     </div>
   );
