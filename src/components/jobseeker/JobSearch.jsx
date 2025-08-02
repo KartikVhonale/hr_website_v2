@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { getAllJobs } from '../../services/jobService';
-import { saveJob, unsaveJob } from '../../services/jobseekerService';
+import { jobsAPI, jobseekerAPI } from '../../api/index.js';
 import { JobCard } from '../ui/cards';
+import { useSearchFilters } from '../../hooks/useFormAutoSave.js';
 import '../../css/JobSearch.css';
 import { 
   FaSearch, 
@@ -11,37 +11,158 @@ import {
 } from 'react-icons/fa';
 
 const JobSearch = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [location, setLocation] = useState('');
-  const [jobType, setJobType] = useState('');
-  const [salaryRange, setSalaryRange] = useState('');
+  // Use search filters hook with cookie persistence
+  const {
+    filters,
+    sortOptions,
+    updateFilters,
+    updateSort,
+    clearFilters,
+    addToSearchHistory,
+    getSearchHistory
+  } = useSearchFilters('jobs');
+
+  const [searchTerm, setSearchTerm] = useState(filters.searchTerm || '');
+  const [location, setLocation] = useState(filters.location || '');
+  const [jobType, setJobType] = useState(filters.jobType || '');
+  const [experienceLevel, setExperienceLevel] = useState(filters.experienceLevel || '');
+  const [salaryRange, setSalaryRange] = useState(filters.salaryRange || '');
   const [jobs, setJobs] = useState([]);
   const [savedJobs, setSavedJobs] = useState(new Set());
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [totalJobs, setTotalJobs] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchHistory, setSearchHistory] = useState(() => getSearchHistory());
+
+  // Load saved jobs on component mount
+  const loadSavedJobs = async () => {
+    try {
+      const response = await jobseekerAPI.getSavedJobs();
+      const apiResponse = response.data;
+
+      if (apiResponse && apiResponse.success) {
+        const savedJobIds = (apiResponse.data || []).map(job => job._id);
+        setSavedJobs(new Set(savedJobIds));
+      }
+    } catch (err) {
+      console.error('Failed to load saved jobs:', err);
+    }
+  };
 
   useEffect(() => {
+    // Load all jobs and saved jobs on component mount
     fetchJobs();
+    loadSavedJobs();
   }, []);
 
-  const fetchJobs = async () => {
+  // Refetch jobs when page changes
+  useEffect(() => {
+    if (currentPage > 1) {
+      fetchJobs();
+    }
+  }, [currentPage]);
+
+  const fetchJobs = async (searchParams = {}) => {
     setLoading(true);
+    setError('');
+
     try {
+      // Build search parameters
       const params = {
-        search: searchTerm,
-        location,
-        jobType,
+        q: searchTerm.trim(),
+        location: location.trim(),
+        jobType: jobType || '',
+        experienceLevel: experienceLevel || '',
+        salaryRange: salaryRange || '',
+        page: currentPage,
+        limit: 20,
+        sortBy: sortOptions.sortBy || 'createdAt',
+        sortOrder: sortOptions.sortOrder || 'desc',
+        ...searchParams
       };
-      const res = await getAllJobs(params);
-      setJobs(res.data.data);
+
+      // Remove empty parameters
+      Object.keys(params).forEach(key => {
+        if (!params[key] || params[key] === '') {
+          delete params[key];
+        }
+      });
+
+      const response = await jobsAPI.getAllJobs(params);
+
+      if (response && response.data && response.data.success) {
+        const jobsData = response.data.data || [];
+        setJobs(jobsData);
+        setTotalJobs(response.data.total || jobsData.length);
+
+        if (jobsData.length === 0) {
+          setError('No jobs found. Try adjusting your search criteria.');
+        }
+      } else {
+        setError('Failed to fetch jobs. Please try again.');
+        setJobs([]);
+        setTotalJobs(0);
+      }
     } catch (err) {
-      console.error('Failed to fetch jobs:', err);
+      console.error('Error fetching jobs:', err);
+      setError('Failed to load jobs. Please try again.');
+      setJobs([]);
+      setTotalJobs(0);
     } finally {
       setLoading(false);
     }
   };
 
   const handleSearch = () => {
+    setCurrentPage(1); // Reset to first page
+
+    // Update filters in cookie storage
+    updateFilters({
+      searchTerm: searchTerm.trim(),
+      location: location.trim(),
+      jobType,
+      experienceLevel,
+      salaryRange
+    });
+
+    fetchJobs();
+  };
+
+  const handleFilterChange = (filterType, value) => {
+    switch (filterType) {
+      case 'location':
+        setLocation(value);
+        break;
+      case 'jobType':
+        setJobType(value);
+        break;
+      case 'experienceLevel':
+        setExperienceLevel(value);
+        break;
+      case 'salaryRange':
+        setSalaryRange(value);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setLocation('');
+    setJobType('');
+    setExperienceLevel('');
+    setSalaryRange('');
+    setCurrentPage(1);
+    clearFilters();
+    fetchJobs();
+  };
+
+  const handleSortChange = (sortBy, sortOrder = 'desc') => {
+    updateSort(sortBy, sortOrder);
+    setCurrentPage(1);
     fetchJobs();
   };
 
@@ -50,10 +171,10 @@ const JobSearch = () => {
     try {
       const newSavedJobs = new Set(savedJobs);
       if (newSavedJobs.has(jobId)) {
-        await unsaveJob(jobId);
+        await jobseekerAPI.unsaveJob(jobId);
         newSavedJobs.delete(jobId);
       } else {
-        await saveJob(jobId);
+        await jobseekerAPI.saveJob(jobId);
         newSavedJobs.add(jobId);
       }
       setSavedJobs(newSavedJobs);
@@ -166,58 +287,98 @@ const JobSearch = () => {
 
       <div className="search-results">
         <div className="results-header">
-          <h3>{jobs.length} Jobs Found</h3>
+          <h3>
+            {loading ? 'Loading...' : `${totalJobs || jobs.length} Jobs Found`}
+          </h3>
           <div className="sort-options">
             <span>Sort by:</span>
-            <select>
-              <option>Most Relevant</option>
-              <option>Newest</option>
-              <option>Salary: High to Low</option>
-              <option>Salary: Low to High</option>
+            <select
+              value={`${sortOptions.sortBy}-${sortOptions.sortOrder}`}
+              onChange={(e) => {
+                const [sortBy, sortOrder] = e.target.value.split('-');
+                handleSortChange(sortBy, sortOrder);
+              }}
+            >
+              <option value="createdAt-desc">Newest First</option>
+              <option value="createdAt-asc">Oldest First</option>
+              <option value="title-asc">Title A-Z</option>
+              <option value="title-desc">Title Z-A</option>
+              <option value="company-asc">Company A-Z</option>
+              <option value="location-asc">Location A-Z</option>
             </select>
           </div>
         </div>
 
+        {/* Error State */}
+        {error && (
+          <div className="error-message">
+            <p>{error}</p>
+            <button onClick={() => fetchJobs()}>Try Again</button>
+          </div>
+        )}
+
+        {/* Loading State */}
+        {loading && (
+          <div className="loading-state">
+            <div className="loading-spinner"></div>
+            <p>Loading jobs...</p>
+          </div>
+        )}
+
         <div className="jobs-grid">
-          {jobs.length > 0 ? (
+          {!loading && jobs.length > 0 ? (
             jobs.map((job) => (
               <JobCard
                 key={job._id}
                 jobTitle={job.title}
-                company={job.employer.name}
+                company={job.employer?.name || 'Company Name'}
                 location={job.location}
                 jobType={job.jobType}
-                salary={job.salary}
+                salary={job.ctc || job.salary}
                 postedDate={job.createdAt}
                 description={job.description}
                 skills={job.skills}
                 isSaved={savedJobs.has(job._id)}
                 onSave={() => toggleSaveJob(job._id)}
                 onApply={() => handleApply(job)}
-                loading={loading}
+                loading={false}
               />
             ))
-          ) : (
+          ) : !loading && jobs.length === 0 ? (
             <div className="no-results">
               <div className="no-results-icon">
                 <FaSearch />
               </div>
               <h3>No jobs found</h3>
               <p>Try adjusting your search criteria or filters</p>
-              <button 
+              <button
                 className="clear-filters-btn"
-                onClick={() => {
-                  setSearchTerm('');
-                  setLocation('');
-                  setJobType('');
-                  setSalaryRange('');
-                }}
+                onClick={handleClearFilters}
               >
                 Clear All Filters
               </button>
             </div>
-          )}
+          ) : null}
         </div>
+
+        {/* Pagination */}
+        {!loading && jobs.length > 0 && totalJobs > 20 && (
+          <div className="pagination">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            <span>Page {currentPage} of {Math.ceil(totalJobs / 20)}</span>
+            <button
+              onClick={() => setCurrentPage(prev => prev + 1)}
+              disabled={currentPage >= Math.ceil(totalJobs / 20)}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

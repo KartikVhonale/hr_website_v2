@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FaThumbsUp, FaThumbsDown } from 'react-icons/fa';
+import { articlesAPI } from '../api/index.js';
 import '../css/ArticleDetail.css';
 
 const ArticleDetail = () => {
@@ -15,13 +16,7 @@ const ArticleDetail = () => {
   useEffect(() => {
     const fetchArticle = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/articles/${id}`);
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || 'Failed to fetch article');
-        }
-
+        const data = await articlesAPI.getArticleById(id);
         setArticle(data.data);
       } catch (err) {
         setError(err.message);
@@ -71,15 +66,7 @@ const ArticleDetail = () => {
     setArticle(newArticle);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/articles/${id}/like`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        setArticle(originalArticle);
-      }
+      await articlesAPI.toggleArticleLike(id);
     } catch (error) {
       setArticle(originalArticle);
       console.error(error);

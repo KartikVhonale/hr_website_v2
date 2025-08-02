@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getApplicationsForJob, updateApplicationStatus } from '../../services/employerService';
+import { employerAPI } from '../../api/index.js';
 import { FileText, User, Calendar, MapPin, Briefcase, DollarSign, Clock, Star, Eye, Check, X, MessageSquare, Download, Filter, Search } from 'lucide-react';
 
 const ApplicationReview = ({ jobId }) => {
@@ -20,10 +20,21 @@ const ApplicationReview = ({ jobId }) => {
     if (!jobId) return;
     setLoading(true);
     try {
-      const res = await getApplicationsForJob(jobId);
-      setApplications(res.data);
+      const response = await employerAPI.getApplicationsForJob(jobId);
+
+      // Handle the response structure: { data: { success: true, data: [...] } }
+      const apiResponse = response.data;
+
+      if (apiResponse && apiResponse.success) {
+        setApplications(apiResponse.data || []);
+      } else {
+        console.warn('API response indicates failure:', apiResponse);
+        setApplications([]);
+      }
     } catch (err) {
+      console.error('Failed to fetch applications:', err);
       setError('Failed to fetch applications');
+      setApplications([]);
     } finally {
       setLoading(false);
     }
@@ -31,7 +42,7 @@ const ApplicationReview = ({ jobId }) => {
 
   const handleStatusChange = async (applicationId, newStatus) => {
     try {
-      await updateApplicationStatus(applicationId, newStatus);
+      await employerAPI.updateApplicationStatus(applicationId, newStatus);
       fetchApplications();
     } catch (err) {
       console.error('Failed to update status', err);

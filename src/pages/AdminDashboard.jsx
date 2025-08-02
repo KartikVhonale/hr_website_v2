@@ -272,12 +272,26 @@ const AdminDashboard = () => {
         }
 
         setActivities(data.data);
+        console.log('Recent activities refreshed:', new Date().toLocaleTimeString());
       } catch (err) {
-        setError(err.message);
+        console.error('Failed to fetch activities:', err.message);
+        // Don't set error for activity fetch failures to avoid disrupting the dashboard
       }
     };
 
+    // Initial fetch
     fetchActivities();
+
+    // Set up auto-refresh every 15 minutes (900,000 ms)
+    const activityRefreshInterval = setInterval(() => {
+      console.log('Auto-refreshing recent activities...');
+      fetchActivities();
+    }, 15 * 60 * 1000); // 15 minutes
+
+    // Cleanup interval on component unmount
+    return () => {
+      clearInterval(activityRefreshInterval);
+    };
   }, [token]);
 
   const formatTimeAgo = (dateString) => {

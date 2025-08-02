@@ -1,6 +1,12 @@
 /**
  * Utility functions for handling PDF URLs from Cloudinary
+ *
+ * @deprecated This file has been moved to ../api/utils.js
+ * This file is kept for backward compatibility during migration.
  */
+
+// Re-export from the new location
+export * from '../api/utils.js';
 
 /**
  * Ensures a Cloudinary URL serves a PDF file in proper PDF format

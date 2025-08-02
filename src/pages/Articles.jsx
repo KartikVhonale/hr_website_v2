@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import '../css/Main.css';
 import BlogCard from '../components/ui/BlogCard';
 import useScrollAnimation from '../lib/useScrollAnimation';
+import { articlesAPI } from '../api/index.js';
 
 const Articles = () => {
   const [categories, setCategories] = useState(['All']);
@@ -21,12 +22,7 @@ const Articles = () => {
   useEffect(() => {
     const fetchArticlesAndCategories = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/articles`);
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || 'Failed to fetch articles');
-        }
+        const data = await articlesAPI.getAllArticles();
 
         const articles = data.data;
         setAllArticles(articles);

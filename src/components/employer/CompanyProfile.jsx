@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getEmployerProfile, updateEmployerProfile } from '../../services/employerService';
+import { employerAPI } from '../../api/index.js';
 import { Building, MapPin, Globe, Users, Mail, Phone, Camera, Edit, Save, X, Plus, Trash2 } from 'lucide-react';
 
 const CompanyProfile = () => {
@@ -17,7 +17,7 @@ const CompanyProfile = () => {
   const fetchCompanyProfile = async () => {
     setLoading(true);
     try {
-      const res = await getEmployerProfile();
+      const res = await employerAPI.getEmployerProfile();
       const initialData = {
         basic: {
           name: res.data.company || '',
@@ -55,7 +55,7 @@ const CompanyProfile = () => {
 
   const handleSave = async () => {
     try {
-      await updateEmployerProfile(editData);
+      await employerAPI.updateEmployerProfile(editData);
       setCompanyData(editData);
       setIsEditing(false);
     } catch (err) {

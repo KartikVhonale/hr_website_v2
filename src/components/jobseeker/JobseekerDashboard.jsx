@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import userPreferences from '../../utils/userPreferences.js';
 import JobseekerSidebar from './JobseekerSidebar';
 import JobSearch from './JobSearch';
 import SavedJobs from './SavedJobs';
@@ -10,7 +11,7 @@ import ProfileManagement from './ProfileManagement/ProfileManagement';
 import ResumeBuilder from './ResumeBuilder';
 import CareerInsights from './CareerInsights';
 import NotificationCenter from './NotificationCenter';
-import * as jobseekerService from '../../services/jobseekerService';
+import { jobseekerAPI, jobsAPI, notificationsAPI } from '../../api/index.js';
 import '../../css/JobseekerDashboard.css';
 import '../../css/JobseekerDashboard-responsive.css';
 import { 
@@ -39,7 +40,10 @@ const JobseekerDashboard = ({ userData }) => {
   const { token, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const user = userData;
-  const [activeSection, setActiveSection] = useState('overview');
+  const [activeSection, setActiveSection] = useState(() => {
+    // Load active section from cookie preferences
+    return userPreferences.getActiveSection();
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [jobs, setJobs] = useState([]);
@@ -47,6 +51,7 @@ const JobseekerDashboard = ({ userData }) => {
   const [applications, setApplications] = useState([]);
   const [interviews, setInterviews] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [dashboardStats, setDashboardStats] = useState({});
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
@@ -77,18 +82,79 @@ const JobseekerDashboard = ({ userData }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, [user, token, authLoading]);
 
+  // Save active section to cookies when it changes
+  useEffect(() => {
+    userPreferences.setActiveSection(activeSection);
+  }, [activeSection]);
+
+  // Auto-refresh notifications every 10 minutes
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      if (!token) return;
+
+      try {
+        const response = await jobseekerAPI.getNotifications();
+        const apiResponse = response.data;
+        if (apiResponse.success) {
+          setNotifications(apiResponse.data || []);
+          console.log('Notifications refreshed:', new Date().toLocaleTimeString());
+        }
+      } catch (err) {
+        console.error('Failed to fetch notifications:', err.message);
+        // Don't set error for notification fetch failures to avoid disrupting the dashboard
+      }
+    };
+
+    // Initial fetch is handled by fetchData, so we only set up the interval
+    const notificationRefreshInterval = setInterval(() => {
+      console.log('Auto-refreshing notifications...');
+      fetchNotifications();
+    }, 10 * 60 * 1000); // 10 minutes
+
+    // Cleanup interval on component unmount
+    return () => {
+      clearInterval(notificationRefreshInterval);
+    };
+  }, [token]);
+
   const fetchData = async () => {
     try {
       setLoading(true);
-      const promises = [fetchJobs(), fetchInterviews(), fetchNotifications()];
-      if (user.savedJobs && user.savedJobs.length > 0) {
-        promises.push(fetchSavedJobs());
+      setError(''); // Clear any previous errors
+
+      // OPTIMIZED: Single API call to get all dashboard data
+      const response = await jobseekerAPI.getDashboardData();
+
+      // The response structure is { data: { success: true, data: {...}, message: '...' } }
+      const apiResponse = response.data;
+
+      if (apiResponse.success) {
+        const {
+          profile,
+          stats,
+          recentApplications,
+          savedJobs: savedJobsData,
+          jobRecommendations,
+          upcomingInterviews,
+          notifications: notificationsData
+        } = apiResponse.data;
+
+        // Update all state with single response
+        setJobs(jobRecommendations || []);
+        setSavedJobs(savedJobsData || []);
+        setApplications(recentApplications || []);
+        setInterviews(upcomingInterviews || []);
+        setNotifications(notificationsData || []);
+
+        // Store stats for overview section
+        setDashboardStats(stats);
+
+        console.log('Jobseeker dashboard data loaded successfully:', stats);
+      } else {
+        throw new Error(apiResponse.message || 'Failed to load dashboard data');
       }
-      if (user.applications && user.applications.length > 0) {
-        promises.push(fetchApplications());
-      }
-      await Promise.all(promises);
     } catch (err) {
+      console.error('Dashboard data fetch error:', err);
       setError('Failed to load dashboard data');
     } finally {
       setLoading(false);
@@ -97,10 +163,9 @@ const JobseekerDashboard = ({ userData }) => {
 
   const fetchJobs = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/jobs`);
-      const data = await response.json();
+      const data = await jobsAPI.getAllJobs({ status: 'active' });
       if (data.success) {
-        setJobs(data.data.filter(job => job.status === 'active'));
+        setJobs(data.data);
       }
     } catch (err) {
       console.error('Failed to fetch jobs:', err);
@@ -109,7 +174,7 @@ const JobseekerDashboard = ({ userData }) => {
 
   const fetchApplications = async () => {
     try {
-      const res = await jobseekerService.getAppliedJobs();
+      const res = await jobseekerAPI.getAppliedJobs();
       setApplications(res.data);
     } catch (err) {
       console.error('Failed to fetch applications:', err);
@@ -118,7 +183,7 @@ const JobseekerDashboard = ({ userData }) => {
 
   const fetchSavedJobs = async () => {
     try {
-      const res = await jobseekerService.getSavedJobs();
+      const res = await jobseekerAPI.getSavedJobs();
       setSavedJobs(res.data);
     } catch (err) {
       console.error('Failed to fetch saved jobs:', err);
@@ -127,19 +192,21 @@ const JobseekerDashboard = ({ userData }) => {
 
   const fetchInterviews = async () => {
     try {
-      // This would be a separate endpoint for interviews
-      setInterviews([]);
+      const res = await jobseekerAPI.getInterviewSchedule();
+      setInterviews(res.data || []);
     } catch (err) {
       console.error('Failed to fetch interviews:', err);
+      setInterviews([]);
     }
   };
 
   const fetchNotifications = async () => {
     try {
-      // This would be a separate endpoint for notifications
-      setNotifications([]);
+      const res = await notificationsAPI.getUserNotifications({ limit: 10 });
+      setNotifications(res.data || []);
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
+      setNotifications([]);
     }
   };
 

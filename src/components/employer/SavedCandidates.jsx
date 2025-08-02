@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getSavedCandidates, unsaveCandidate } from '../../services/employerService';
+import { employerAPI } from '../../api/index.js';
 import { Heart, Search, Filter, MapPin, Briefcase, DollarSign, Clock, Star, Eye, Send, Trash2, Grid, List } from 'lucide-react';
 
 const SavedCandidates = () => {
@@ -18,10 +18,21 @@ const SavedCandidates = () => {
   const fetchSavedCandidates = async () => {
     setLoading(true);
     try {
-      const res = await getSavedCandidates();
-      setSavedCandidates(res.data);
+      const response = await employerAPI.getSavedCandidates();
+
+      // Handle the response structure: { data: { success: true, data: [...] } }
+      const apiResponse = response.data;
+
+      if (apiResponse && apiResponse.success) {
+        setSavedCandidates(apiResponse.data || []);
+      } else {
+        console.warn('API response indicates failure:', apiResponse);
+        setSavedCandidates([]);
+      }
     } catch (err) {
+      console.error('Failed to fetch saved candidates:', err);
       setError('Failed to fetch saved candidates');
+      setSavedCandidates([]);
     } finally {
       setLoading(false);
     }
@@ -29,7 +40,7 @@ const SavedCandidates = () => {
 
   const handleRemoveCandidate = async (candidateId) => {
     try {
-      await unsaveCandidate(candidateId);
+      await employerAPI.unsaveCandidate(candidateId);
       fetchSavedCandidates();
     } catch (err) {
       console.error('Failed to remove candidate', err);

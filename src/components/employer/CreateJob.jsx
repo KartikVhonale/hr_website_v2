@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { jobsAPI } from '../../api/index.js';
+import { useFormAutoSave } from '../../hooks/useFormAutoSave.js';
 import Card from '../ui/Card.jsx';
 import Button from '../ui/button.tsx';
 import TextInput from '../ui/TextInput.jsx';
@@ -54,34 +56,110 @@ const CreateJob = () => {
       return;
     }
 
+    // Validate required fields
+    if (!title.trim()) {
+      setError('Job title is required.');
+      setLoading(false);
+      return;
+    }
+
+    if (!description.trim()) {
+      setError('Job description is required.');
+      setLoading(false);
+      return;
+    }
+
+    if (!company.trim()) {
+      setError('Company name is required.');
+      setLoading(false);
+      return;
+    }
+
+    if (!location.trim()) {
+      setError('Location is required.');
+      setLoading(false);
+      return;
+    }
+
+    if (!ctc.trim()) {
+      setError('CTC is required.');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/jobs`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title,
-          description,
-          company,
-          location,
-          ctc,
-          jobType,
-          experienceLevel,
-          skills: skills,
-        }),
+      // Prepare job data with proper validation
+      const jobData = {
+        title: title.trim(),
+        description: description.trim(),
+        company: company.trim(),
+        location: location.trim(),
+        ctc: ctc.trim(),
+        jobType,
+        experienceLevel,
+        skills: skills.filter(skill => skill && skill.trim()) // Remove empty/null skills
+      };
+
+      // Remove any empty string fields
+      Object.keys(jobData).forEach(key => {
+        if (jobData[key] === '' || jobData[key] === null || jobData[key] === undefined) {
+          delete jobData[key];
+        }
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to create job');
+      // Ensure skills is always an array with at least one item
+      if (!jobData.skills || !Array.isArray(jobData.skills) || jobData.skills.length === 0) {
+        setError('Please add at least one skill for this job position.');
+        setLoading(false);
+        return;
       }
 
-      navigate('/dashboard');
+      console.log('Submitting job data:', JSON.stringify(jobData, null, 2));
+
+      const response = await jobsAPI.createJob(jobData);
+
+      if (response.success) {
+        console.log('Job created successfully:', response.data);
+
+        // Navigate to employer dashboard with manage jobs tab active
+        navigate('/dashboard', {
+          state: {
+            activeTab: 'jobs',
+            successMessage: '🎉 Job posted successfully! Your job is now live and visible to candidates.',
+            newJobId: response.data._id
+          }
+        });
+      } else {
+        throw new Error(response.message || 'Failed to create job');
+      }
     } catch (err) {
-      setError(err.message);
+      console.error('Job creation error:', err);
+      console.error('Error response:', err.response);
+      console.error('Error data:', err.response?.data);
+      console.error('Full error object:', JSON.stringify(err, null, 2));
+
+      let errorMessage = 'Failed to create job. Please try again.';
+
+      // Check different possible error structures
+      if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
+        // Backend validation errors format
+        const errorMessages = err.response.data.errors
+          .filter(error => error.field && error.message) // Filter out undefined fields
+          .map(error => `${error.field}: ${error.message}`)
+          .join('\n');
+
+        if (errorMessages) {
+          errorMessage = `Validation errors:\n${errorMessages}`;
+        }
+      } else if (err.response?.data?.message) {
+        // Backend error message
+        errorMessage = err.response.data.message;
+      } else if (err.message) {
+        // General error message
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

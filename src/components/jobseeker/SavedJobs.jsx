@@ -10,7 +10,7 @@ import {
   FaSort,
   FaSearch
 } from 'react-icons/fa';
-import { getSavedJobs, unsaveJob } from '../../services/jobseekerService';
+import { jobseekerAPI } from '../../api/index.js';
 import '../../css/SavedJobs.css';
 
 const SavedJobs = () => {
@@ -27,8 +27,8 @@ const SavedJobs = () => {
   const fetchSavedJobs = async () => {
     setLoading(true);
     try {
-      const res = await getSavedJobs();
-      setSavedJobs(res.data);
+      const res = await jobseekerAPI.getSavedJobs();
+      setSavedJobs(res.data || []);
     } catch (err) {
       console.error('Failed to fetch saved jobs:', err);
     } finally {
@@ -39,7 +39,7 @@ const SavedJobs = () => {
   const handleUnsaveJob = async (jobId) => {
     setLoading(true);
     try {
-      await unsaveJob(jobId);
+      await jobseekerAPI.unsaveJob(jobId);
       fetchSavedJobs(); // Refetch the saved jobs list
     } catch (err) {
       console.error('Failed to unsave job:', err);

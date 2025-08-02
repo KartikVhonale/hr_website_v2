@@ -11,7 +11,7 @@ import {
   FaBuilding,
   FaUser
 } from 'react-icons/fa';
-import { getAppliedJobs, updateApplicationStatus } from '../../services/jobseekerService';
+import { jobseekerAPI, applicationsAPI } from '../../api/index.js';
 import '../../css/MyApplications.css';
 
 const MyApplications = () => {
@@ -29,8 +29,8 @@ const MyApplications = () => {
   const fetchAppliedJobs = async () => {
     setLoading(true);
     try {
-      const res = await getAppliedJobs();
-      setApplications(res.data);
+      const res = await jobseekerAPI.getAppliedJobs();
+      setApplications(res.data || []);
     } catch (err) {
       console.error('Failed to fetch applied jobs:', err);
     } finally {

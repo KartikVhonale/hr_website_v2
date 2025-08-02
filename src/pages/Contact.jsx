@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import '../css/Main.css';
 import useScrollAnimation from '../lib/useScrollAnimation';
 import { FaEnvelope, FaPhone, FaWhatsapp, FaMapMarkerAlt, FaClock, FaUser, FaUserTie, FaRegUser, FaRegBuilding, FaRegCommentDots } from 'react-icons/fa';
+import { contactAPI } from '../api/index.js';
 
 const Contact = () => {
   const heroRef = useRef();
@@ -24,17 +25,7 @@ const Contact = () => {
     setError(null);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/contact`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(form),
-      });
-
-      if (!response.ok) {
-        throw new Error('Something went wrong');
-      }
+      await contactAPI.submitContactForm(form);
 
       setSubmitted(true);
       setTimeout(() => {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import JobSearch from '../components/jobseeker/JobSearch';
 import JobCard from '../components/ui/cards/JobCard';
-import { getAllJobs } from '../services/jobService';
+import { jobsAPI } from '../api/index.js';
 import { useAuth } from '../context/AuthContext';
 import '../css/JobPortal.css';
 
@@ -22,8 +22,8 @@ const JobPortal = () => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const res = await getAllJobs();
-        const jobs = res.data.data;
+        const res = await jobsAPI.getAllJobs();
+        const jobs = res.data || [];
         setJobs(jobs);
         
         // Mark first 3 jobs as featured

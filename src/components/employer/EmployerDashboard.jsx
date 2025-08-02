@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import userPreferences from '../../utils/userPreferences.js';
 import EmployerSidebar from './EmployerSidebar';
 import CreateJob from './CreateJob';
 import ManageJobs from './ManageJobs';
@@ -27,13 +28,18 @@ import {
   FaHome,
   FaTachometerAlt
 } from 'react-icons/fa';
-import userService from '../../services/userService';
+import { employerAPI, activityAPI } from '../../api/index.js';
 
 const EmployerDashboard = ({ userData }) => {
   const { token, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const user = userData;
-  const [activeSection, setActiveSection] = useState('overview');
+  const [activeSection, setActiveSection] = useState(() => {
+    // Load active section from cookie preferences
+    return userPreferences.getActiveSection();
+  });
+  const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [jobs, setJobs] = useState([]);
@@ -43,10 +49,43 @@ const EmployerDashboard = ({ userData }) => {
   const [candidateNotes, setCandidateNotes] = useState({});
   const [interviews, setInterviews] = useState([]);
   const [articles, setArticles] = useState([]);
+  const [dashboardStats, setDashboardStats] = useState({});
   
   // Mobile state
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  // Handle navigation state from job creation
+  useEffect(() => {
+    if (location.state) {
+      const { activeTab, successMessage: navSuccessMessage, newJobId } = location.state;
+
+      if (activeTab) {
+        setActiveSection(activeTab);
+        // Save to cookie preferences
+        userPreferences.setActiveSection(activeTab);
+      }
+
+      if (navSuccessMessage) {
+        setSuccessMessage(navSuccessMessage);
+        // Clear success message after 5 seconds
+        setTimeout(() => setSuccessMessage(''), 5000);
+      }
+
+      // If a new job was created, refresh the jobs list
+      if (newJobId) {
+        fetchJobs();
+      }
+
+      // Clear the navigation state to prevent re-triggering
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, navigate, location.pathname]);
+
+  // Save active section to cookies when it changes
+  useEffect(() => {
+    userPreferences.setActiveSection(activeSection);
+  }, [activeSection]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -82,19 +121,27 @@ const EmployerDashboard = ({ userData }) => {
       setLoading(true);
       setError(''); // Clear any previous errors
 
-      // Use Promise.allSettled to handle individual failures gracefully
-      const results = await Promise.allSettled([
-        fetchJobs(),
-        fetchApplications(),
-        fetchArticles(),
-        fetchSavedCandidates()
-      ]);
+      // OPTIMIZED: Single API call to get all dashboard data
+      const response = await employerAPI.getDashboardData();
 
-      // Check for any rejected promises and log them
-      const failures = results.filter(result => result.status === 'rejected');
-      if (failures.length > 0) {
-        console.warn('Some data failed to load:', failures);
-        // Don't set error for partial failures, just log them
+      // The response structure is { data: { success: true, data: {...}, message: '...' } }
+      const apiResponse = response.data;
+
+      if (apiResponse.success) {
+        const { stats, recentJobs, recentApplications, savedCandidates, recentArticles } = apiResponse.data;
+
+        // Update all state with single response
+        setJobs(recentJobs || []);
+        setApplications(recentApplications || []);
+        setSavedCandidates(savedCandidates || []);
+        setArticles(recentArticles || []);
+
+        // Store stats for overview section
+        setDashboardStats(stats);
+
+        console.log('Dashboard data loaded successfully:', stats);
+      } else {
+        throw new Error(apiResponse.message || 'Failed to load dashboard data');
       }
     } catch (err) {
       console.error('Dashboard data fetch error:', err);
@@ -106,15 +153,20 @@ const EmployerDashboard = ({ userData }) => {
 
   const fetchJobs = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/jobs/employer/${user._id}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      if (data.success) {
-        setJobs(data.data);
+      const response = await employerAPI.getPostedJobs();
+
+      // Handle the response structure: { data: { success: true, data: [...] } }
+      const apiResponse = response.data;
+
+      if (apiResponse && apiResponse.success) {
+        setJobs(apiResponse.data || []);
+      } else {
+        console.warn('API response indicates failure:', apiResponse);
+        setJobs([]);
       }
     } catch (err) {
       console.error('Failed to fetch jobs:', err);
+      setJobs([]);
     }
   };
 
@@ -659,6 +711,22 @@ const EmployerDashboard = ({ userData }) => {
       <div className="employer-content">
         <div className="dashboard-container">
           <h1 className="dashboard-title">Employer Dashboard</h1>
+          {successMessage && (
+            <div className="success-alert" style={{
+              backgroundColor: '#d4edda',
+              color: '#155724',
+              padding: '12px 20px',
+              borderRadius: '8px',
+              border: '1px solid #c3e6cb',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              <FaCheckCircle />
+              <span>{successMessage}</span>
+            </div>
+          )}
           {renderContent()}
         </div>
       </div>
