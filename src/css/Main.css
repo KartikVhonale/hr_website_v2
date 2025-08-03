@@ -654,6 +654,19 @@
     transform: translateY(-2px) scale(1.04);
     box-shadow: 0 4px 18px rgba(0,81,162,0.13);
   }
+
+  .employers-cta:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 2px 12px rgba(156, 163, 175, 0.10);
+  }
+
+  .employers-cta:disabled:hover {
+    background: #9ca3af;
+    transform: none;
+    box-shadow: 0 2px 12px rgba(156, 163, 175, 0.10);
+  }
   
   .employers-featured {
     margin: 0 auto;
