@@ -1913,14 +1913,14 @@
     
     /* Enhanced mobile jobseekers page */
     .jobseekers-page {
-      padding-top: 60px;
+      padding-top: 80px;
     }
     .jobseekers-hero {
       padding: 1.2rem 0.5rem 0.8rem 0.5rem;
       border-radius: 0 0 0.7rem 0.7rem;
     }
     .jobseekers-title {
-      font-size: 1.8rem;
+      font-size: 3rem;
       margin-bottom: 0.8rem;
     }
     .jobseekers-desc {
@@ -1949,14 +1949,14 @@
     
     /* Enhanced mobile employers page */
     .employers-page {
-      padding-top: 60px;
+      padding-top: 80px;
     }
     .employers-hero {
       padding: 1.2rem 0.5rem 0.8rem 0.5rem;
       border-radius: 0 0 0.7rem 0.7rem;
     }
     .employers-title {
-      font-size: 1.8rem;
+      font-size: 3rem;
       margin-bottom: 0.8rem;
     }
     .employers-desc {
@@ -1985,14 +1985,14 @@
     
     /* Enhanced mobile about page */
     .about-page {
-      padding-top: 60px;
+      padding-top: 80px;
     }
     .about-hero {
       padding: 1.2rem 0.5rem 0.8rem 0.5rem;
       border-radius: 0 0 0.7rem 0.7rem;
     }
     .about-title {
-      font-size: 1.8rem;
+      font-size: 3rem;
       margin-bottom: 0.8rem;
     }
     .about-desc {
@@ -2030,14 +2030,14 @@
     
     /* Enhanced mobile contact page */
     .contact-page {
-      padding-top: 60px;
+      padding-top: 80px;
     }
     .contact-hero {
       padding: 1.2rem 0.5rem 0.8rem 0.5rem;
       border-radius: 0 0 0.7rem 0.7rem;
     }
     .contact-title {
-      font-size: 1.8rem;
+      font-size: 3rem;
     }
     .contact-desc {
       font-size: 0.9rem;
