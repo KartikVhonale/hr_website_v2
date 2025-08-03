@@ -53,7 +53,7 @@ const JobCard = ({
 
         {description && (
           <div className="job-description">
-            {description.length > 150 ? `${description.substring(0, 150)}...` : description}
+            {description}
           </div>
         )}
 

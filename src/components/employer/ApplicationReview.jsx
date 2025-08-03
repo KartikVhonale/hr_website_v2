@@ -22,18 +22,31 @@ const ApplicationReview = ({ jobId }) => {
     try {
       const response = await employerAPI.getApplicationsForJob(jobId);
 
-      // Handle the response structure: { data: { success: true, data: [...] } }
-      const apiResponse = response.data;
+      console.log('ApplicationReview API response:', response);
+
+      // Handle different response structures
+      let apiResponse;
+      if (response.data) {
+        apiResponse = response.data;
+      } else if (response.success !== undefined) {
+        apiResponse = response;
+      } else {
+        throw new Error('Invalid API response structure');
+      }
 
       if (apiResponse && apiResponse.success) {
-        setApplications(apiResponse.data || []);
+        const applicationsData = apiResponse.data || [];
+        setApplications(Array.isArray(applicationsData) ? applicationsData : []);
+        console.log('ApplicationReview: Applications loaded successfully:', applicationsData.length);
+        setError(''); // Clear any previous errors
       } else {
-        console.warn('API response indicates failure:', apiResponse);
+        console.warn('ApplicationReview: API response indicates failure:', apiResponse);
         setApplications([]);
+        setError(apiResponse.message || 'Failed to fetch applications');
       }
     } catch (err) {
-      console.error('Failed to fetch applications:', err);
-      setError('Failed to fetch applications');
+      console.error('ApplicationReview: Failed to fetch applications:', err);
+      setError(`Failed to fetch applications: ${err.message}`);
       setApplications([]);
     } finally {
       setLoading(false);
@@ -42,33 +55,69 @@ const ApplicationReview = ({ jobId }) => {
 
   const handleStatusChange = async (applicationId, newStatus) => {
     try {
-      await employerAPI.updateApplicationStatus(applicationId, newStatus);
-      fetchApplications();
+      const response = await employerAPI.updateApplicationStatus(applicationId, newStatus);
+
+      // Handle different response structures
+      let apiResponse;
+      if (response.data) {
+        apiResponse = response.data;
+      } else if (response.success !== undefined) {
+        apiResponse = response;
+      } else {
+        apiResponse = { success: true }; // Assume success if no clear structure
+      }
+
+      if (apiResponse.success !== false) {
+        // Update local state immediately for better UX
+        setApplications(applications.map(app =>
+          app._id === applicationId
+            ? { ...app, status: newStatus }
+            : app
+        ));
+        console.log('Application status updated successfully');
+
+        // Optionally refetch to ensure data consistency
+        await fetchApplications();
+      } else {
+        throw new Error(apiResponse.message || 'Failed to update status');
+      }
     } catch (err) {
-      console.error('Failed to update status', err);
+      console.error('Failed to update status:', err);
+      setError(`Failed to update status: ${err.message}`);
     }
   };
 
   const handleAddNotes = async (applicationId, notes) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/applications/${applicationId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ notes }),
-      });
-      const data = await response.json();
-      if (data.success) {
+      // Get current application to preserve status
+      const currentApp = applications.find(app => app._id === applicationId);
+      const currentStatus = currentApp?.status || 'pending';
+
+      const response = await employerAPI.updateApplicationStatus(applicationId, currentStatus, notes);
+
+      // Handle different response structures
+      let apiResponse;
+      if (response.data) {
+        apiResponse = response.data;
+      } else if (response.success !== undefined) {
+        apiResponse = response;
+      } else {
+        apiResponse = { success: true }; // Assume success if no clear structure
+      }
+
+      if (apiResponse.success !== false) {
         setApplications(applications.map(app =>
           app._id === applicationId
             ? { ...app, notes }
             : app
         ));
+        console.log('Notes added successfully');
+      } else {
+        throw new Error(apiResponse.message || 'Failed to add notes');
       }
     } catch (err) {
-      console.error('Failed to add notes', err);
+      console.error('Failed to add notes:', err);
+      setError(`Failed to add notes: ${err.message}`);
     }
   };
 

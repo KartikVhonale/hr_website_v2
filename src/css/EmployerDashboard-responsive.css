@@ -199,10 +199,46 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
   }
+  
+  /* Company Profile Responsive Styles */
+  .profile-details {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* Mobile Styles (768px and below) */
 @media (max-width: 768px) {
+  /* Company Profile Mobile Styles */
+  .company-profile-section {
+    padding: 1.5rem 1rem;
+  }
+  
+  .profile-card {
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.25rem 1rem;
+    gap: 1rem;
+  }
+  
+  .company-info {
+    text-align: center;
+  }
+  
+  .profile-details {
+    grid-template-columns: 1fr;
+    padding: 1.25rem 1rem;
+    gap: 1.25rem;
+  }
+  
+  .save-btn {
+    width: 100%;
+    margin: 0.5rem 0 1rem 0;
+  }
+  
   .employer-layout {
     flex-direction: column;
   }

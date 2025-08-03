@@ -24,14 +24,33 @@ const SavedJobs = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchSavedJobs();
+    let isMounted = true;
+
+    const loadSavedJobs = async () => {
+      if (isMounted) {
+        await fetchSavedJobs();
+      }
+    };
+
+    loadSavedJobs();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const fetchSavedJobs = async () => {
-    setLoading(true);
-    setError(null);
     try {
-      const response = await jobseekerAPI.getSavedJobs();
+      setLoading(true);
+      setError(null);
+
+      const response = await Promise.race([
+        jobseekerAPI.getSavedJobs(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Request timeout')), 10000)
+        )
+      ]);
+
       console.log('SavedJobs API response:', response);
 
       // Handle the response structure: { success: true, data: [...] }
@@ -67,21 +86,47 @@ const SavedJobs = () => {
   };
 
   const handleUnsaveJob = async (jobId) => {
-    setLoading(true);
     try {
-      await jobseekerAPI.unsaveJob(jobId);
-      fetchSavedJobs(); // Refetch the saved jobs list
+      setLoading(true);
+
+      await Promise.race([
+        jobseekerAPI.unsaveJob(jobId),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Request timeout')), 5000)
+        )
+      ]);
+
+      // Optimistically update the UI
+      setSavedJobs(prevJobs => prevJobs.filter(job => job._id !== jobId));
+
+      // Then refetch to ensure consistency
+      await fetchSavedJobs();
     } catch (err) {
       console.error('Failed to unsave job:', err);
+      setError('Failed to remove job. Please try again.');
+      // Refetch to restore correct state
+      await fetchSavedJobs();
     } finally {
       setLoading(false);
     }
   };
-   const handleApply = (job) => {
-    // Navigate to job details page where user can apply
-    console.log('Navigating to job details for job:', job);
-    console.log('Job ID:', job._id);
-    navigate(`/job/${job._id}`);
+  const handleApply = (job) => {
+    try {
+      // Navigate to job details page where user can apply
+      console.log('Navigating to job details for job:', job);
+      console.log('Job ID:', job._id);
+
+      if (!job._id) {
+        console.error('Job ID is missing');
+        setError('Unable to navigate to job details. Job ID is missing.');
+        return;
+      }
+
+      navigate(`/job/${job._id}`);
+    } catch (err) {
+      console.error('Navigation error:', err);
+      setError('Unable to navigate to job details. Please try again.');
+    }
   };
 
   // Ensure savedJobs is an array before filtering
@@ -276,7 +321,15 @@ const SavedJobs = () => {
             </p>
             <button
               className="browse-jobs-btn"
-              onClick={() => window.location.href = '#job-search'}
+              onClick={() => {
+                try {
+                  navigate('/jobs');
+                } catch (err) {
+                  console.error('Navigation error:', err);
+                  // Fallback to window location
+                  window.location.href = '/jobs';
+                }
+              }}
             >
               Browse Jobs
             </button>

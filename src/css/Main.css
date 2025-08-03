@@ -1247,7 +1247,6 @@
     color: var(--text-secondary);
     margin-bottom: 1.5rem;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -2214,3 +2213,21 @@
       text-align: center !important;
     }
   }
+
+.employers-featured {
+  padding: 4rem 2rem;
+}
+
+.featured-title {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.featured-desc {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #6c757d;
+  max-width: 800px;
+  margin: 0 auto;
+}

@@ -6,12 +6,14 @@ import {
   FaEye,
   FaMapMarkerAlt,
   FaBuilding,
-  FaDollarSign,
+  FaRupeeSign,
   FaClock,
   FaUsers,
   FaPlus,
   FaSearch,
-  FaFilter
+  FaFilter,
+  FaCalendarAlt,
+  FaBriefcase
 } from 'react-icons/fa';
 import '../../css/ManageJobs.css';
 
@@ -30,17 +32,28 @@ const ManageJobs = () => {
     try {
       const response = await employerAPI.getPostedJobs();
 
-      // Handle the response structure: { data: { success: true, data: [...] } }
-      const apiResponse = response.data;
+      console.log('ManageJobs API response:', response);
+
+      // Handle different response structures
+      let apiResponse;
+      if (response.data) {
+        apiResponse = response.data;
+      } else if (response.success !== undefined) {
+        apiResponse = response;
+      } else {
+        throw new Error('Invalid API response structure');
+      }
 
       if (apiResponse && apiResponse.success) {
-        setJobs(apiResponse.data || []);
+        const jobsData = apiResponse.data || [];
+        setJobs(Array.isArray(jobsData) ? jobsData : []);
+        console.log('ManageJobs: Jobs loaded successfully:', jobsData.length);
       } else {
-        console.warn('API response indicates failure:', apiResponse);
+        console.warn('ManageJobs: API response indicates failure:', apiResponse);
         setJobs([]);
       }
     } catch (error) {
-      console.error('Error fetching jobs:', error);
+      console.error('ManageJobs: Error fetching jobs:', error);
       setJobs([]);
     } finally {
       setLoading(false);
@@ -84,11 +97,13 @@ const ManageJobs = () => {
         </div>
         <div className="header-stats">
           <div className="stat-card">
-            <div className="stat-number">{jobs.length}</div>
+            <div className="stat-number">{Array.isArray(jobs) ? jobs.length : 0}</div>
             <div className="stat-label">Total Jobs</div>
           </div>
           <div className="stat-card">
-            <div className="stat-number">{jobs.filter(job => job.status === 'approved').length}</div>
+            <div className="stat-number">
+              {Array.isArray(jobs) ? jobs.filter(job => job.status === 'approved').length : 0}
+            </div>
             <div className="stat-label">Active</div>
           </div>
         </div>
@@ -151,8 +166,10 @@ const ManageJobs = () => {
                       <span>{job.location}</span>
                     </div>
                     <div className="info-item">
-                      <FaDollarSign className="info-icon" />
-                      <span>{job.ctc}</span>
+                      <FaRupeeSign className="info-icon" />
+                      <span className="ctc-display">
+                        {job.ctc ? `${job.ctc} LPA` : 'Not specified'}
+                      </span>
                     </div>
                     <div className="info-item">
                       <FaClock className="info-icon" />
@@ -161,15 +178,21 @@ const ManageJobs = () => {
                   </div>
 
                   <div className="job-description">
-                    <p>{job.description.substring(0, 120)}...</p>
+                    <p>{job.description ? job.description.substring() + '' : 'No description available'}</p>
                   </div>
 
                   <div className="job-skills">
-                    {job.skills && job.skills.slice(0, 3).map((skill, index) => (
-                      <span key={index} className="skill-tag">{skill}</span>
-                    ))}
-                    {job.skills && job.skills.length > 3 && (
-                      <span className="skill-tag more">+{job.skills.length - 3} more</span>
+                    {job.skills && Array.isArray(job.skills) && job.skills.length > 0 ? (
+                      <>
+                        {job.skills.slice(0, 3).map((skill, index) => (
+                          <span key={index} className="skill-tag">{skill}</span>
+                        ))}
+                        {job.skills.length > 3 && (
+                          <span className="skill-tag more">+{job.skills.length - 3} more</span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="skill-tag">No skills specified</span>
                     )}
                   </div>
                 </div>

@@ -45,8 +45,7 @@ const EmployerDashboard = ({ userData }) => {
   const [jobs, setJobs] = useState([]);
   const [applications, setApplications] = useState([]);
   const [savedCandidates, setSavedCandidates] = useState([]);
-  const [candidateStatus, setCandidateStatus] = useState({});
-  const [candidateNotes, setCandidateNotes] = useState({});
+
   const [interviews, setInterviews] = useState([]);
   const [articles, setArticles] = useState([]);
   const [dashboardStats, setDashboardStats] = useState({});
@@ -124,20 +123,43 @@ const EmployerDashboard = ({ userData }) => {
       // OPTIMIZED: Single API call to get all dashboard data
       const response = await employerAPI.getDashboardData();
 
-      // The response structure is { data: { success: true, data: {...}, message: '...' } }
-      const apiResponse = response.data;
+      console.log('Dashboard API response:', response);
+
+      // Handle different response structures
+      let apiResponse;
+      if (response.data) {
+        apiResponse = response.data;
+      } else if (response.success !== undefined) {
+        apiResponse = response;
+      } else {
+        throw new Error('Invalid API response structure');
+      }
 
       if (apiResponse.success) {
-        const { stats, recentJobs, recentApplications, savedCandidates, recentArticles } = apiResponse.data;
+        const dashboardData = apiResponse.data || {};
+        const {
+          stats = {},
+          recentJobs = [],
+          recentApplications = [],
+          savedCandidates = [],
+          recentArticles = []
+        } = dashboardData;
 
         // Update all state with single response
-        setJobs(recentJobs || []);
-        setApplications(recentApplications || []);
-        setSavedCandidates(savedCandidates || []);
-        setArticles(recentArticles || []);
+        setJobs(Array.isArray(recentJobs) ? recentJobs : []);
+        setApplications(Array.isArray(recentApplications) ? recentApplications : []);
+        setSavedCandidates(Array.isArray(savedCandidates) ? savedCandidates : []);
+        setArticles(Array.isArray(recentArticles) ? recentArticles : []);
 
         // Store stats for overview section
-        setDashboardStats(stats);
+        setDashboardStats({
+          totalJobs: stats.totalJobs || 0,
+          activeJobs: stats.activeJobs || 0,
+          pendingJobs: stats.pendingJobs || 0,
+          totalApplications: stats.totalApplications || 0,
+          savedCandidates: stats.savedCandidates || 0,
+          recentApplications: stats.recentApplications || 0
+        });
 
         console.log('Dashboard data loaded successfully:', stats);
       } else {
@@ -145,7 +167,21 @@ const EmployerDashboard = ({ userData }) => {
       }
     } catch (err) {
       console.error('Dashboard data fetch error:', err);
-      setError('Failed to load dashboard data');
+      setError(`Failed to load dashboard data: ${err.message}`);
+
+      // Set default empty states on error
+      setJobs([]);
+      setApplications([]);
+      setSavedCandidates([]);
+      setArticles([]);
+      setDashboardStats({
+        totalJobs: 0,
+        activeJobs: 0,
+        pendingJobs: 0,
+        totalApplications: 0,
+        savedCandidates: 0,
+        recentApplications: 0
+      });
     } finally {
       setLoading(false);
     }
@@ -155,11 +191,22 @@ const EmployerDashboard = ({ userData }) => {
     try {
       const response = await employerAPI.getPostedJobs();
 
-      // Handle the response structure: { data: { success: true, data: [...] } }
-      const apiResponse = response.data;
+      console.log('Jobs API response:', response);
+
+      // Handle different response structures
+      let apiResponse;
+      if (response.data) {
+        apiResponse = response.data;
+      } else if (response.success !== undefined) {
+        apiResponse = response;
+      } else {
+        throw new Error('Invalid API response structure');
+      }
 
       if (apiResponse && apiResponse.success) {
-        setJobs(apiResponse.data || []);
+        const jobsData = apiResponse.data || [];
+        setJobs(Array.isArray(jobsData) ? jobsData : []);
+        console.log('Jobs loaded successfully:', jobsData.length);
       } else {
         console.warn('API response indicates failure:', apiResponse);
         setJobs([]);
@@ -170,76 +217,43 @@ const EmployerDashboard = ({ userData }) => {
     }
   };
 
-  const fetchApplications = async () => {
+  const handleStatusChange = async (applicationId, newStatus) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/applications/employer/${user._id}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      if (data.success) {
-        setApplications(data.data);
-      }
-    } catch (err) {
-      console.error('Failed to fetch applications:', err);
-    }
-  };
+      const response = await employerAPI.updateApplicationStatus(applicationId, newStatus);
 
-  const fetchArticles = async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/articles/author/${user._id}`);
-      const data = await response.json();
-      if (data.success) {
-        setArticles(data.data);
-      }
-    } catch (err) {
-      console.error('Failed to fetch articles:', err);
-    }
-  };
-
-  const fetchSavedCandidates = async () => {
-    try {
-      const data = await userService.getSavedCandidates(token);
-      if (data && data.success) {
-        setSavedCandidates(data.data || []);
-        // Initialize status and notes state
-        const statusMap = {};
-        const notesMap = {};
-        (data.data || []).forEach(candidate => {
-          if (candidate && candidate._id) {
-            statusMap[candidate._id] = candidate.status || 'new';
-            notesMap[candidate._id] = candidate.notes || '';
-          }
-        });
-        setCandidateStatus(statusMap);
-        setCandidateNotes(notesMap);
+      // Handle different response structures
+      let apiResponse;
+      if (response.data) {
+        apiResponse = response.data;
+      } else if (response.success !== undefined) {
+        apiResponse = response;
       } else {
-        setSavedCandidates([]);
-        setCandidateStatus({});
-        setCandidateNotes({});
+        apiResponse = { success: true }; // Assume success if no clear structure
+      }
+
+      if (apiResponse.success !== false) {
+        // Update local state immediately for better UX
+        setApplications(applications.map(app =>
+          app._id === applicationId
+            ? { ...app, status: newStatus }
+            : app
+        ));
+        console.log('Application status updated successfully');
+
+        // Optionally refetch to ensure data consistency
+        await fetchData();
+      } else {
+        throw new Error(apiResponse.message || 'Failed to update status');
       }
     } catch (err) {
-      console.error('Failed to fetch saved candidates:', err);
+      console.error('Failed to update status:', err);
+      setError(`Failed to update status: ${err.message}`);
     }
   };
 
-  const handleRemoveCandidate = async (candidateId) => {
-    try {
-      await userService.removeSavedCandidate(candidateId, token);
-      setSavedCandidates(savedCandidates.filter(c => c._id !== candidateId));
-    } catch (err) {
-      console.error('Failed to remove candidate:', err);
-    }
-  };
 
-  const handleStatusChange = (candidateId, status) => {
-    setCandidateStatus(prev => ({
-      ...prev,
-      [candidateId]: status
-    }));
-    // Auto-save status change
-    userService.updateCandidateStatus(candidateId, status, token)
-      .catch(err => console.error('Failed to update status:', err));
-  };
+
+
 
   const handleNotesChange = (candidateId, notes) => {
     setCandidateNotes(prev => ({
@@ -261,10 +275,41 @@ const EmployerDashboard = ({ userData }) => {
   };
 
   const renderOverview = () => {
-    const activeJobs = jobs.filter(job => job.status === 'active').length;
-    const totalApplications = applications.length;
-    const pendingApplications = applications.filter(app => app.status === 'pending').length;
-    const scheduledInterviews = interviews.filter(interview => interview.status === 'scheduled').length;
+    // Use dashboardStats if available, otherwise calculate from local data
+    const stats = {
+      activeJobs: dashboardStats.activeJobs || (Array.isArray(jobs) ? jobs.filter(job => job.status === 'approved').length : 0),
+      totalApplications: dashboardStats.totalApplications || (Array.isArray(applications) ? applications.length : 0),
+      pendingApplications: dashboardStats.recentApplications || (Array.isArray(applications) ? applications.filter(app => app.status === 'pending').length : 0),
+      scheduledInterviews: Array.isArray(interviews) ? interviews.filter(interview => interview.status === 'scheduled').length : 0,
+      totalJobs: dashboardStats.totalJobs || (Array.isArray(jobs) ? jobs.length : 0),
+      savedCandidates: dashboardStats.savedCandidates || (Array.isArray(savedCandidates) ? savedCandidates.length : 0)
+    };
+
+    if (loading) {
+      return (
+        <div className="employer-overview">
+          <div className="loading-state">
+            <div className="loading-spinner"></div>
+            <p>Loading dashboard data...</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="employer-overview">
+          <div className="error-state">
+            <div className="error-icon">⚠️</div>
+            <h3>Failed to load dashboard</h3>
+            <p>{error}</p>
+            <button className="retry-btn" onClick={fetchData}>
+              Try Again
+            </button>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className="employer-overview">
@@ -275,7 +320,7 @@ const EmployerDashboard = ({ userData }) => {
             </div>
             <div className="card-content">
               <h3>Active Jobs</h3>
-              <p className="card-number">{activeJobs}</p>
+              <p className="card-number">{stats.activeJobs}</p>
               <span className="card-label">Job postings</span>
             </div>
           </div>
@@ -285,7 +330,7 @@ const EmployerDashboard = ({ userData }) => {
             </div>
             <div className="card-content">
               <h3>Total Applications</h3>
-              <p className="card-number">{totalApplications}</p>
+              <p className="card-number">{stats.totalApplications}</p>
               <span className="card-label">Received applications</span>
             </div>
           </div>
@@ -295,7 +340,7 @@ const EmployerDashboard = ({ userData }) => {
             </div>
             <div className="card-content">
               <h3>Pending Review</h3>
-              <p className="card-number">{pendingApplications}</p>
+              <p className="card-number">{stats.pendingApplications}</p>
               <span className="card-label">Awaiting review</span>
             </div>
           </div>
@@ -304,9 +349,9 @@ const EmployerDashboard = ({ userData }) => {
               <FaCalendarAlt />
             </div>
             <div className="card-content">
-              <h3>Scheduled Interviews</h3>
-              <p className="card-number">{scheduledInterviews}</p>
-              <span className="card-label">This week</span>
+              <h3>Saved Candidates</h3>
+              <p className="card-number">{stats.savedCandidates}</p>
+              <span className="card-label">In your list</span>
             </div>
           </div>
         </div>
@@ -315,19 +360,29 @@ const EmployerDashboard = ({ userData }) => {
           <div className="recent-applications">
             <h3>Recent Applications</h3>
             <div className="application-list">
-              {applications.slice(0, 5).map((app, index) => (
-                <div key={index} className="application-item">
-                  <div className="applicant-info">
-                    <span className="applicant-name">{app.applicant.name}</span>
-                    <span className="job-title">{app.job.title}</span>
+              {Array.isArray(applications) && applications.length > 0 ? (
+                applications.slice(0, 5).map((app, index) => (
+                  <div key={app._id || index} className="application-item">
+                    <div className="applicant-info">
+                      <span className="applicant-name">
+                        {app.applicant?.name || 'Unknown Applicant'}
+                      </span>
+                      <span className="job-title">
+                        {app.job?.title || 'Unknown Job'}
+                      </span>
+                    </div>
+                    <div className="application-status">
+                      <span className={`status-badge ${app.status || 'pending'}`}>
+                        {app.status || 'Pending'}
+                      </span>
+                    </div>
                   </div>
-                  <div className="application-status">
-                    <span className={`status-badge ${app.status || 'pending'}`}>
-                      {app.status || 'Pending'}
-                    </span>
-                  </div>
+                ))
+              ) : (
+                <div className="empty-state">
+                  <p>No recent applications</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
@@ -336,15 +391,19 @@ const EmployerDashboard = ({ userData }) => {
             <div className="stats-list">
               <div className="stat-item">
                 <span className="stat-label">Total Jobs</span>
-                <span className="stat-value">{jobs.length}</span>
+                <span className="stat-value">{stats.totalJobs}</span>
               </div>
               <div className="stat-item">
                 <span className="stat-label">Total Applications</span>
-                <span className="stat-value">{applications.length}</span>
+                <span className="stat-value">{stats.totalApplications}</span>
               </div>
               <div className="stat-item">
                 <span className="stat-label">Total Articles</span>
-                <span className="stat-value">{articles.length}</span>
+                <span className="stat-value">{Array.isArray(articles) ? articles.length : 0}</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-label">Saved Candidates</span>
+                <span className="stat-value">{stats.savedCandidates}</span>
               </div>
             </div>
           </div>
@@ -388,24 +447,33 @@ const EmployerDashboard = ({ userData }) => {
     <div className="applications-section">
       <h2>Job Applications</h2>
       <div className="applications-grid">
-        {applications.length > 0 ? (
+        {Array.isArray(applications) && applications.length > 0 ? (
           applications.map((app, index) => (
-            <div key={index} className="application-card">
+            <div key={app._id || index} className="application-card">
               <div className="application-header">
-                <h4>{app.applicant.name}</h4>
+                <h4>{app.applicant?.name || 'Unknown Applicant'}</h4>
                 <span className={`status-badge ${app.status || 'pending'}`}>
                   {app.status || 'Pending'}
                 </span>
               </div>
-              <p className="job-title">{app.job.title}</p>
+              <p className="job-title">{app.job?.title || 'Unknown Job'}</p>
               <div className="application-actions">
-                <button className="btn-view">
+                <button
+                  className="btn-view"
+                  onClick={() => console.log('View application:', app._id)}
+                >
                   <FaEye /> View
                 </button>
-                <button className="btn-approve">
+                <button
+                  className="btn-approve"
+                  onClick={() => handleStatusChange(app._id, 'approved')}
+                >
                   <FaCheckCircle /> Approve
                 </button>
-                <button className="btn-reject">
+                <button
+                  className="btn-reject"
+                  onClick={() => handleStatusChange(app._id, 'rejected')}
+                >
                   <FaTimes /> Reject
                 </button>
               </div>
@@ -413,7 +481,11 @@ const EmployerDashboard = ({ userData }) => {
           ))
         ) : (
           <div className="empty-state">
-            <p>No applications received yet.</p>
+            <div className="empty-icon">
+              <FaUsers />
+            </div>
+            <h3>No Applications Yet</h3>
+            <p>Applications will appear here once candidates start applying to your jobs.</p>
           </div>
         )}
       </div>

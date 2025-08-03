@@ -289,10 +289,10 @@ const JobSearch = () => {
                   onChange={(e) => setSalaryRange(e.target.value)}
                 >
                   <option value="">Any Salary</option>
-                  <option value="0-30000">Up to $30,000</option>
-                  <option value="30000-50000">$30,000 - $50,000</option>
-                  <option value="50000-70000">$50,000 - $70,000</option>
-                  <option value="70000+">$70,000+</option>
+                  <option value="0-1">Up to 1LPA</option>
+                  <option value="1-4">1LPA - 4LPA</option>
+                  <option value="4-10">4LPA - 10LPA</option>
+                  <option value="10+">10LPA+</option>
                 </select>
               </div>
             </div>

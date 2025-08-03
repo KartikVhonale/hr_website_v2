@@ -1,36 +1,19 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../css/Main.css';
-import JobCard from '../components/ui/JobCard';
 import BlogCard from '../components/ui/BlogCard';
 import useScrollAnimation from '../lib/useScrollAnimation';
 import { Link } from 'react-router-dom';
-import { articlesAPI } from '../api/index.js';
+import { articlesAPI, jobsAPI } from '../api/index.js';
+import FeaturedJobs from '../components/jobseeker/FeaturedJobs';
 
-const jobs = [
-  {
-    title: 'Frontend Developer',
-    company: 'BlueTech',
-    location: 'Remote',
-    salary: '$80k-$110k',
-  },
-  {
-    title: 'UI/UX Designer',
-    company: 'Designify',
-    location: 'New York, NY',
-    salary: '$70k-$95k',
-  },
-  {
-    title: 'Data Analyst',
-    company: 'InsightWorks',
-    location: 'San Francisco, CA',
-    salary: '$90k-$120k',
-  },
-];
+
 
 const Jobseekers = () => {
   const [articles, setArticles] = useState([]);
+  const [featuredJobs, setFeaturedJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [jobsLoading, setJobsLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const heroRef = useRef();
@@ -52,7 +35,36 @@ const Jobseekers = () => {
       }
     };
 
+    const fetchJobs = async () => {
+      try {
+        const response = await jobsAPI.getAllJobs();
+        let jobs = [];
+      if (response && response.data && response.data.success) {
+        jobs = response.data.data || [];
+      } else if (response && Array.isArray(response.data)) {
+        jobs = response.data;
+      } else if (response && Array.isArray(response)) {
+        jobs = response;
+      }
+      if (!Array.isArray(jobs)) {
+        jobs = [];
+      }
+      const featured = jobs.slice(0, 4).map(job => ({
+        ...job,
+        isFeatured: true,
+        companyLogo: job.employer?.logo || 'https://via.placeholder.com/40'
+      }));
+      setFeaturedJobs(featured);
+    } catch (err) {
+      console.error('Failed to fetch jobs:', err);
+      setFeaturedJobs([]);
+    } finally {
+      setJobsLoading(false);
+    }
+  };
+
     fetchArticles();
+    fetchJobs();
   }, []);
 
   const handleViewAllArticles = () => {
@@ -68,20 +80,6 @@ const Jobseekers = () => {
         
       </section>
       
-      <section className="jobseekers-featured" ref={featuredRef}>
-        <h2 className="featured-title">Featured Jobs</h2>
-        <div className="featured-jobs-list">
-          {jobs.map((job, idx) => (
-            <JobCard
-              key={idx}
-              title={job.title}
-              company={job.company}
-              location={job.location}
-              salary={job.salary}
-            />
-          ))}
-        </div>
-      </section>
 
       <section className="jobseekers-blogs" ref={blogsRef}>
         <h2 className="blogs-title">Career Insights & Tips</h2>
@@ -94,15 +92,15 @@ const Jobseekers = () => {
           ) : (
             articles.map((article) => (
               <BlogCard
-                key={article._id}
-                id={article._id}
-                title={article.title}
-                excerpt={article.content.substring(0, 100) + '...'}
-                author={article.author ? article.author.name : 'Unknown Author'}
-                date={article.date}
-                readTime={article.readTime}
-                image={article.image}
-                category={article.category}
+              key={article._id}
+              id={article._id}
+              title={article.title}
+              excerpt={article.content.substring(0, 100) + '...'}
+              author={article.author ? article.author.name : 'Unknown Author'}
+              date={article.date}
+              readTime={article.readTime}
+              image={article.image}
+              category={article.category}
               />
             ))
           )}
@@ -111,8 +109,9 @@ const Jobseekers = () => {
           <button className="blogs-view-all" onClick={handleViewAllArticles}>View All Articles</button>
         </div>
       </section>
+      {jobsLoading ? <div>Loading jobs...</div> : featuredJobs.length > 0 && <FeaturedJobs featuredJobs={featuredJobs} />}
     </div>
   );
 };
 
-export default Jobseekers; 
+export default Jobseekers;

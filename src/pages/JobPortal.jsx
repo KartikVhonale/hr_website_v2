@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import JobSearch from '../components/jobseeker/JobSearch';
-import JobCard from '../components/ui/cards/JobCard';
+import FeaturedJobs from '../components/jobseeker/FeaturedJobs';
 import { jobsAPI } from '../api/index.js';
 import { useAuth } from '../context/AuthContext';
 import '../css/JobPortal.css';
@@ -15,6 +15,7 @@ const JobPortal = () => {
     { id: 4, name: 'Education', count: 0 },
     { id: 5, name: 'Marketing', count: 0 },
     { id: 6, name: 'Engineering', count: 0 },
+    { id: 7, name: 'coming soon ...', count: 100},
   ]);
   const [loading, setLoading] = useState(true);
   const { token } = useAuth();
@@ -85,28 +86,8 @@ const JobPortal = () => {
       <div className="portal-description">
         Browse through our latest job openings and find your perfect match
       </div>
+      <JobSearch />
 
-      {/* Featured Jobs Section */}
-      {featuredJobs.length > 0 && (
-        <section className="featured-jobs-section">
-          <h2>Featured Jobs</h2>
-          <div className="featured-jobs-grid">
-            {featuredJobs.map(job => (
-              <JobCard
-                key={job._id}
-                jobTitle={job.title}
-                company={job.employer.name}
-                companyLogo={job.employer.logo}
-                location={job.location}
-                salary={job.salary}
-                jobType={job.jobType}
-                postedDate={job.createdAt}
-                isFeatured={true}
-              />
-            ))}
-          </div>
-        </section>
-      )}
 
       {/* Job Categories Section */}
       <section className="job-categories">
@@ -121,7 +102,8 @@ const JobPortal = () => {
         </div>
       </section>
 
-      <JobSearch />
+      {/* Featured Jobs Section */}
+      {featuredJobs.length > 0 && <FeaturedJobs featuredJobs={featuredJobs} />}
     </div>
   );
 };
