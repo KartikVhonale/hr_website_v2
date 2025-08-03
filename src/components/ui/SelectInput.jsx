@@ -17,8 +17,8 @@ const SelectInput = ({
       required={required}
       className={`select-input ${className}`}
     >
-      {options.map((option) => (
-        <option key={option} value={option}>
+      {options.map((option, index) => (
+        <option key={`${option}-${index}`} value={option}>
           {option}
         </option>
       ))}

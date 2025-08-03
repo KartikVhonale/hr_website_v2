@@ -35,8 +35,8 @@ const EducationTab = ({
         </div>
         
         <div className="education-list">
-          {getProfileArray('education').map((edu) => (
-            <div key={edu.id} className="education-item">
+          {getProfileArray('education').map((edu, index) => (
+            <div key={edu.id || `education-${index}`} className="education-item">
               {isEditing ? (
                 <div className="education-form">
                   <div className="form-grid">
@@ -149,8 +149,8 @@ const EducationTab = ({
         </div>
         
         <div className="certifications-list">
-          {getProfileArray('certifications').map((cert) => (
-            <div key={cert.id} className="certification-item">
+          {getProfileArray('certifications').map((cert, index) => (
+            <div key={cert.id || `certification-${index}`} className="certification-item">
               {isEditing ? (
                 <div className="certification-form">
                   <div className="form-grid">

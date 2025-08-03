@@ -35,8 +35,8 @@ const ExperienceTab = ({
         </div>
         
         <div className="experience-list">
-          {getProfileArray('experience').map((exp) => (
-            <div key={exp.id} className="experience-item">
+          {getProfileArray('experience').map((exp, index) => (
+            <div key={exp.id || `experience-${index}`} className="experience-item">
               {isEditing ? (
                 <div className="experience-form">
                   <div className="form-grid">

@@ -10,13 +10,21 @@ import EducationTab from './EducationTab';
 import '../../../css/ProfileManagement.css';
 
 const ProfileManagement = ({ user }) => {
-  console.log('ProfileManagement component rendering'); // Debug log
   const { updateUser } = useAuth();
 
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
   const [loading, setLoading] = useState(false);
   const [newSkill, setNewSkill] = useState('');
+  // Helper function to ensure array items have IDs
+  const ensureArrayItemsHaveIds = (array, prefix) => {
+    if (!Array.isArray(array)) return [];
+    return array.map((item, index) => ({
+      ...item,
+      id: item.id || item._id || `${prefix}-${index}-${Date.now()}`
+    }));
+  };
+
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -28,10 +36,10 @@ const ProfileManagement = ({ user }) => {
     linkedin: user?.socialLinks?.linkedin || '',
     github: user?.socialLinks?.github || '',
     portfolio: user?.socialLinks?.portfolio || '',
-    experience: user?.experience || [],
-    education: user?.education || [],
+    experience: ensureArrayItemsHaveIds(user?.experience, 'exp'),
+    education: ensureArrayItemsHaveIds(user?.education, 'edu'),
     skills: user?.skills || [],
-    certifications: user?.certifications || [],
+    certifications: ensureArrayItemsHaveIds(user?.certifications, 'cert'),
     resume: user?.resume || null
   });
 
@@ -42,6 +50,15 @@ const ProfileManagement = ({ user }) => {
   // Update profile data when user prop changes (only once)
   useEffect(() => {
     if (user && !profileData.name) {
+      // Helper function to ensure array items have IDs
+      const ensureArrayItemsHaveIds = (array, prefix) => {
+        if (!Array.isArray(array)) return [];
+        return array.map((item, index) => ({
+          ...item,
+          id: item.id || item._id || `${prefix}-${index}-${Date.now()}`
+        }));
+      };
+
       setProfileData({
         name: user.name || '',
         email: user.email || '',
@@ -53,10 +70,10 @@ const ProfileManagement = ({ user }) => {
         linkedin: user.socialLinks?.linkedin || '',
         github: user.socialLinks?.github || '',
         portfolio: user.socialLinks?.portfolio || '',
-        experience: user.experience || [],
-        education: user.education || [],
+        experience: ensureArrayItemsHaveIds(user.experience, 'exp'),
+        education: ensureArrayItemsHaveIds(user.education, 'edu'),
         skills: user.skills || [],
-        certifications: user.certifications || [],
+        certifications: ensureArrayItemsHaveIds(user.certifications, 'cert'),
         resume: user.resume || null
       });
     }
@@ -66,22 +83,28 @@ const ProfileManagement = ({ user }) => {
     setLoading(true);
     try {
       const res = await getJobseekerProfile();
-      console.log('Profile API response:', res); // Debug log
-      
+
       let userData = null;
-      
+
       // Handle different response structures
       if (res.data) {
         if (res.data.success && res.data.data) {
           userData = res.data.data;
-          console.log('Using success response data:', userData);
         } else if (res.data._id || res.data.name || res.data.email) {
           userData = res.data;
-          console.log('Using direct response data:', userData);
         }
       }
       
       if (userData) {
+        // Helper function to ensure array items have IDs
+        const ensureArrayItemsHaveIds = (array, prefix) => {
+          if (!Array.isArray(array)) return [];
+          return array.map((item, index) => ({
+            ...item,
+            id: item.id || item._id || `${prefix}-${index}-${Date.now()}`
+          }));
+        };
+
         setProfileData({
           name: userData.name || '',
           email: userData.email || '',
@@ -93,15 +116,12 @@ const ProfileManagement = ({ user }) => {
           linkedin: userData.socialLinks?.linkedin || '',
           github: userData.socialLinks?.github || '',
           portfolio: userData.socialLinks?.portfolio || '',
-          experience: userData.experience || [],
-          education: userData.education || [],
+          experience: ensureArrayItemsHaveIds(userData.experience, 'exp'),
+          education: ensureArrayItemsHaveIds(userData.education, 'edu'),
           skills: userData.skills || [],
-          certifications: userData.certifications || [],
+          certifications: ensureArrayItemsHaveIds(userData.certifications, 'cert'),
           resume: userData.resume || null
         });
-        console.log('Profile data set successfully');
-      } else {
-        console.log('No valid user data found in response');
       }
     } catch (err) {
       console.error('Failed to fetch profile:', err);
@@ -127,9 +147,17 @@ const ProfileManagement = ({ user }) => {
     return profileData && profileData[field] ? profileData[field] : '';
   }, [profileData]);
 
-  // Helper function to safely get profile arrays
+  // Helper function to safely get profile arrays with IDs
   const getProfileArray = (field) => {
-    return profileData && Array.isArray(profileData[field]) ? profileData[field] : [];
+    if (!profileData || !Array.isArray(profileData[field])) {
+      return [];
+    }
+
+    // Ensure each item has an ID for React keys
+    return profileData[field].map((item, index) => ({
+      ...item,
+      id: item.id || item._id || `${field}-${index}-${Date.now()}`
+    }));
   };
 
   // Add new item to array
@@ -177,8 +205,6 @@ const ProfileManagement = ({ user }) => {
 
   // Handle resume update
   const handleResumeUpdate = useCallback(async (resumeData) => {
-    console.log('Resume update received:', resumeData);
-
     // Update local state immediately
     setProfileData(prev => ({
       ...prev,
@@ -187,7 +213,6 @@ const ProfileManagement = ({ user }) => {
 
     // Also refresh the profile from backend to ensure consistency
     try {
-      console.log('Refreshing profile data after resume update...');
       await fetchProfile();
     } catch (error) {
       console.error('Failed to refresh profile after resume update:', error);
@@ -217,9 +242,7 @@ const ProfileManagement = ({ user }) => {
         skills: Array.isArray(profileData.skills) ? profileData.skills : []
       };
 
-      console.log('Saving profile data:', cleanedData);
       const res = await updateJobseekerProfile(cleanedData);
-      console.log('Save response:', res);
 
       if (res.data) {
         if (res.data.success) {

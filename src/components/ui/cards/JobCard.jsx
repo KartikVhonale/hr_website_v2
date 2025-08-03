@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FaBookmark, FaRegBookmark } from 'react-icons/fa';
 import DataCard from './DataCard';
 import '../../../css/Card.css';
 
@@ -75,8 +76,10 @@ const JobCard = ({
               className={`save-btn ${isSaved ? 'saved' : ''}`}
               onClick={onSave}
               disabled={loading}
+              title={isSaved ? 'Remove from saved jobs' : 'Save job'}
             >
-              {isSaved ? 'Saved' : 'Save Job'}
+              {isSaved ? <FaBookmark /> : <FaRegBookmark />}
+              {/* {isSaved ? 'Saved' : 'Save Job'} */}
             </button>
           )}
           {onApply && (

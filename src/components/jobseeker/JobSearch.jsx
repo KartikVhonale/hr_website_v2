@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { jobsAPI, jobseekerAPI } from '../../api/index.js';
 import { JobCard } from '../ui/cards';
+import JobListItem from '../ui/cards/JobListItem';
 import { useSearchFilters } from '../../hooks/useFormAutoSave.js';
 import '../../css/JobSearch.css';
-import { 
-  FaSearch, 
-  FaMapMarkerAlt, 
-  FaBriefcase, 
-  FaFilter
+import {
+  FaSearch,
+  FaMapMarkerAlt,
+  FaBriefcase,
+  FaFilter,
+  FaTh,
+  FaList
 } from 'react-icons/fa';
 
 const JobSearch = () => {
+  const navigate = useNavigate();
+
   // Use search filters hook with cookie persistence
   const {
     filters,
@@ -35,19 +41,42 @@ const JobSearch = () => {
   const [totalJobs, setTotalJobs] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchHistory, setSearchHistory] = useState(() => getSearchHistory());
+  const [viewMode, setViewMode] = useState('list'); // 'grid' or 'list'
 
   // Load saved jobs on component mount
   const loadSavedJobs = async () => {
     try {
       const response = await jobseekerAPI.getSavedJobs();
-      const apiResponse = response.data;
 
-      if (apiResponse && apiResponse.success) {
-        const savedJobIds = (apiResponse.data || []).map(job => job._id);
-        setSavedJobs(new Set(savedJobIds));
+      console.log('Saved jobs response:', response);
+
+      // Handle the response structure
+      let savedJobsData = [];
+      if (response && response.success) {
+        savedJobsData = response.data || [];
+      } else if (response && response.data && response.data.success) {
+        savedJobsData = response.data.data || [];
+      } else if (response && Array.isArray(response.data)) {
+        // Fallback for direct array response
+        savedJobsData = response.data;
+      } else if (response && Array.isArray(response)) {
+        // Fallback for direct array response
+        savedJobsData = response;
       }
+
+      console.log('Processed saved jobs:', savedJobsData);
+
+      // Ensure savedJobsData is an array
+      if (!Array.isArray(savedJobsData)) {
+        console.warn('Saved jobs data is not an array:', savedJobsData);
+        savedJobsData = [];
+      }
+
+      const savedJobIds = savedJobsData.map(job => job._id);
+      setSavedJobs(new Set(savedJobIds));
     } catch (err) {
       console.error('Failed to load saved jobs:', err);
+      setSavedJobs(new Set()); // Set empty set on error
     }
   };
 
@@ -185,25 +214,11 @@ const JobSearch = () => {
     }
   };
 
-  const handleApply = async (job) => {
-    setLoading(true);
-    try {
-      // In a real implementation, you would collect application data from a form
-      const applicationData = {
-        resume: 'path/to/resume.pdf', // This would be the actual resume file
-        coverLetter: 'path/to/cover-letter.pdf' // This would be the actual cover letter file
-      };
-      
-      const data = await jobseekerService.applyForJob(job._id, applicationData, token);
-      if (data.success) {
-        alert('Application submitted successfully!');
-      }
-    } catch (err) {
-      console.error('Failed to apply for job:', err);
-      alert('Failed to submit application. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+  const handleApply = (job) => {
+    // Navigate to job details page where user can apply
+    console.log('Navigating to job details for job:', job);
+    console.log('Job ID:', job._id);
+    navigate(`/job/${job._id}`);
   };
 
   return (
@@ -290,22 +305,43 @@ const JobSearch = () => {
           <h3>
             {loading ? 'Loading...' : `${totalJobs || jobs.length} Jobs Found`}
           </h3>
-          <div className="sort-options">
-            <span>Sort by:</span>
-            <select
-              value={`${sortOptions.sortBy}-${sortOptions.sortOrder}`}
-              onChange={(e) => {
-                const [sortBy, sortOrder] = e.target.value.split('-');
-                handleSortChange(sortBy, sortOrder);
-              }}
-            >
-              <option value="createdAt-desc">Newest First</option>
-              <option value="createdAt-asc">Oldest First</option>
-              <option value="title-asc">Title A-Z</option>
-              <option value="title-desc">Title Z-A</option>
-              <option value="company-asc">Company A-Z</option>
-              <option value="location-asc">Location A-Z</option>
-            </select>
+          <div className="results-controls">
+            {/* View Toggle */}
+            <div className="view-toggle">
+              <button
+                className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
+                onClick={() => setViewMode('grid')}
+                title="Grid View"
+              >
+                <FaTh />
+              </button>
+              <button
+                className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
+                onClick={() => setViewMode('list')}
+                title="List View"
+              >
+                <FaList />
+              </button>
+            </div>
+
+            {/* Sort Options */}
+            <div className="sort-options">
+              <span>Sort by:</span>
+              <select
+                value={`${sortOptions.sortBy}-${sortOptions.sortOrder}`}
+                onChange={(e) => {
+                  const [sortBy, sortOrder] = e.target.value.split('-');
+                  handleSortChange(sortBy, sortOrder);
+                }}
+              >
+                <option value="createdAt-desc">Newest First</option>
+                <option value="createdAt-asc">Oldest First</option>
+                <option value="title-asc">Title A-Z</option>
+                <option value="title-desc">Title Z-A</option>
+                <option value="company-asc">Company A-Z</option>
+                <option value="location-asc">Location A-Z</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -325,25 +361,30 @@ const JobSearch = () => {
           </div>
         )}
 
-        <div className="jobs-grid">
+        <div className={`jobs-container ${viewMode === 'list' ? 'jobs-list' : 'jobs-grid'}`}>
           {!loading && jobs.length > 0 ? (
-            jobs.map((job) => (
-              <JobCard
-                key={job._id}
-                jobTitle={job.title}
-                company={job.employer?.name || 'Company Name'}
-                location={job.location}
-                jobType={job.jobType}
-                salary={job.ctc || job.salary}
-                postedDate={job.createdAt}
-                description={job.description}
-                skills={job.skills}
-                isSaved={savedJobs.has(job._id)}
-                onSave={() => toggleSaveJob(job._id)}
-                onApply={() => handleApply(job)}
-                loading={false}
-              />
-            ))
+            jobs.map((job) => {
+              const jobProps = {
+                jobTitle: job.title,
+                company: job.employer?.name || 'Company Name',
+                location: job.location,
+                jobType: job.jobType,
+                salary: job.ctc || job.salary,
+                postedDate: job.createdAt,
+                description: job.description,
+                skills: job.skills,
+                isSaved: savedJobs.has(job._id),
+                onSave: () => toggleSaveJob(job._id),
+                onApply: () => handleApply(job),
+                loading: false
+              };
+
+              return viewMode === 'list' ? (
+                <JobListItem key={job._id} {...jobProps} />
+              ) : (
+                <JobCard key={job._id} {...jobProps} />
+              );
+            })
           ) : !loading && jobs.length === 0 ? (
             <div className="no-results">
               <div className="no-results-icon">

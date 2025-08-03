@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   FaBookmark, 
   FaTrash,
@@ -19,6 +20,8 @@ const SavedJobs = () => {
   const [filterBy, setFilterBy] = useState('all');
   const [sortBy, setSortBy] = useState('date');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchSavedJobs();
@@ -26,11 +29,38 @@ const SavedJobs = () => {
 
   const fetchSavedJobs = async () => {
     setLoading(true);
+    setError(null);
     try {
-      const res = await jobseekerAPI.getSavedJobs();
-      setSavedJobs(res.data || []);
+      const response = await jobseekerAPI.getSavedJobs();
+      console.log('SavedJobs API response:', response);
+
+      // Handle the response structure: { success: true, data: [...] }
+      let jobs = [];
+      if (response && response.success) {
+        jobs = response.data || [];
+      } else if (response && response.data && response.data.success) {
+        jobs = response.data.data || [];
+      } else if (response && Array.isArray(response.data)) {
+        // Fallback for direct array response
+        jobs = response.data;
+      } else if (response && Array.isArray(response)) {
+        // Fallback for direct array response
+        jobs = response;
+      }
+
+      console.log('Processed saved jobs:', jobs);
+
+      // Ensure jobs is an array
+      if (!Array.isArray(jobs)) {
+        console.warn('Saved jobs data is not an array:', jobs);
+        jobs = [];
+      }
+
+      setSavedJobs(jobs);
     } catch (err) {
       console.error('Failed to fetch saved jobs:', err);
+      setError('Failed to load saved jobs. Please try again.');
+      setSavedJobs([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -47,30 +77,52 @@ const SavedJobs = () => {
       setLoading(false);
     }
   };
+   const handleApply = (job) => {
+    // Navigate to job details page where user can apply
+    console.log('Navigating to job details for job:', job);
+    console.log('Job ID:', job._id);
+    navigate(`/job/${job._id}`);
+  };
 
-  const filteredAndSortedJobs = savedJobs
+  // Ensure savedJobs is an array before filtering
+  const jobsArray = Array.isArray(savedJobs) ? savedJobs : [];
+
+  const filteredAndSortedJobs = jobsArray
     .filter(job => {
+      // Safety check for job object
+      if (!job || typeof job !== 'object') return false;
+
       // Filter by search term
+      const companyName = job.employer?.name || job.employer?.company || job.company?.name || '';
       const matchesSearch = !searchTerm ||
-        job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.description.toLowerCase().includes(searchTerm.toLowerCase());
+        (job.title && job.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (companyName && companyName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (job.description && job.description.toLowerCase().includes(searchTerm.toLowerCase()));
 
       // Filter by job type
       const matchesFilter = filterBy === 'all' ||
-        job.jobType.toLowerCase().replace(' ', '-') === filterBy;
+        (job.jobType && job.jobType.toLowerCase().replace(' ', '-') === filterBy);
 
       return matchesSearch && matchesFilter;
     })
     .sort((a, b) => {
+      // Safety checks for sort comparison
+      if (!a || !b) return 0;
+
       switch (sortBy) {
         case 'title':
-          return a.title.localeCompare(b.title);
+          const titleA = a.title || '';
+          const titleB = b.title || '';
+          return titleA.localeCompare(titleB);
         case 'company':
-          return a.company.name.localeCompare(b.company.name);
+          const companyA = a.employer?.name || a.employer?.company || a.company?.name || '';
+          const companyB = b.employer?.name || b.employer?.company || b.company?.name || '';
+          return companyA.localeCompare(companyB);
         case 'date':
         default:
-          return new Date(b.createdAt) - new Date(a.createdAt);
+          const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+          const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+          return dateB - dateA;
       }
     });
 
@@ -83,7 +135,7 @@ const SavedJobs = () => {
         </div>
         <div className="header-stats">
           <div className="stat-item">
-            <span className="stat-number">{savedJobs.length}</span>
+            <span className="stat-number">{Array.isArray(savedJobs) ? savedJobs.length : 0}</span>
             <span className="stat-label">Saved Jobs</span>
           </div>
         </div>
@@ -130,8 +182,23 @@ const SavedJobs = () => {
         </div>
       </div>
 
+      {error && (
+        <div className="error-message">
+          <p>{error}</p>
+          <button onClick={fetchSavedJobs} className="retry-btn">
+            Try Again
+          </button>
+        </div>
+      )}
+
+      {loading && (
+        <div className="loading-message">
+          <p>Loading saved jobs...</p>
+        </div>
+      )}
+
       <div className="saved-jobs-list">
-        {filteredAndSortedJobs.length > 0 ? (
+        {!loading && !error && filteredAndSortedJobs.length > 0 ? (
           filteredAndSortedJobs.map((job) => (
             <div key={job._id} className="saved-job-card">
               <div className="job-header">
@@ -150,7 +217,9 @@ const SavedJobs = () => {
               
               <div className="job-content">
                 <h4 className="job-title">{job.title}</h4>
-                <p className="company-name">{job.company.name}</p>
+                <p className="company-name">
+                  {job.employer?.name || job.employer?.company || job.company?.name || 'Company Name'}
+                </p>
                 
                 <div className="job-details">
                   <span className="job-location">
@@ -174,7 +243,7 @@ const SavedJobs = () => {
                 </p>
                 
                 <div className="job-tags">
-                  {job.skills && job.skills.slice(0, 3).map((skill, index) => (
+                  {job.skills && Array.isArray(job.skills) && job.skills.slice(0, 3).map((skill, index) => (
                     <span key={index} className="skill-tag">{skill}</span>
                   ))}
                 </div>
@@ -186,33 +255,33 @@ const SavedJobs = () => {
                 </span>
                 <button 
                   className="apply-btn"
-                  onClick={() => alert(`Applying for ${job.title} at ${job.company}`)}
+                  onClick={() => handleApply(job)}
                 >
                   Apply Now
                 </button>
               </div>
             </div>
           ))
-        ) : (
+        ) : !loading && !error ? (
           <div className="empty-saved-jobs">
             <div className="empty-icon">
               <FaBookmark />
             </div>
             <h3>No saved jobs found</h3>
             <p>
-              {searchTerm 
+              {searchTerm
                 ? "No saved jobs match your search criteria."
                 : "You haven't saved any jobs yet. Start saving jobs that interest you!"
               }
             </p>
-            <button 
+            <button
               className="browse-jobs-btn"
               onClick={() => window.location.href = '#job-search'}
             >
               Browse Jobs
             </button>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

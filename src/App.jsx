@@ -18,6 +18,7 @@ import EditArticle from './pages/EditArticle';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import JobPortal from './pages/JobPortal';
+import JobDetails from './components/jobseeker/JobDetails';
 import ViewResume from './pages/ViewResume';
 import './App.css';
 import './css/Modal.css';
@@ -43,8 +44,10 @@ function App() {
             <Route path="/create-article" element={<CreateArticle />} />
             <Route path="/edit-article/:id" element={<EditArticle />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/jobs" element={<JobPortal />} />
+            <Route path="/job/:jobId" element={<JobDetails />} />
             <Route path="/view-resume" element={<ViewResume />} />
 
           </Routes>

@@ -279,9 +279,8 @@ export const getCached = async (url, options = {}) => {
     const startTime = Date.now();
     const result = await get(url, { params, ...fetchOptions });
 
-    // Log request duration
+    // Track request duration for performance monitoring
     const duration = Date.now() - startTime;
-    console.log(`API GET: ${url} (${duration}ms)`);
 
     // Cache successful responses
     if (result) {

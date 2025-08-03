@@ -22,15 +22,37 @@ const JobPortal = () => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const res = await jobsAPI.getAllJobs();
-        const jobs = res.data || [];
+        const response = await jobsAPI.getAllJobs();
+
+        console.log('JobPortal API response:', response);
+
+        // Handle the response structure: { data: { success: true, data: [...] } }
+        let jobs = [];
+        if (response && response.data && response.data.success) {
+          jobs = response.data.data || [];
+        } else if (response && Array.isArray(response.data)) {
+          // Fallback for direct array response
+          jobs = response.data;
+        } else if (response && Array.isArray(response)) {
+          // Fallback for direct array response
+          jobs = response;
+        }
+
+        console.log('Processed jobs:', jobs);
+
+        // Ensure jobs is an array
+        if (!Array.isArray(jobs)) {
+          console.warn('Jobs is not an array:', jobs);
+          jobs = [];
+        }
+
         setJobs(jobs);
-        
+
         // Mark first 3 jobs as featured
         const featured = jobs.slice(0, 3).map(job => ({
           ...job,
           isFeatured: true,
-          companyLogo: job.employer.logo || 'https://via.placeholder.com/40'
+          companyLogo: job.employer?.logo || 'https://via.placeholder.com/40'
         }));
         setFeaturedJobs(featured);
 
@@ -43,6 +65,8 @@ const JobPortal = () => {
         );
       } catch (err) {
         console.error('Failed to fetch jobs:', err);
+        setJobs([]);
+        setFeaturedJobs([]);
       } finally {
         setLoading(false);
       }

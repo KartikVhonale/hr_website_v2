@@ -20,10 +20,6 @@ const getJobseekerProfile = () => {
 
 const updateJobseekerProfile = async (profileData) => {
     try {
-        console.log('API URL:', API_URL);
-        console.log('Auth Token:', getAuthToken() ? 'Present' : 'Missing');
-        console.log('Profile Data being sent:', profileData);
-
         const response = await httpClient.put(`${API_URL}/profile`, profileData, {
             headers: {
                 'Content-Type': 'application/json',
@@ -31,7 +27,6 @@ const updateJobseekerProfile = async (profileData) => {
             },
         });
 
-        console.log('API Response:', response);
         return response;
     } catch (error) {
         console.error('API Error:', error);
@@ -82,8 +77,6 @@ const updateApplicationStatus = (applicationId, status) => {
 
 const uploadResume = async (file) => {
     try {
-        console.log('Uploading resume file:', file.name);
-
         const formData = new FormData();
         formData.append('resume', file);
 
@@ -94,7 +87,6 @@ const uploadResume = async (file) => {
             },
         });
 
-        console.log('Resume upload response:', response);
         return response;
     } catch (error) {
         console.error('Resume upload error:', error);
@@ -105,15 +97,12 @@ const uploadResume = async (file) => {
 
 const deleteResume = async () => {
     try {
-        console.log('Deleting resume');
-
         const response = await httpClient.delete(`${API_URL}/resume`, {
             headers: {
                 Authorization: `Bearer ${getAuthToken()}`,
             },
         });
 
-        console.log('Resume delete response:', response);
         return response;
     } catch (error) {
         console.error('Resume delete error:', error);

@@ -104,15 +104,18 @@ export const extractPublicId = (url) => {
  * @param {string} context - Context for logging (e.g., 'upload', 'view', 'download')
  */
 export const debugPdfUrl = (url, context = 'general') => {
-  console.log(`=== PDF URL DEBUG (${context.toUpperCase()}) ===`);
-  console.log('URL:', url);
-  console.log('Ends with .pdf:', url?.endsWith('.pdf'));
-  console.log('Has attachment flag:', url?.includes('fl_attachment'));
-  console.log('Is raw resource:', url?.includes('/raw/upload/'));
-  console.log('Is image resource:', url?.includes('/image/upload/'));
-  console.log('Public ID:', extractPublicId(url));
-  console.log('Is valid PDF URL:', isPdfUrlValid(url));
-  console.log('=====================================');
+  // Debug function - only log in development mode
+  if (import.meta.env.DEV) {
+    console.log(`=== PDF URL DEBUG (${context.toUpperCase()}) ===`);
+    console.log('URL:', url);
+    console.log('Ends with .pdf:', url?.endsWith('.pdf'));
+    console.log('Has attachment flag:', url?.includes('fl_attachment'));
+    console.log('Is raw resource:', url?.includes('/raw/upload/'));
+    console.log('Is image resource:', url?.includes('/image/upload/'));
+    console.log('Public ID:', extractPublicId(url));
+    console.log('Is valid PDF URL:', isPdfUrlValid(url));
+    console.log('=====================================');
+  }
 };
 
 /**
