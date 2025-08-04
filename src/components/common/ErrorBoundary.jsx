@@ -1,4 +1,5 @@
 import React from 'react';
+import { isBrowserExtensionError } from '../../main.jsx';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -12,17 +13,8 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    // Filter out browser extension errors
-    const errorMessage = error.message || '';
-    const isExtensionError = 
-      errorMessage.includes('onMessage listener') ||
-      errorMessage.includes('Extension context invalidated') ||
-      errorMessage.includes('chrome-extension://') ||
-      errorMessage.includes('moz-extension://');
-
-    if (isExtensionError) {
+    if (isBrowserExtensionError(error)) {
       console.warn('Browser extension error detected (ignoring):', error);
-      // Reset the error boundary for extension errors
       this.setState({ hasError: false, error: null, errorInfo: null });
       return;
     }

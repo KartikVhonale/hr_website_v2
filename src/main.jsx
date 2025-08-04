@@ -8,37 +8,31 @@ import App from './App.jsx'
 // Set the app element for react-modal accessibility
 Modal.setAppElement('#root')
 
-// Global error handler to filter out browser extension errors
-window.addEventListener('error', (event) => {
-  const errorMessage = event.message || '';
-  const isExtensionError =
+// Helper function to identify browser extension errors
+export const isBrowserExtensionError = (error) => {
+  const errorMessage = error?.message || String(error) || '';
+  return (
     errorMessage.includes('onMessage listener') ||
     errorMessage.includes('Extension context invalidated') ||
     errorMessage.includes('chrome-extension://') ||
     errorMessage.includes('moz-extension://') ||
-    errorMessage.includes('Promised response from onMessage listener went out of scope');
+    errorMessage.includes('Promised response from onMessage listener went out of scope')
+  );
+};
 
-  if (isExtensionError) {
+// Global error handler to filter out browser extension errors
+window.addEventListener('error', (event) => {
+  if (isBrowserExtensionError(event.error || event.message)) {
     console.warn('Browser extension error detected (ignoring):', event.error);
     event.preventDefault();
-    return false;
   }
 });
 
 // Handle unhandled promise rejections
 window.addEventListener('unhandledrejection', (event) => {
-  const errorMessage = event.reason?.message || event.reason || '';
-  const isExtensionError =
-    errorMessage.includes('onMessage listener') ||
-    errorMessage.includes('Extension context invalidated') ||
-    errorMessage.includes('chrome-extension://') ||
-    errorMessage.includes('moz-extension://') ||
-    errorMessage.includes('Promised response from onMessage listener went out of scope');
-
-  if (isExtensionError) {
+  if (isBrowserExtensionError(event.reason)) {
     console.warn('Browser extension promise rejection detected (ignoring):', event.reason);
     event.preventDefault();
-    return false;
   }
 });
 
