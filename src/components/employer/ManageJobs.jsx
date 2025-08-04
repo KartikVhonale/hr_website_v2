@@ -16,21 +16,45 @@ import {
   FaBriefcase
 } from 'react-icons/fa';
 import '../../css/ManageJobs.css';
+import { useNavigate } from 'react-router-dom';
+import EditJobModal from '../modal/EditJobModal.jsx';
 
-const ManageJobs = () => {
+const ManageJobs = ({ refetchTrigger }) => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  // Edit modal state
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const navigate = useNavigate();
+
+  const handleOpenEdit = (job) => {
+    setSelectedJob(job);
+    setIsEditOpen(true);
+  };
+  const handleCloseEdit = () => {
+    setSelectedJob(null);
+    setIsEditOpen(false);
+  };
+  const handleJobUpdated = (updatedJob) => {
+    setJobs(prev => prev.map(j => j._id === updatedJob._id ? updatedJob : j));
+  };
 
   useEffect(() => {
-    fetchJobs();
-  }, []);
+    // Fetch jobs on mount and when the refetch trigger changes
+    if (refetchTrigger > 0) {
+      fetchJobs(true); // Force refetch, bypassing cache
+    } else {
+      fetchJobs(false); // Fetch from cache on initial load
+    }
+  }, [refetchTrigger]);
 
-  const fetchJobs = async () => {
+  const fetchJobs = async (forceRefetch = false) => {
     setLoading(true);
     try {
-      const response = await employerAPI.getPostedJobs();
+      // Pass forceRefetch to the API call
+      const response = await employerAPI.getPostedJobs(forceRefetch);
 
       console.log('ManageJobs API response:', response);
 
@@ -62,13 +86,29 @@ const ManageJobs = () => {
 
   const handleDelete = async (jobId) => {
     if (window.confirm('Are you sure you want to delete this job?')) {
+      setLoading(true);
       try {
-        await jobsAPI.deleteJob(jobId);
+        console.log(`Attempting to delete job with ID: ${jobId}`);
+        const response = await jobsAPI.deleteJob(jobId);
+        console.log('Delete job API response:', response);
+        // Refresh the job list after successful deletion
         fetchJobs();
+        alert('Job deleted successfully!');
       } catch (error) {
         console.error('Error deleting job:', error);
+        alert('Failed to delete job. Please try again.');
+        // Optionally, show an error message to the user
+      } finally {
+        setLoading(false);
       }
     }
+  };
+// View and Edit action handlers
+  const handleView = (jobId) => {
+    navigate(`/job/${jobId}`);
+  };
+  const handleEdit = (jobId) => {
+    window.alert(`Edit job ${jobId}`);
   };
 
   // Filter jobs based on search and status
@@ -108,6 +148,15 @@ const ManageJobs = () => {
           </div>
         </div>
       </div>
+                {/* Edit Job Modal */}
+                {selectedJob && (
+                  <EditJobModal
+                    isOpen={isEditOpen}
+                    onRequestClose={handleCloseEdit}
+                    job={selectedJob}
+                    onJobUpdated={handleJobUpdated}
+                  />
+                )}
 
       {/* Search and Filter Section */}
       <div className="manage-jobs-controls">
@@ -178,7 +227,7 @@ const ManageJobs = () => {
                   </div>
 
                   <div className="job-description">
-                    <p>{job.description ? job.description.substring() + '' : 'No description available'}</p>
+                    <p>{job.description ? job.description.substring(0, 100) + '...' : 'No description available'}</p>
                   </div>
 
                   <div className="job-skills">
@@ -204,10 +253,10 @@ const ManageJobs = () => {
                     </span>
                   </div>
                   <div className="job-actions">
-                    <button className="action-btn view-btn" title="View Details">
+                    <button className="action-btn view-btn" title="View Details" onClick={() => handleView(job._id)}>
                       <FaEye />
                     </button>
-                    <button className="action-btn edit-btn" title="Edit Job">
+                    <button className="action-btn edit-btn" title="Edit Job" onClick={() => handleOpenEdit(job)}>
                       <FaEdit />
                     </button>
                     <button

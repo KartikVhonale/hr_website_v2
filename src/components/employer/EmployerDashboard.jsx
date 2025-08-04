@@ -49,6 +49,7 @@ const EmployerDashboard = ({ userData }) => {
   const [interviews, setInterviews] = useState([]);
   const [articles, setArticles] = useState([]);
   const [dashboardStats, setDashboardStats] = useState({});
+  const [jobRefetchTrigger, setJobRefetchTrigger] = useState(0);
   
   // Mobile state
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -74,6 +75,7 @@ const EmployerDashboard = ({ userData }) => {
       // If a new job was created, refresh the jobs list
       if (newJobId) {
         fetchJobs();
+        setJobRefetchTrigger(Date.now()); // Trigger refetch in ManageJobs
       }
 
       // Clear the navigation state to prevent re-triggering
@@ -424,7 +426,7 @@ const EmployerDashboard = ({ userData }) => {
           Post New Job
         </button>
       </div>
-      <ManageJobs />
+      <ManageJobs refetchTrigger={jobRefetchTrigger} />
     </div>
   );
 
@@ -682,35 +684,35 @@ const EmployerDashboard = ({ userData }) => {
         {isMobile && (
           <div className="mobile-bottom-nav">
             <div className="mobile-nav-items">
-              <button 
+              <button
                 className={`mobile-nav-item ${activeSection === 'overview' ? 'active' : ''}`}
                 onClick={() => setActiveSection('overview')}
               >
                 <FaHome />
                 <span>Home</span>
               </button>
-              <button 
+              <button
                 className={`mobile-nav-item ${activeSection === 'jobs' ? 'active' : ''}`}
                 onClick={() => setActiveSection('jobs')}
               >
                 <FaBriefcase />
                 <span>Jobs</span>
               </button>
-              <button 
+              <button
                 className={`mobile-nav-item ${activeSection === 'applications' ? 'active' : ''}`}
                 onClick={() => setActiveSection('applications')}
               >
                 <FaUsers />
                 <span>Applications</span>
               </button>
-              <button 
+              <button
                 className={`mobile-nav-item ${activeSection === 'analytics' ? 'active' : ''}`}
                 onClick={() => setActiveSection('analytics')}
               >
                 <FaChartBar />
                 <span>Analytics</span>
               </button>
-              <button 
+              <button
                 className={`mobile-nav-item ${activeSection === 'profile' ? 'active' : ''}`}
                 onClick={() => setActiveSection('profile')}
               >

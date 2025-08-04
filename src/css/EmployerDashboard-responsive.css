@@ -161,6 +161,12 @@
   text-align: center;
 }
 
+.mobile-nav-items {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
+
 /* Dark theme support for bottom nav */
 :root[data-theme='dark'] .mobile-bottom-nav {
   background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
@@ -321,8 +327,7 @@
 /* Small Mobile Styles (480px and below) */
 @media (max-width: 480px) {
   .dashboard-container {
-    padding: 1rem 0.75rem;
-    margin-top: 80px !important; /* Force 80px top margin */
+    padding: 1rem 0.75rem;/* Force 80px top margin */
   }
 
   .dashboard-title {

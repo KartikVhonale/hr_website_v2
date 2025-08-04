@@ -43,11 +43,11 @@ export const updateEmployerProfile = async (profileData) => {
 };
 
 // Get posted jobs (cached for 5 minutes)
-export const getPostedJobs = async (filters = {}) => {
+export const getPostedJobs = async (forceRefetch = false) => {
   try {
     const response = await getCached(API_ENDPOINTS.EMPLOYER.JOBS, {
-      params: filters,
-      cacheTTL: CACHE_TTL.MEDIUM
+      cacheTTL: CACHE_TTL.MEDIUM,
+      forceRefetch
     });
     return response;
   } catch (error) {

@@ -121,28 +121,19 @@ const CreateJob = () => {
       console.log('CreateJob API response:', response);
 
       // Handle different response structures
-      let apiResponse;
-      if (response.data) {
-        apiResponse = response.data;
-      } else if (response.success !== undefined) {
-        apiResponse = response;
-      } else {
-        throw new Error('Invalid API response structure');
-      }
-
-      if (apiResponse.success) {
-        console.log('Job created successfully:', apiResponse.data);
+      if (response.success) {
+        console.log('Job created successfully:', response.data);
 
         // Navigate to employer dashboard with manage jobs tab active
         navigate('/dashboard', {
           state: {
             activeTab: 'jobs',
             successMessage: '🎉 Job posted successfully! Your job is now live and visible to candidates.',
-            newJobId: apiResponse.data?._id
+            newJobId: response.data?._id
           }
         });
       } else {
-        throw new Error(apiResponse.message || 'Failed to create job');
+        throw new Error(response.message || 'Failed to create job');
       }
     } catch (err) {
       console.error('Job creation error:', err);
