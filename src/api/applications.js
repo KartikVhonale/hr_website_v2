@@ -98,6 +98,8 @@ export const submitApplication = async (jobId, applicationData) => {
     if (applicationData.resume) {
       formData.append('resume', applicationData.resume);
     }
+    
+    // Add cover letter as a text field
     if (applicationData.coverLetter) {
       formData.append('coverLetter', applicationData.coverLetter);
     }

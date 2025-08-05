@@ -74,7 +74,7 @@ const EmployerDashboard = ({ userData }) => {
 
       // If a new job was created, refresh the jobs list
       if (newJobId) {
-        fetchJobs();
+        fetchData(); // Refetch all dashboard data
         setJobRefetchTrigger(Date.now()); // Trigger refetch in ManageJobs
       }
 

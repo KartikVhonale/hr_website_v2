@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import JobSearch from '../components/jobseeker/JobSearch';
 import FeaturedJobs from '../components/jobseeker/FeaturedJobs';
 import { jobsAPI } from '../api/index.js';
-import { useAuth } from '../context/AuthContext';
 import '../css/JobPortal.css';
 
 const JobPortal = () => {
@@ -18,7 +17,6 @@ const JobPortal = () => {
     { id: 7, name: 'coming soon ...', count: 100},
   ]);
   const [loading, setLoading] = useState(true);
-  const { token } = useAuth();
 
   useEffect(() => {
     const fetchJobs = async () => {

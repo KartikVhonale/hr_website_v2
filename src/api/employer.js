@@ -6,6 +6,7 @@
 import httpClient, {
   getCached,
   getUserData,
+  invalidateCache,
   CACHE_TTL,
   COOKIE_TTL
 } from './httpClient.js';
@@ -82,6 +83,14 @@ export const updateJobPosting = async (jobId, jobData) => {
 export const deleteJobPosting = async (jobId) => {
   try {
     const response = await httpClient.delete(`${API_ENDPOINTS.EMPLOYER.JOBS}/${jobId}`);
+    
+    // On successful deletion, invalidate relevant caches
+    if (response.data.success) {
+      console.log('Job deleted, invalidating caches...');
+      invalidateCache(API_ENDPOINTS.EMPLOYER.JOBS); // Invalidate /employer/jobs
+      invalidateCache(`${API_ENDPOINTS.EMPLOYER.BASE}/dashboard`); // Invalidate /employer/dashboard
+    }
+    
     return response.data;
   } catch (error) {
     console.error('Delete job posting error:', error);

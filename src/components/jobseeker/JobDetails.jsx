@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaMapMarkerAlt, FaClock, FaDollarSign, FaBuilding, FaCalendarAlt, FaBookmark, FaRegBookmark, FaArrowLeft, FaShare } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaClock, FaDollarSign, FaBuilding, FaCalendarAlt, FaBookmark, FaRegBookmark, FaArrowLeft, FaShare, FaUser, FaEnvelope } from 'react-icons/fa';
 import jobsAPI from '../../api/jobs';
 import jobseekerAPI from '../../api/jobseeker';
 import applicationsAPI from '../../api/applications';
+import { useAuth } from '../../context/AuthContext';
+import ApplyJobModal from '../modal/ApplyJobModal';
 import '../../css/JobDetails.css';
 
 const JobDetails = () => {
   const { jobId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -17,15 +20,6 @@ const JobDetails = () => {
   const [error, setError] = useState('');
   const [hasApplied, setHasApplied] = useState(false);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
-  
-  // Application form state
-  const [applicationData, setApplicationData] = useState({
-    coverLetter: '',
-    resume: null,
-    expectedSalary: '',
-    availableFrom: '',
-    additionalInfo: ''
-  });
 
   useEffect(() => {
     console.log('JobDetails useEffect - jobId:', jobId);
@@ -105,63 +99,37 @@ const JobDetails = () => {
   };
 
   const handleApplyClick = () => {
+    if (!user) {
+      navigate('/login', { 
+        state: { 
+          from: `/job/${jobId}`,
+          message: 'You must be logged in as a Jobseeker to apply.' 
+        } 
+      });
+      return;
+    }
+
+    if (user.role !== 'jobseeker') {
+      navigate('/login', { 
+        state: { 
+          from: `/job/${jobId}`,
+          message: `You are logged in as an ${user.role}. Please log in as a Jobseeker to apply.`
+        } 
+      });
+      return;
+    }
+    
     if (hasApplied) {
       alert('You have already applied for this job');
       return;
     }
+
     setShowApplicationForm(true);
   };
 
-  const handleApplicationSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      setApplying(true);
-
-      // Prepare application data according to API signature
-      const appData = {
-        coverLetter: applicationData.coverLetter,
-        expectedSalary: applicationData.expectedSalary,
-        availableFrom: applicationData.availableFrom,
-        additionalInfo: applicationData.additionalInfo
-      };
-
-      // Add resume if provided
-      if (applicationData.resume) {
-        appData.resume = applicationData.resume;
-      }
-
-      const response = await applicationsAPI.submitApplication(jobId, appData);
-
-      if (response && response.success) {
-        alert('Application submitted successfully!');
-        setHasApplied(true);
-        setShowApplicationForm(false);
-        setApplicationData({
-          coverLetter: '',
-          resume: null,
-          expectedSalary: '',
-          availableFrom: '',
-          additionalInfo: ''
-        });
-      } else {
-        alert('Failed to submit application. Please try again.');
-      }
-    } catch (err) {
-      console.error('Error submitting application:', err);
-      alert('Failed to submit application. Please try again.');
-    } finally {
-      setApplying(false);
-    }
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === 'resume') {
-      setApplicationData(prev => ({ ...prev, [name]: files[0] }));
-    } else {
-      setApplicationData(prev => ({ ...prev, [name]: value }));
-    }
+  const handleApplicationSuccess = () => {
+    setHasApplied(true);
+    setShowApplicationForm(false);
   };
 
   const formatDate = (dateString) => {
@@ -320,90 +288,13 @@ const JobDetails = () => {
         </div>
       </div>
 
-      {/* Application Form Modal */}
-      {showApplicationForm && (
-        <div className="application-modal">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2>Apply for {job.title}</h2>
-              <button onClick={() => setShowApplicationForm(false)} className="close-btn">×</button>
-            </div>
-            
-            <form onSubmit={handleApplicationSubmit} className="application-form">
-              <div className="form-group">
-                <label htmlFor="coverLetter">Cover Letter *</label>
-                <textarea
-                  id="coverLetter"
-                  name="coverLetter"
-                  value={applicationData.coverLetter}
-                  onChange={handleInputChange}
-                  placeholder="Tell us why you're interested in this position..."
-                  required
-                  rows={6}
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="resume">Resume (Optional)</label>
-                <input
-                  type="file"
-                  id="resume"
-                  name="resume"
-                  onChange={handleInputChange}
-                  accept=".pdf,.doc,.docx"
-                />
-                <small>Upload your latest resume (PDF, DOC, DOCX)</small>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="expectedSalary">Expected Salary</label>
-                  <input
-                    type="text"
-                    id="expectedSalary"
-                    name="expectedSalary"
-                    value={applicationData.expectedSalary}
-                    onChange={handleInputChange}
-                    placeholder="e.g., $50,000"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="availableFrom">Available From</label>
-                  <input
-                    type="date"
-                    id="availableFrom"
-                    name="availableFrom"
-                    value={applicationData.availableFrom}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="additionalInfo">Additional Information</label>
-                <textarea
-                  id="additionalInfo"
-                  name="additionalInfo"
-                  value={applicationData.additionalInfo}
-                  onChange={handleInputChange}
-                  placeholder="Any additional information you'd like to share..."
-                  rows={3}
-                />
-              </div>
-
-              <div className="form-actions">
-                <button type="button" onClick={() => setShowApplicationForm(false)} className="cancel-btn">
-                  Cancel
-                </button>
-                <button type="submit" disabled={applying} className="submit-btn">
-                  {applying ? 'Submitting...' : 'Submit Application'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <ApplyJobModal
+        isOpen={showApplicationForm}
+        onRequestClose={() => setShowApplicationForm(false)}
+        job={job}
+        user={user}
+        onApplicationSuccess={handleApplicationSuccess}
+      />
     </div>
   );
 };

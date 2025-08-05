@@ -89,15 +89,17 @@ const ManageJobs = ({ refetchTrigger }) => {
       setLoading(true);
       try {
         console.log(`Attempting to delete job with ID: ${jobId}`);
-        const response = await jobsAPI.deleteJob(jobId);
-        console.log('Delete job API response:', response);
-        // Refresh the job list after successful deletion
-        fetchJobs();
+        // The deleteJobPosting function in the API layer now handles cache invalidation
+        await jobsAPI.deleteJob(jobId);
         alert('Job deleted successfully!');
+        
+        // Simply refetch the jobs for this component.
+        // The parent component will refetch its own data via its own mechanisms.
+        fetchJobs(true);
+
       } catch (error) {
         console.error('Error deleting job:', error);
         alert('Failed to delete job. Please try again.');
-        // Optionally, show an error message to the user
       } finally {
         setLoading(false);
       }

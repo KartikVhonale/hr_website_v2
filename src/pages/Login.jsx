@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaEye, FaEyeSlash, FaInfoCircle } from 'react-icons/fa';
 import { authAPI } from '../api/index.js';
 import '../css/Login.css';
 
@@ -11,9 +11,19 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [infoMessage, setInfoMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
+
+  useEffect(() => {
+    if (location.state?.message) {
+      setInfoMessage(location.state.message);
+      // Optional: Clear the message from state so it doesn't reappear on refresh
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,6 +73,12 @@ const Login = () => {
           </button>
         </div>
         <h2 className="login-title">Login to TalentFlow</h2>
+        {infoMessage && (
+          <div className="login-info-message">
+            <FaInfoCircle />
+            <span>{infoMessage}</span>
+          </div>
+        )}
         {error && <p className="login-error">{error}</p>}
         <div className="login-field">
           <label htmlFor="email">Email</label>
