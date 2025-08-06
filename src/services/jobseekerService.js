@@ -82,7 +82,6 @@ const uploadResume = async (file) => {
 
         const response = await httpClient.post(`${API_URL}/upload-resume`, formData, {
             headers: {
-                'Content-Type': 'multipart/form-data',
                 Authorization: `Bearer ${getAuthToken()}`,
             },
         });

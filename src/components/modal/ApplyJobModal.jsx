@@ -66,7 +66,7 @@ const ApplyJobModal = ({ isOpen, onRequestClose, job, user, onApplicationSuccess
 
       const response = await applicationsAPI.submitApplication(job._id, appData);
 
-      if (response && response.success) {
+      if (response && response.data.success) {
         alert('Application submitted successfully!');
         onApplicationSuccess(); // Notify parent
       } else {

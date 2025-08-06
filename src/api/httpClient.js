@@ -145,8 +145,9 @@ export const post = async (url, data = {}, options = {}) => {
   // Handle different data types
   if (data instanceof FormData) {
     body = data;
-    // Remove Content-Type for FormData to let browser set boundary
-    delete finalHeaders['Content-Type'];
+    // By setting Content-Type to undefined, we prevent the default 'application/json'
+    // header from being added, allowing the browser to set the correct multipart boundary.
+    finalHeaders['Content-Type'] = undefined;
   } else {
     body = JSON.stringify(data);
     finalHeaders['Content-Type'] = 'application/json';
@@ -170,8 +171,9 @@ export const put = async (url, data = {}, options = {}) => {
   // Handle different data types
   if (data instanceof FormData) {
     body = data;
-    // Remove Content-Type for FormData to let browser set boundary
-    delete finalHeaders['Content-Type'];
+    // By setting Content-Type to undefined, we prevent the default 'application/json'
+    // header from being added, allowing the browser to set the correct multipart boundary.
+    finalHeaders['Content-Type'] = undefined;
   } else {
     body = JSON.stringify(data);
     finalHeaders['Content-Type'] = 'application/json';

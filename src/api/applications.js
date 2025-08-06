@@ -108,7 +108,7 @@ export const submitApplication = async (jobId, applicationData) => {
       API_ENDPOINTS.JOBS.APPLICATIONS(jobId),
       formData
     );
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Submit application error:', error);
     throw error;
