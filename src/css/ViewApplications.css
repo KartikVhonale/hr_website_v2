@@ -1,0 +1,49 @@
+.view-applications-container {
+  padding: 2rem;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.view-applications-header {
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.applications-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.application-card {
+  background-color: var(--card-bg-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.application-card:hover {
+  transform: translateY(-5px);
+}
+
+.application-card-header {
+  margin-bottom: 1rem;
+}
+
+.applicant-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.application-card-body p {
+  margin-bottom: 1rem;
+}
+
+.applicant-email {
+  color: var(--link-color);
+}

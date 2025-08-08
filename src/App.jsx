@@ -20,6 +20,9 @@ import AdminDashboard from './pages/AdminDashboard';
 import JobPortal from './pages/JobPortal';
 import JobDetails from './components/jobseeker/JobDetails';
 import ViewResume from './pages/ViewResume';
+import ViewApplications from './components/employer/ViewApplications';
+import ApplicationStatus from './pages/ApplicationStatus';
+import NotFound from './pages/NotFound';
 import './App.css';
 import './css/Modal.css';
 import { Routes, Route } from 'react-router-dom';
@@ -49,6 +52,9 @@ function App() {
             <Route path="/jobs" element={<JobPortal />} />
             <Route path="/job/:jobId" element={<JobDetails />} />
             <Route path="/view-resume" element={<ViewResume />} />
+            <Route path="/employer/dashboard/applications/:jobId" element={<ViewApplications />} />
+            <Route path="/application-status/:id" element={<ApplicationStatus />} />
+            <Route path="*" element={<NotFound />} />
 
           </Routes>
           <Footer />

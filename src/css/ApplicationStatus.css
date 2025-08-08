@@ -1,0 +1,37 @@
+.application-status-page {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.status-card {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.status-card h3 {
+  margin-top: 0;
+}
+
+.status-applied {
+  color: #007bff;
+  font-weight: bold;
+}
+
+.status-review {
+  color: #ffc107;
+  font-weight: bold;
+}
+
+.status-selected {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.status-rejected {
+  color: #dc3545;
+  font-weight: bold;
+}

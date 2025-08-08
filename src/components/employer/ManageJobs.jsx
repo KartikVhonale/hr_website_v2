@@ -255,6 +255,10 @@ const ManageJobs = ({ refetchTrigger }) => {
                     </span>
                   </div>
                   <div className="job-actions">
+                    <button className="action-btn view-applicants-btn" title="View Applications" onClick={() => navigate(`/employer/dashboard/applications/${job._id}`)}>
+                      <FaUsers />
+                      <span className="applicants-count">{job.applicationCount || 0}</span>
+                    </button>
                     <button className="action-btn view-btn" title="View Details" onClick={() => handleView(job._id)}>
                       <FaEye />
                     </button>

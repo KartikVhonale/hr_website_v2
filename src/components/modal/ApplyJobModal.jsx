@@ -31,6 +31,7 @@ const ApplyJobModal = ({ isOpen, onRequestClose, job, user, onApplicationSuccess
               email: user.email || '',
               coverLetter: `Dear Hiring Manager,\n\nI am writing to express my interest in the ${job.title} position. With a background in ${jobseekerProfile.jobTitle || 'this field'} and experience with ${jobseekerProfile.skills?.join(', ') || 'relevant technologies'}, I am confident I have the skills and qualifications you are looking for.\n\nMy resume is attached for your review. Thank you for your time and consideration.\n\nSincerely,\n${user.name}`,
               expectedSalary: jobseekerProfile.preferences?.salaryRange?.min ? String(jobseekerProfile.preferences.salaryRange.min) : '',
+              resume: jobseekerProfile.resume,
             }));
           }
         } catch (error) {
@@ -61,8 +62,13 @@ const ApplyJobModal = ({ isOpen, onRequestClose, job, user, onApplicationSuccess
         expectedSalary: applicationData.expectedSalary,
         availableFrom: applicationData.availableFrom,
         additionalInfo: applicationData.additionalInfo,
-        resume: applicationData.resume
+        resume: applicationData.resume,
       };
+
+      // If a new resume is not uploaded but exists in profile, use the existing one
+      if (!appData.resume && profile && profile.resume) {
+        appData.resume = profile.resume;
+      }
 
       const response = await applicationsAPI.submitApplication(job._id, appData);
 
@@ -70,11 +76,13 @@ const ApplyJobModal = ({ isOpen, onRequestClose, job, user, onApplicationSuccess
         alert('Application submitted successfully!');
         onApplicationSuccess(); // Notify parent
       } else {
-        alert('Failed to submit application. Please try again.');
+        const errorMessage = response?.data?.message || 'Failed to submit application. Please try again.';
+        alert(errorMessage);
       }
     } catch (err) {
       console.error('Error submitting application:', err);
-      alert('Failed to submit application. Please try again.');
+      const errorMessage = err.response?.data?.message || 'An unexpected error occurred. Please try again.';
+      alert(errorMessage);
     } finally {
       setApplying(false);
     }
@@ -138,6 +146,11 @@ const ApplyJobModal = ({ isOpen, onRequestClose, job, user, onApplicationSuccess
               accept=".pdf,.doc,.docx"
             />
             <small>{profile?.resume?.url ? 'Upload a different resume (optional)' : 'Upload your resume (PDF, DOC, DOCX)'}</small>
+            {profile?.resume?.url && (
+              <button type="button" onClick={() => document.getElementById('resume').click()} className="edit-resume-btn">
+                Edit Resume
+              </button>
+            )}
           </div>
 
           <div className="form-row">

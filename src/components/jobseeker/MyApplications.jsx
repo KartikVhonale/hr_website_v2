@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   FaFileAlt, 
   FaClock, 
@@ -274,12 +275,9 @@ const MyApplications = () => {
               </div>
 
               <div className="application-actions">
-                <button 
-                  className="action-btn view-btn"
-                  onClick={() => setSelectedApplication(application)}
-                >
-                  <FaEye /> View Details
-                </button>
+                <Link to={`/application-status/${application._id}`} className="action-btn view-btn">
+                  <FaEye /> View Status
+                </Link>
                 {(application.status === 'pending' || application.status === 'review') && (
                   <button 
                     className="action-btn withdraw-btn"

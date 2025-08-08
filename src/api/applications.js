@@ -96,7 +96,12 @@ export const submitApplication = async (jobId, applicationData) => {
     
     // Add files if present
     if (applicationData.resume) {
-      formData.append('resume', applicationData.resume);
+      if (applicationData.resume instanceof File) {
+        formData.append('resume', applicationData.resume);
+      } else if (typeof applicationData.resume === 'object' && applicationData.resume.url) {
+        formData.append('resumeUrl', applicationData.resume.url);
+        formData.append('resume_original_name', applicationData.resume.original_name);
+      }
     }
     
     // Add cover letter as a text field
