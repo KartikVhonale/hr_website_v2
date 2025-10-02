@@ -9,14 +9,28 @@ const AllApplicationsReview = ({ applications: propApplications, loading: propLo
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortBy, setSortBy] = useState('dateApplied');
-  const [loading, setLoading] = useState(propLoading !== undefined ? propLoading : true);
+  // Initialize loading state - always load data unless propLoading is explicitly set to false
+  const [loading, setLoading] = useState(() => {
+    // If propLoading is provided, use that value
+    if (propLoading !== undefined) {
+      return propLoading;
+    }
+    // Otherwise, we need to fetch data, so we're loading
+    return true;
+  });
   const [error, setError] = useState(propError || '');
   const [successMessage, setSuccessMessage] = useState(''); // Added success message state
+  const [showResumeModal, setShowResumeModal] = useState(false);
+  const [selectedResumeUrl, setSelectedResumeUrl] = useState('');
 
   // Update local state when props change
   useEffect(() => {
     if (propApplications !== undefined) {
       setApplications(propApplications);
+      // If we have applications from props, we're no longer loading
+      if (Array.isArray(propApplications) && propApplications.length > 0) {
+        setLoading(false);
+      }
     }
     if (propLoading !== undefined) {
       setLoading(propLoading);
@@ -26,17 +40,18 @@ const AllApplicationsReview = ({ applications: propApplications, loading: propLo
     }
   }, [propApplications, propLoading, propError]);
 
-  // If no applications were passed via props, fetch them
+  // If no applications were passed via props, or if we want to fetch all applications, fetch them
   useEffect(() => {
-    if (propApplications === undefined) {
-      fetchAllApplications();
-    }
+    fetchAllApplications(false);
   }, []);
 
-  const fetchAllApplications = async () => {
-    if (propApplications !== undefined) return; // Don't fetch if props are provided
+  const fetchAllApplications = async (forceRefetch = false) => {
+    // Always fetch all applications, regardless of props
+    // Only set loading state if we're not using propLoading
+    if (propLoading === undefined) {
+      setLoading(true);
+    }
     
-    setLoading(true);
     try {
       const response = await employerAPI.getAllApplications();
 
@@ -44,10 +59,15 @@ const AllApplicationsReview = ({ applications: propApplications, loading: propLo
 
       // Handle different response structures
       let apiResponse;
-      if (response.data) {
-        apiResponse = response.data;
-      } else if (response.success !== undefined) {
+      if (response && response.data && response.success !== undefined) {
+        // Standard response structure with success, count, and data properties
         apiResponse = response;
+      } else if (Array.isArray(response)) {
+        // Direct array response from backend
+        apiResponse = { success: true, data: response };
+      } else if (response && response.data && Array.isArray(response.data)) {
+        // Response with data property containing array
+        apiResponse = { success: true, data: response.data };
       } else {
         throw new Error('Invalid API response structure');
       }
@@ -67,9 +87,8 @@ const AllApplicationsReview = ({ applications: propApplications, loading: propLo
       setError(`Failed to fetch applications: ${err.message}`);
       setApplications([]);
     } finally {
-      if (propLoading === undefined) {
-        setLoading(false);
-      }
+      // Always reset loading state regardless of propLoading
+      setLoading(false);
     }
   };
 
@@ -84,7 +103,7 @@ const AllApplicationsReview = ({ applications: propApplications, loading: propLo
     
     // Show confirmation dialog for changing status
     const currentStatus = currentApplication ? currentApplication.status : 'unknown';
-    const action = newStatus === 'approved' ? 'accept' : 'reject';
+    const action = newStatus === 'selected' ? 'accept' : 'reject';
     const confirmed = window.confirm(`Are you sure you want to ${action} this application? Current status: ${currentStatus}`);
     
     if (!confirmed) {
@@ -92,6 +111,13 @@ const AllApplicationsReview = ({ applications: propApplications, loading: propLo
     }
     
     try {
+      // Update local state immediately for better UX
+      setApplications(applications.map(app =>
+        app._id === applicationId
+          ? { ...app, status: newStatus }
+          : app
+      ));
+      
       const response = await employerAPI.updateApplicationStatus(applicationId, newStatus);
 
       // Handle different response structures
@@ -103,20 +129,19 @@ const AllApplicationsReview = ({ applications: propApplications, loading: propLo
       } else if (response._id) {
         // Direct response from backend
         apiResponse = { success: true, data: response };
+      } else if (Array.isArray(response)) {
+        // Array response from backend
+        apiResponse = { success: true, data: response };
       } else {
         apiResponse = { success: true }; // Assume success if no clear structure
       }
 
       if (apiResponse.success !== false) {
-        // Update local state immediately for better UX
-        setApplications(applications.map(app =>
-          app._id === applicationId
-            ? { ...app, status: newStatus }
-            : app
-        ));
+        // Refetch applications to ensure data consistency
+        await fetchAllApplications(true);
         
         // Show success message
-        const action = newStatus === 'approved' ? 'accepted' : 'rejected';
+        const action = newStatus === 'selected' ? 'accepted' : 'rejected';
         setSuccessMessage(`Application ${action} successfully`);
         setError(''); // Clear any previous error
         setTimeout(() => setSuccessMessage(''), 3000); // Clear message after 3 seconds
@@ -126,10 +151,13 @@ const AllApplicationsReview = ({ applications: propApplications, loading: propLo
           setShowModal(false);
           setSelectedApplication(null);
         }
-        
-        // Optionally refetch to ensure data consistency
-        // await fetchAllApplications(); // Commented out to avoid unnecessary refetch
       } else {
+        // Revert the local state change if the API call failed
+        setApplications(applications.map(app =>
+          app._id === applicationId
+            ? { ...app, status: currentStatus }
+            : app
+        ));
         throw new Error(apiResponse.message || 'Failed to update status');
       }
     } catch (err) {
@@ -145,6 +173,13 @@ const AllApplicationsReview = ({ applications: propApplications, loading: propLo
       // Get current application to preserve status
       const currentApp = applications.find(app => app._id === applicationId);
       const currentStatus = currentApp?.status || 'applied';
+      
+      // Update local state immediately for better UX
+      setApplications(applications.map(app =>
+        app._id === applicationId
+          ? { ...app, notes }
+          : app
+      ));
 
       const response = await employerAPI.updateApplicationStatus(applicationId, currentStatus, notes);
 
@@ -157,18 +192,24 @@ const AllApplicationsReview = ({ applications: propApplications, loading: propLo
       } else if (response._id) {
         // Direct response from backend
         apiResponse = { success: true, data: response };
+      } else if (Array.isArray(response)) {
+        // Array response from backend
+        apiResponse = { success: true, data: response };
       } else {
         apiResponse = { success: true }; // Assume success if no clear structure
       }
 
       if (apiResponse.success !== false) {
-        setApplications(applications.map(app =>
-          app._id === applicationId
-            ? { ...app, notes }
-            : app
-        ));
+        // Refetch applications to ensure data consistency
+        await fetchAllApplications(true);
         console.log('Notes added successfully');
       } else {
+        // Revert the local state change if the API call failed
+        setApplications(applications.map(app =>
+          app._id === applicationId
+            ? { ...app, notes: currentApp?.notes || '' }
+            : app
+        ));
         throw new Error(apiResponse.message || 'Failed to add notes');
       }
     } catch (err) {
@@ -182,12 +223,17 @@ const AllApplicationsReview = ({ applications: propApplications, loading: propLo
     console.log('Scheduling interview for application:', applicationId);
   };
 
+  const handleViewResume = (resumeUrl) => {
+    setSelectedResumeUrl(resumeUrl);
+    setShowResumeModal(true);
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      case 'approved': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'applied': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'selected': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      case 'interviewed': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'review': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
@@ -286,15 +332,18 @@ const AllApplicationsReview = ({ applications: propApplications, loading: propLo
           <Eye className="w-4 h-4 mr-2" />
           View Details
         </button>
-        <button className="flex items-center justify-center px-3 py-2 bg-gray-600 text-white rounded-md text-sm font-medium hover:bg-gray-700 transition-colors">
-          <Download className="w-4 h-4 mr-2" />
-          Resume
+        <button 
+          className="flex items-center justify-center px-3 py-2 bg-gray-600 text-white rounded-md text-sm font-medium hover:bg-gray-700 transition-colors"
+          onClick={() => handleViewResume(application.resume?.url)}
+        >
+          <Eye className="w-4 h-4 mr-2" />
+          View Resume
         </button>
       </div>
 
       {/* Always visible Accept/Reject buttons */}
       <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
-        {application.status === 'pending' ? (
+        {application.status === 'applied' ? (
           <>
             <div className="flex items-center mb-2">
               <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2 animate-pulse"></div>
@@ -302,7 +351,7 @@ const AllApplicationsReview = ({ applications: propApplications, loading: propLo
             </div>
             <div className="flex space-x-2">
               <button
-                onClick={() => handleStatusChange(application._id, 'approved')}
+                onClick={() => handleStatusChange(application._id, 'selected')}
                 className="flex-1 flex items-center justify-center px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium transition-colors shadow-md"
               >
                 <Check className="w-4 h-4 mr-2" />
@@ -320,10 +369,10 @@ const AllApplicationsReview = ({ applications: propApplications, loading: propLo
         ) : (
           <div className="flex space-x-2">
             <button
-              onClick={() => handleStatusChange(application._id, 'approved')}
-              disabled={application.status === 'approved'}
+              onClick={() => handleStatusChange(application._id, 'selected')}
+              disabled={application.status === 'selected'}
               className={`flex-1 flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-colors shadow-md ${
-                application.status === 'approved' 
+                application.status === 'selected' 
                   ? 'bg-green-300 text-green-800 cursor-not-allowed' 
                   : 'bg-green-600 hover:bg-green-700 text-white'
               }`}
@@ -447,6 +496,13 @@ const AllApplicationsReview = ({ applications: propApplications, loading: propLo
 
           {/* Actions */}
           <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <button 
+              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              onClick={() => handleViewResume(application.resume?.url)}
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              View Resume
+            </button>
             <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
               <Download className="w-4 h-4 mr-2" />
               Download Resume
@@ -465,7 +521,7 @@ const AllApplicationsReview = ({ applications: propApplications, loading: propLo
             
             {/* Always visible Accept/Reject buttons */}
             <div className="w-full pt-2">
-              {application.status === 'pending' ? (
+              {application.status === 'applied' ? (
                 <>
                   <div className="flex items-center mb-2">
                     <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2 animate-pulse"></div>
@@ -474,7 +530,7 @@ const AllApplicationsReview = ({ applications: propApplications, loading: propLo
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => {
-                        handleStatusChange(application._id, 'approved');
+                        handleStatusChange(application._id, 'selected');
                         onClose();
                       }}
                       className="flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors font-medium shadow-md"
@@ -497,10 +553,10 @@ const AllApplicationsReview = ({ applications: propApplications, loading: propLo
               ) : (
                 <div className="flex flex-wrap gap-2">
                   <button
-                    onClick={() => handleStatusChange(application._id, 'approved')}
-                    disabled={application.status === 'approved'}
+                    onClick={() => handleStatusChange(application._id, 'selected')}
+                    disabled={application.status === 'selected'}
                     className={`flex items-center px-4 py-2 rounded-md transition-colors font-medium shadow-md ${
-                      application.status === 'approved' 
+                      application.status === 'selected' 
                         ? 'bg-green-300 text-green-800 cursor-not-allowed' 
                         : 'bg-green-600 hover:bg-green-700 text-white'
                     }`}
@@ -524,6 +580,51 @@ const AllApplicationsReview = ({ applications: propApplications, loading: propLo
               )}
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const ResumeModal = ({ resumeUrl, onClose }) => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Resume Preview</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        <div className="p-4 h-[80vh]">
+          {resumeUrl ? (
+            <iframe 
+              src={resumeUrl} 
+              className="w-full h-full border-0"
+              title="Resume Preview"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = 'about:blank';
+              }}
+            >
+              <p>Your browser does not support PDF viewing. <a href={resumeUrl} target="_blank" rel="noopener noreferrer">Download the PDF</a> to view it.</p>
+            </iframe>
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-gray-500 dark:text-gray-400">No resume available</p>
+            </div>
+          )}
+        </div>
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+          <a 
+            href={resumeUrl} 
+            download 
+            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download Resume
+          </a>
         </div>
       </div>
     </div>
@@ -585,10 +686,10 @@ const AllApplicationsReview = ({ applications: propApplications, loading: propLo
             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           >
             <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
+            <option value="applied">Applied</option>
+            <option value="selected">Selected</option>
             <option value="rejected">Rejected</option>
-            <option value="interviewed">Interviewed</option>
+            <option value="review">Review</option>
           </select>
         </div>
       </div>
@@ -626,6 +727,17 @@ const AllApplicationsReview = ({ applications: propApplications, loading: propLo
           onClose={() => {
             setShowModal(false);
             setSelectedApplication(null);
+          }}
+        />
+      )}
+
+      {/* Resume Modal */}
+      {showResumeModal && selectedResumeUrl && (
+        <ResumeModal
+          resumeUrl={selectedResumeUrl}
+          onClose={() => {
+            setShowResumeModal(false);
+            setSelectedResumeUrl('');
           }}
         />
       )}
