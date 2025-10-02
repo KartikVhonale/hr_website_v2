@@ -2,34 +2,45 @@ import React, { useState, useEffect } from 'react';
 import { employerAPI } from '../../api/index.js';
 import { FileText, User, Calendar, MapPin, Briefcase, DollarSign, Clock, Star, Eye, Check, X, MessageSquare, Download, Filter, Search } from 'lucide-react';
 
-const ApplicationReview = ({ jobId }) => {
-  const [applications, setApplications] = useState([]);
+const AllApplicationsReview = ({ applications: propApplications, loading: propLoading, error: propError }) => {
+  const [applications, setApplications] = useState(propApplications || []);
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortBy, setSortBy] = useState('dateApplied');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(propLoading !== undefined ? propLoading : true);
+  const [error, setError] = useState(propError || '');
+  const [successMessage, setSuccessMessage] = useState(''); // Added success message state
 
+  // Update local state when props change
   useEffect(() => {
-    fetchApplications();
-  }, [jobId]);
+    if (propApplications !== undefined) {
+      setApplications(propApplications);
+    }
+    if (propLoading !== undefined) {
+      setLoading(propLoading);
+    }
+    if (propError !== undefined) {
+      setError(propError);
+    }
+  }, [propApplications, propLoading, propError]);
 
-  const fetchApplications = async () => {
+  // If no applications were passed via props, fetch them
+  useEffect(() => {
+    if (propApplications === undefined) {
+      fetchAllApplications();
+    }
+  }, []);
+
+  const fetchAllApplications = async () => {
+    if (propApplications !== undefined) return; // Don't fetch if props are provided
+    
     setLoading(true);
     try {
-      let response;
-      
-      // If jobId is provided, fetch applications for that specific job
-      // Otherwise, fetch all applications for the employer
-      if (jobId) {
-        response = await employerAPI.getApplicationsForJob(jobId);
-      } else {
-        response = await employerAPI.getAllApplications();
-      }
+      const response = await employerAPI.getAllApplications();
 
-      console.log('ApplicationReview API response:', response);
+      console.log('AllApplicationsReview API response:', response);
 
       // Handle different response structures
       let apiResponse;
@@ -44,23 +55,42 @@ const ApplicationReview = ({ jobId }) => {
       if (apiResponse && apiResponse.success) {
         const applicationsData = apiResponse.data || [];
         setApplications(Array.isArray(applicationsData) ? applicationsData : []);
-        console.log('ApplicationReview: Applications loaded successfully:', applicationsData.length);
+        console.log('AllApplicationsReview: Applications loaded successfully:', applicationsData.length);
         setError(''); // Clear any previous errors
       } else {
-        console.warn('ApplicationReview: API response indicates failure:', apiResponse);
+        console.warn('AllApplicationsReview: API response indicates failure:', apiResponse);
         setApplications([]);
         setError(apiResponse.message || 'Failed to fetch applications');
       }
     } catch (err) {
-      console.error('ApplicationReview: Failed to fetch applications:', err);
+      console.error('AllApplicationsReview: Failed to fetch applications:', err);
       setError(`Failed to fetch applications: ${err.message}`);
       setApplications([]);
     } finally {
-      setLoading(false);
+      if (propLoading === undefined) {
+        setLoading(false);
+      }
     }
   };
 
   const handleStatusChange = async (applicationId, newStatus) => {
+    // If the application is already in the desired state, don't proceed
+    const currentApplication = applications.find(app => app._id === applicationId);
+    if (currentApplication && currentApplication.status === newStatus) {
+      setSuccessMessage(`Application is already ${newStatus}`);
+      setTimeout(() => setSuccessMessage(''), 3000);
+      return;
+    }
+    
+    // Show confirmation dialog for changing status
+    const currentStatus = currentApplication ? currentApplication.status : 'unknown';
+    const action = newStatus === 'approved' ? 'accept' : 'reject';
+    const confirmed = window.confirm(`Are you sure you want to ${action} this application? Current status: ${currentStatus}`);
+    
+    if (!confirmed) {
+      return; // User cancelled the action
+    }
+    
     try {
       const response = await employerAPI.updateApplicationStatus(applicationId, newStatus);
 
@@ -70,6 +100,9 @@ const ApplicationReview = ({ jobId }) => {
         apiResponse = response.data;
       } else if (response.success !== undefined) {
         apiResponse = response;
+      } else if (response._id) {
+        // Direct response from backend
+        apiResponse = { success: true, data: response };
       } else {
         apiResponse = { success: true }; // Assume success if no clear structure
       }
@@ -81,16 +114,29 @@ const ApplicationReview = ({ jobId }) => {
             ? { ...app, status: newStatus }
             : app
         ));
-        console.log('Application status updated successfully');
-
+        
+        // Show success message
+        const action = newStatus === 'approved' ? 'accepted' : 'rejected';
+        setSuccessMessage(`Application ${action} successfully`);
+        setError(''); // Clear any previous error
+        setTimeout(() => setSuccessMessage(''), 3000); // Clear message after 3 seconds
+        
+        // Close modal if it's open and showing this application
+        if (selectedApplication && selectedApplication._id === applicationId) {
+          setShowModal(false);
+          setSelectedApplication(null);
+        }
+        
         // Optionally refetch to ensure data consistency
-        await fetchApplications();
+        // await fetchAllApplications(); // Commented out to avoid unnecessary refetch
       } else {
         throw new Error(apiResponse.message || 'Failed to update status');
       }
     } catch (err) {
       console.error('Failed to update status:', err);
       setError(`Failed to update status: ${err.message}`);
+      setSuccessMessage(''); // Clear any previous success message
+      setTimeout(() => setError(''), 5000); // Clear error after 5 seconds
     }
   };
 
@@ -98,7 +144,7 @@ const ApplicationReview = ({ jobId }) => {
     try {
       // Get current application to preserve status
       const currentApp = applications.find(app => app._id === applicationId);
-      const currentStatus = currentApp?.status || 'pending';
+      const currentStatus = currentApp?.status || 'applied';
 
       const response = await employerAPI.updateApplicationStatus(applicationId, currentStatus, notes);
 
@@ -108,6 +154,9 @@ const ApplicationReview = ({ jobId }) => {
         apiResponse = response.data;
       } else if (response.success !== undefined) {
         apiResponse = response;
+      } else if (response._id) {
+        // Direct response from backend
+        apiResponse = { success: true, data: response };
       } else {
         apiResponse = { success: true }; // Assume success if no clear structure
       }
@@ -151,16 +200,19 @@ const ApplicationReview = ({ jobId }) => {
     .filter(app =>
       (app.applicant.name && app.applicant.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (app.job.title && app.job.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (app.skills && app.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase())))
+      (app.applicant.email && app.applicant.email.toLowerCase().includes(searchQuery.toLowerCase()))
     )
     .sort((a, b) => {
       switch (sortBy) {
         case 'name':
-          return a.candidateName.localeCompare(b.candidateName);
-        case 'rating':
-          return b.rating - a.rating;
+          // Use applicant name for sorting
+          const nameA = a.applicant?.name || '';
+          const nameB = b.applicant?.name || '';
+          return nameA.localeCompare(nameB);
         case 'dateApplied':
-          return new Date(b.dateApplied) - new Date(a.dateApplied);
+          const dateA = new Date(a.createdAt || 0);
+          const dateB = new Date(b.createdAt || 0);
+          return dateB - dateA;
         default:
           return 0;
       }
@@ -195,30 +247,24 @@ const ApplicationReview = ({ jobId }) => {
           {application.job.location}
         </div>
         <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-          <Briefcase className="w-4 h-4 mr-2" />
-          {application.experience || 'N/A'}
-        </div>
-        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-          <DollarSign className="w-4 h-4 mr-2" />
-          {application.expectedSalary || 'N/A'}
-        </div>
-        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-          <Star className="w-4 h-4 mr-2 text-yellow-400 fill-current" />
-          {application.rating || 'N/A'}
+          <User className="w-4 h-4 mr-2" />
+          {application.applicant.phone || 'No phone provided'}
         </div>
       </div>
 
       <div className="mb-4">
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Skills:</p>
         <div className="flex flex-wrap gap-2">
-          {application.skills.map((skill, index) => (
+          {Array.isArray(application.applicant.skills) ? application.applicant.skills.map((skill, index) => (
             <span
               key={index}
               className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded-full"
             >
               {skill}
             </span>
-          ))}
+          )) : (
+            <span className="text-gray-500 text-sm">No skills listed</span>
+          )}
         </div>
       </div>
 
@@ -246,24 +292,60 @@ const ApplicationReview = ({ jobId }) => {
         </button>
       </div>
 
-      {application.status === 'pending' && (
-        <div className="flex space-x-2">
-          <button
-            onClick={() => handleStatusChange(application._id, 'approved')}
-            className="flex-1 flex items-center justify-center px-3 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 transition-colors"
-          >
-            <Check className="w-4 h-4 mr-2" />
-            Approve
-          </button>
-          <button
-            onClick={() => handleStatusChange(application._id, 'rejected')}
-            className="flex-1 flex items-center justify-center px-3 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 transition-colors"
-          >
-            <X className="w-4 h-4 mr-2" />
-            Reject
-          </button>
-        </div>
-      )}
+      {/* Always visible Accept/Reject buttons */}
+      <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
+        {application.status === 'pending' ? (
+          <>
+            <div className="flex items-center mb-2">
+              <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2 animate-pulse"></div>
+              <span className="text-sm font-medium text-yellow-700 dark:text-yellow-300">Action Required</span>
+            </div>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => handleStatusChange(application._id, 'approved')}
+                className="flex-1 flex items-center justify-center px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium transition-colors shadow-md"
+              >
+                <Check className="w-4 h-4 mr-2" />
+                Accept
+              </button>
+              <button
+                onClick={() => handleStatusChange(application._id, 'rejected')}
+                className="flex-1 flex items-center justify-center px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition-colors shadow-md"
+              >
+                <X className="w-4 h-4 mr-2" />
+                Reject
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="flex space-x-2">
+            <button
+              onClick={() => handleStatusChange(application._id, 'approved')}
+              disabled={application.status === 'approved'}
+              className={`flex-1 flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-colors shadow-md ${
+                application.status === 'approved' 
+                  ? 'bg-green-300 text-green-800 cursor-not-allowed' 
+                  : 'bg-green-600 hover:bg-green-700 text-white'
+              }`}
+            >
+              <Check className="w-4 h-4 mr-2" />
+              Accept
+            </button>
+            <button
+              onClick={() => handleStatusChange(application._id, 'rejected')}
+              disabled={application.status === 'rejected'}
+              className={`flex-1 flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-colors shadow-md ${
+                application.status === 'rejected' 
+                  ? 'bg-red-300 text-red-800 cursor-not-allowed' 
+                  : 'bg-red-600 hover:bg-red-700 text-white'
+              }`}
+            >
+              <X className="w-4 h-4 mr-2" />
+              Reject
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 
@@ -319,19 +401,9 @@ const ApplicationReview = ({ jobId }) => {
                   <span className="ml-2 text-gray-900 dark:text-white">{application.job.location}</span>
                 </div>
                 <div className="flex items-center text-sm">
-                  <Briefcase className="w-4 h-4 mr-2 text-gray-400" />
-                  <span className="text-gray-600 dark:text-gray-400">Experience:</span>
-                  <span className="ml-2 text-gray-900 dark:text-white">{application.experience || 'N/A'}</span>
-                </div>
-                <div className="flex items-center text-sm">
-                  <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
-                  <span className="text-gray-600 dark:text-gray-400">Expected Salary:</span>
-                  <span className="ml-2 text-gray-900 dark:text-white">{application.expectedSalary || 'N/A'}</span>
-                </div>
-                <div className="flex items-center text-sm">
-                  <Star className="w-4 h-4 mr-2 text-yellow-400 fill-current" />
-                  <span className="text-gray-600 dark:text-gray-400">Rating:</span>
-                  <span className="ml-2 text-gray-900 dark:text-white">{application.rating || 'N/A'}</span>
+                  <User className="w-4 h-4 mr-2 text-gray-400" />
+                  <span className="text-gray-600 dark:text-gray-400">Phone:</span>
+                  <span className="ml-2 text-gray-900 dark:text-white">{application.applicant.phone || 'N/A'}</span>
                 </div>
               </div>
             </div>
@@ -339,14 +411,16 @@ const ApplicationReview = ({ jobId }) => {
             <div>
               <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Skills</h4>
               <div className="flex flex-wrap gap-2">
-                {application.skills.map((skill, index) => (
+                {Array.isArray(application.applicant.skills) ? application.applicant.skills.map((skill, index) => (
                   <span
                     key={index}
                     className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm rounded-full"
                   >
                     {skill}
                   </span>
-                ))}
+                )) : (
+                  <span className="text-gray-500 text-sm">No skills listed</span>
+                )}
               </div>
             </div>
           </div>
@@ -355,7 +429,7 @@ const ApplicationReview = ({ jobId }) => {
           <div>
             <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Cover Letter</h4>
             <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <p className="text-gray-700 dark:text-gray-300">{application.coverLetter}</p>
+              <p className="text-gray-700 dark:text-gray-300">{application.applicant.coverLetter || 'No cover letter provided'}</p>
             </div>
           </div>
 
@@ -372,7 +446,7 @@ const ApplicationReview = ({ jobId }) => {
           </div>
 
           {/* Actions */}
-          <div className="flex space-x-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
             <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
               <Download className="w-4 h-4 mr-2" />
               Download Resume
@@ -388,30 +462,67 @@ const ApplicationReview = ({ jobId }) => {
               <MessageSquare className="w-4 h-4 mr-2" />
               Send Message
             </button>
-            {application.status === 'pending' && (
-              <>
-                <button
-                  onClick={() => {
-                    handleStatusChange(application._id, 'approved');
-                    onClose();
-                  }}
-                  className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-                >
-                  <Check className="w-4 h-4 mr-2" />
-                  Approve
-                </button>
-                <button
-                  onClick={() => {
-                    handleStatusChange(application._id, 'rejected');
-                    onClose();
-                  }}
-                  className="flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  Reject
-                </button>
-              </>
-            )}
+            
+            {/* Always visible Accept/Reject buttons */}
+            <div className="w-full pt-2">
+              {application.status === 'pending' ? (
+                <>
+                  <div className="flex items-center mb-2">
+                    <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2 animate-pulse"></div>
+                    <span className="text-sm font-medium text-yellow-700 dark:text-yellow-300">Action Required</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => {
+                        handleStatusChange(application._id, 'approved');
+                        onClose();
+                      }}
+                      className="flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors font-medium shadow-md"
+                    >
+                      <Check className="w-5 h-5 mr-2" />
+                      Accept Application
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleStatusChange(application._id, 'rejected');
+                        onClose();
+                      }}
+                      className="flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors font-medium shadow-md"
+                    >
+                      <X className="w-5 h-5 mr-2" />
+                      Reject Application
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => handleStatusChange(application._id, 'approved')}
+                    disabled={application.status === 'approved'}
+                    className={`flex items-center px-4 py-2 rounded-md transition-colors font-medium shadow-md ${
+                      application.status === 'approved' 
+                        ? 'bg-green-300 text-green-800 cursor-not-allowed' 
+                        : 'bg-green-600 hover:bg-green-700 text-white'
+                    }`}
+                  >
+                    <Check className="w-5 h-5 mr-2" />
+                    Accept Application
+                  </button>
+                  <button
+                    onClick={() => handleStatusChange(application._id, 'rejected')}
+                    disabled={application.status === 'rejected'}
+                    className={`flex items-center px-4 py-2 rounded-md transition-colors font-medium shadow-md ${
+                      application.status === 'rejected' 
+                        ? 'bg-red-300 text-red-800 cursor-not-allowed' 
+                        : 'bg-red-600 hover:bg-red-700 text-white'
+                    }`}
+                  >
+                    <X className="w-5 h-5 mr-2" />
+                    Reject Application
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -420,12 +531,28 @@ const ApplicationReview = ({ jobId }) => {
 
   return (
     <div className="space-y-6">
+      {/* Success message */}
+      {successMessage && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">Success! </strong>
+          <span className="block sm:inline">{successMessage}</span>
+        </div>
+      )}
+      
+      {/* Error message */}
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">Error! </strong>
+          <span className="block sm:inline">{error}</span>
+        </div>
+      )}
+      
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
             <FileText className="w-6 h-6 text-green-600" />
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Application Review</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">All Applications</h2>
           </div>
           <div className="text-sm text-gray-600 dark:text-gray-400">
             {applications.length} total applications
@@ -451,7 +578,6 @@ const ApplicationReview = ({ jobId }) => {
           >
             <option value="dateApplied">Sort by Date Applied</option>
             <option value="name">Sort by Name</option>
-            <option value="rating">Sort by Rating</option>
           </select>
           <select
             value={statusFilter}
@@ -469,7 +595,12 @@ const ApplicationReview = ({ jobId }) => {
 
       {/* Applications Grid */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        {filteredAndSortedApplications.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="loading-spinner"></div>
+            <p>Loading applications...</p>
+          </div>
+        ) : filteredAndSortedApplications.length === 0 ? (
           <div className="text-center py-12">
             <FileText className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No applications found</h3>
@@ -502,4 +633,4 @@ const ApplicationReview = ({ jobId }) => {
   );
 };
 
-export default ApplicationReview;
+export default AllApplicationsReview;

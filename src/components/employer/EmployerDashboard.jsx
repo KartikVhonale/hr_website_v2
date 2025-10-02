@@ -6,6 +6,7 @@ import EmployerSidebar from './EmployerSidebar';
 import CreateJob from './CreateJob';
 import ManageJobs from './ManageJobs';
 import ArticleManagement from './ArticleManagement';
+import AllApplicationsReview from './AllApplicationsReview'; // Changed import
 import '../../css/EmployerDashboard.css';
 import '../../css/EmployerDashboard-responsive.css';
 import { 
@@ -44,7 +45,9 @@ const EmployerDashboard = ({ userData }) => {
   const [error, setError] = useState('');
   const [jobs, setJobs] = useState([]);
   const [applications, setApplications] = useState([]);
-  const [savedCandidates, setSavedCandidates] = useState([]);
+  const [savedCandidates, setSavedCandidates] = useState([]); // Fixed: Added useState hook
+  const [candidateNotes, setCandidateNotes] = useState({}); // Added: State for candidate notes
+  const [candidateStatus, setCandidateStatus] = useState({}); // Added: State for candidate status
 
   const [interviews, setInterviews] = useState([]);
   const [articles, setArticles] = useState([]);
@@ -253,10 +256,6 @@ const EmployerDashboard = ({ userData }) => {
     }
   };
 
-
-
-
-
   const handleNotesChange = (candidateId, notes) => {
     setCandidateNotes(prev => ({
       ...prev,
@@ -273,6 +272,21 @@ const EmployerDashboard = ({ userData }) => {
       );
     } catch (err) {
       console.error('Failed to save notes:', err);
+    }
+  };
+
+  const handleRemoveCandidate = async (candidateId) => {
+    try {
+      // Call API to remove candidate from saved list
+      await userService.removeSavedCandidate(candidateId, token);
+      
+      // Update local state immediately for better UX
+      setSavedCandidates(prev => prev.filter(candidate => candidate._id !== candidateId));
+      
+      console.log('Candidate removed successfully');
+    } catch (err) {
+      console.error('Failed to remove candidate:', err);
+      setError(`Failed to remove candidate: ${err.message}`);
     }
   };
 
@@ -448,49 +462,8 @@ const EmployerDashboard = ({ userData }) => {
   const renderApplications = () => (
     <div className="applications-section">
       <h2>Job Applications</h2>
-      <div className="applications-grid">
-        {Array.isArray(applications) && applications.length > 0 ? (
-          applications.map((app, index) => (
-            <div key={app._id || index} className="application-card">
-              <div className="application-header">
-                <h4>{app.applicant?.name || 'Unknown Applicant'}</h4>
-                <span className={`status-badge ${app.status || 'pending'}`}>
-                  {app.status || 'Pending'}
-                </span>
-              </div>
-              <p className="job-title">{app.job?.title || 'Unknown Job'}</p>
-              <div className="application-actions">
-                <button
-                  className="btn-view"
-                  onClick={() => console.log('View application:', app._id)}
-                >
-                  <FaEye /> View
-                </button>
-                <button
-                  className="btn-approve"
-                  onClick={() => handleStatusChange(app._id, 'approved')}
-                >
-                  <FaCheckCircle /> Approve
-                </button>
-                <button
-                  className="btn-reject"
-                  onClick={() => handleStatusChange(app._id, 'rejected')}
-                >
-                  <FaTimes /> Reject
-                </button>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="empty-state">
-            <div className="empty-icon">
-              <FaUsers />
-            </div>
-            <h3>No Applications Yet</h3>
-            <p>Applications will appear here once candidates start applying to your jobs.</p>
-          </div>
-        )}
-      </div>
+      {/* Using the AllApplicationsReview component with applications data from dashboard */}
+      <AllApplicationsReview applications={applications} loading={loading} error={error} />
     </div>
   );
 
