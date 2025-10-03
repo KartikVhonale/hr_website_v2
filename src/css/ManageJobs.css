@@ -258,6 +258,11 @@
   color: #92400e;
 }
 
+.job-status.inactive {
+  background: #e5e7eb;
+  color: #374151;
+}
+
 /* Dark mode status badges */
 [data-theme="dark"] .job-status.approved {
   background: #064e3b;
@@ -269,6 +274,11 @@
   color: #fcd34d;
 }
 
+[data-theme="dark"] .job-status.inactive {
+  background: #374151;
+  color: #d1d5db;
+}
+
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) .job-status.approved {
     background: #064e3b;
@@ -278,6 +288,11 @@
   :root:not([data-theme]) .job-status.pending {
     background: #78350f;
     color: #fcd34d;
+  }
+
+  :root:not([data-theme]) .job-status.inactive {
+    background: #374151;
+    color: #d1d5db;
   }
 }
 
@@ -410,6 +425,26 @@
   transform: scale(1.05);
 }
 
+.activate-btn {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.activate-btn:hover {
+  background: #bbf7d0;
+  transform: scale(1.05);
+}
+
+.deactivate-btn {
+  background: #fecaca;
+  color: #dc2626;
+}
+
+.deactivate-btn:hover {
+  background: #fca5a5;
+  transform: scale(1.05);
+}
+
 /* Dark mode action buttons */
 [data-theme="dark"] .view-btn {
   background: #0c4a6e;
@@ -438,6 +473,24 @@
   background: #991b1b;
 }
 
+[data-theme="dark"] .activate-btn {
+  background: #052e16;
+  color: #4ade80;
+}
+
+[data-theme="dark"] .activate-btn:hover {
+  background: #064e3b;
+}
+
+[data-theme="dark"] .deactivate-btn {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
+
+[data-theme="dark"] .deactivate-btn:hover {
+  background: #991b1b;
+}
+
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) .view-btn {
     background: #0c4a6e;
@@ -463,6 +516,24 @@
   }
 
   :root:not([data-theme]) .delete-btn:hover {
+    background: #991b1b;
+  }
+
+  :root:not([data-theme]) .activate-btn {
+    background: #052e16;
+    color: #4ade80;
+  }
+
+  :root:not([data-theme]) .activate-btn:hover {
+    background: #064e3b;
+  }
+
+  :root:not([data-theme]) .deactivate-btn {
+    background: #7f1d1d;
+    color: #fca5a5;
+  }
+
+  :root:not([data-theme]) .deactivate-btn:hover {
     background: #991b1b;
   }
 }
@@ -657,5 +728,3 @@
     padding: 1rem;
   }
 }
-
-

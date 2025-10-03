@@ -13,7 +13,9 @@ import {
   FaSearch,
   FaFilter,
   FaCalendarAlt,
-  FaBriefcase
+  FaBriefcase,
+  FaToggleOn,
+  FaToggleOff
 } from 'react-icons/fa';
 import '../../css/ManageJobs.css';
 import { useNavigate } from 'react-router-dom';
@@ -105,6 +107,30 @@ const ManageJobs = ({ refetchTrigger }) => {
       }
     }
   };
+
+  // Toggle job active/inactive status
+  const toggleJobStatus = async (jobId, currentStatus) => {
+    try {
+      const newStatus = currentStatus === 'approved' ? 'inactive' : 'approved';
+      const response = await jobsAPI.updateJob(jobId, { status: newStatus });
+      
+      if (response.success) {
+        // Update the job in the local state
+        setJobs(prevJobs => 
+          prevJobs.map(job => 
+            job._id === jobId ? { ...job, status: newStatus } : job
+          )
+        );
+        alert(`Job ${newStatus === 'approved' ? 'activated' : 'deactivated'} successfully!`);
+      } else {
+        alert('Failed to update job status. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error updating job status:', error);
+      alert('Failed to update job status. Please try again.');
+    }
+  };
+
 // View and Edit action handlers
   const handleView = (jobId) => {
     navigate(`/job/${jobId}`);
@@ -181,6 +207,7 @@ const ManageJobs = ({ refetchTrigger }) => {
           >
             <option value="all">All Status</option>
             <option value="approved">Active</option>
+            <option value="inactive">Inactive</option>
             <option value="pending">Pending</option>
           </select>
         </div>
@@ -201,7 +228,7 @@ const ManageJobs = ({ refetchTrigger }) => {
                   <div className="job-title-section">
                     <h3 className="job-title">{job.title}</h3>
                     <span className={`job-status ${job.status}`}>
-                      {job.status === 'approved' ? 'Active' : 'Pending'}
+                      {job.status === 'approved' ? 'Active' : job.status === 'inactive' ? 'Inactive' : 'Pending'}
                     </span>
                   </div>
                 </div>
@@ -255,6 +282,13 @@ const ManageJobs = ({ refetchTrigger }) => {
                     </span>
                   </div>
                   <div className="job-actions">
+                    <button 
+                      className={`action-btn ${job.status === 'approved' ? 'deactivate-btn' : 'activate-btn'}`} 
+                      title={job.status === 'approved' ? 'Deactivate Job' : 'Activate Job'}
+                      onClick={() => toggleJobStatus(job._id, job.status)}
+                    >
+                      {job.status === 'approved' ? <FaToggleOn /> : <FaToggleOff />}
+                    </button>
                     <button className="action-btn view-applicants-btn" title="View Applications" onClick={() => navigate(`/employer/dashboard/applications/${job._id}`)}>
                       <FaUsers />
                       <span className="applicants-count">{job.applicationCount || 0}</span>
